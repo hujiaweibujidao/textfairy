@@ -1,14 +1,16 @@
 package com.googlecode.tesseract.android;
 
+import android.os.AsyncTask;
+
 import com.googlecode.leptonica.android.Pix;
 import com.renard.ocr.util.Util;
-
-import android.os.AsyncTask;
 
 import java.io.File;
 import java.io.IOException;
 
 /**
+ * 保存Pix到文件File的操作
+ *
  * @author renard
  */
 class SavePixTask extends AsyncTask<Void, Void, File> {

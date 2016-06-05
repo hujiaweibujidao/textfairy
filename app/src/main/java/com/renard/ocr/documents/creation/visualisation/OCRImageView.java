@@ -15,9 +15,6 @@
  */
 package com.renard.ocr.documents.creation.visualisation;
 
-import com.renard.ocr.R;
-import com.renard.ocr.documents.creation.crop.ImageViewTouchBase;
-
 import android.content.Context;
 import android.graphics.BlurMaskFilter;
 import android.graphics.BlurMaskFilter.Blur;
@@ -31,17 +28,22 @@ import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 
+import com.renard.ocr.R;
+import com.renard.ocr.documents.creation.crop.ImageViewTouchBase;
+
 import java.util.ArrayList;
 
 /**
+ * 用于显示预览图片和OCR处理过程
+ *
  * is used to show preview images and progress during ocr process
  *
  * @author renard
  */
 public class OCRImageView extends ImageViewTouchBase {
 
-    private final static float TEXT_SIZE = 60f;
     private static final String LOG_TAG = OCRImageView.class.getSimpleName();
+    private final static float TEXT_SIZE = 60f;
 
     private final Paint mNumberStrokePaint = new Paint();
     private final Paint mNumberPaint = new Paint();

@@ -23,6 +23,9 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.util.Log;
 
+/**
+ * 语言下载的广播接收器
+ */
 public class DownloadBroadCastReceiver extends BroadcastReceiver {
     private static final String LOG_TAG = DownloadBroadCastReceiver.class.getSimpleName();
 

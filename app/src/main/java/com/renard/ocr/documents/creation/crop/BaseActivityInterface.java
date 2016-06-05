@@ -17,6 +17,9 @@ package com.renard.ocr.documents.creation.crop;
 
 import android.view.View;
 
+/**
+ * Activity的基本界面
+ */
 public interface BaseActivityInterface {
 	
 	public void setDialogId(int dialogId);

@@ -21,14 +21,16 @@ import android.view.View;
 import android.webkit.WebView;
 import android.widget.TextView;
 
-import com.renard.ocr.R;
-
+/**
+ * 信息提示窗口
+ */
 public class HintDialog{
 
 	private HintDialog(){
 		
 	}
-	
+
+    //静态方法，用来创建AlertDialog，内部嵌入了一个webview，可以用来显示html内容
 	public static AlertDialog createDialog(final Context context,final int speechBubbleText, final String pathToHTML){
 		AlertDialog.Builder builder;
 
@@ -42,7 +44,6 @@ public class HintDialog{
 		builder.setNegativeButton(android.R.string.ok, null);
 
 		return builder.create();
-		
 	}
 
 }

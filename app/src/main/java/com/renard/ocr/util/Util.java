@@ -15,12 +15,6 @@
  */
 package com.renard.ocr.util;
 
-import com.googlecode.leptonica.android.Pix;
-import com.googlecode.leptonica.android.WriteFile;
-import com.renard.ocr.MonitoredActivity;
-import com.renard.ocr.R;
-import com.renard.ocr.documents.viewing.grid.FastBitmapDrawable;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
@@ -44,6 +38,12 @@ import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
+import com.googlecode.leptonica.android.Pix;
+import com.googlecode.leptonica.android.WriteFile;
+import com.renard.ocr.MonitoredActivity;
+import com.renard.ocr.R;
+import com.renard.ocr.documents.viewing.grid.FastBitmapDrawable;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -66,6 +66,7 @@ public class Util {
     private static final FastBitmapDrawable NULL_DRAWABLE = new FastBitmapDrawable(null);
     public static FastBitmapDrawable sDefaultDocumentThumbnail;
 
+    //确定缩略图的大小
     public static int determineThumbnailSize(final Activity context, final int[] outNum) {
         DisplayMetrics metrics = new DisplayMetrics();
         context.getWindowManager().getDefaultDisplay().getMetrics(metrics);
@@ -100,9 +101,12 @@ public class Util {
         PreferencesUtils.saveThumbnailSize(c, w, h);
     }
 
+    /**
+     * 缩略图的LRU缓存
+     */
     private static class ThumbnailCache extends LruCache<Integer, FastBitmapDrawable> {
 
-        final private static int cacheSize = 10 * 1024 * 1024;
+        final private static int cacheSize = 10 * 1024 * 1024;//缓存10MB
 
         public ThumbnailCache() {
             super(cacheSize);
@@ -123,6 +127,7 @@ public class Util {
 
     private static ThumbnailCache mCache = new ThumbnailCache();
 
+    //根据文档id加载它的缩略图
     private static Bitmap loadDocumentThumbnail(int documentId) {
         Log.i("cache", "loadDocumentThumbnail " + documentId);
 
@@ -269,6 +274,7 @@ public class Util {
 
     }
 
+    //name是last_scan，文件是png类型
     public static File savePixToDir(final Pix pix, final String name, File picDir) throws IOException {
         final String fileName = name + ".png";
         if (!picDir.exists()) {
@@ -312,7 +318,7 @@ public class Util {
         }
     }
 
-
+    //获取tessdata的目录
     public static String getTessDir(final Context appContext) {
         String tessDir = PreferencesUtils.getTessDir(appContext);
         if (tessDir == null) {
@@ -331,6 +337,8 @@ public class Util {
     }
 
     /**
+     * 创建一个缩略图并放入到内存缓存中
+     *
      * creates a thumbnail file and puts it into the in memory cache
      */
     public static void createThumbnail(final Context context, final File image, final int documentId) {
@@ -344,7 +352,6 @@ public class Util {
             Bitmap thumb = Util.adjustBitmapSize(thumbnailWidth, thumbnailHeight, source);
 
             if (thumb != null) {
-
                 FastBitmapDrawable drawable = new FastBitmapDrawable(thumb);
                 mCache.put(documentId, drawable);
                 File thumbDir = new File(Environment.getExternalStorageDirectory(), CACHE_DIRECTORY);
@@ -442,14 +449,15 @@ public class Util {
         return b2;
     }
 
-
+    //后台任务的封装类，它能监听某个Activity的生命周期
     private static class BackgroundJob extends MonitoredActivity.LifeCycleAdapter implements Runnable {
 
         private final MonitoredActivity mActivity;
         @Nullable
-        private final ProgressDialog mDialog;
-        private final Runnable mJob;
-        private final Handler mHandler;
+        private final ProgressDialog mDialog;//后台任务执行的时候显示的进度条对话框
+        private final Runnable mJob;//后台执行的任务
+        private final Handler mHandler;//
+
         private final Runnable mCleanupRunner = new Runnable() {
             public void run() {
                 mActivity.removeLifeCycleListener(BackgroundJob.this);
@@ -470,7 +478,7 @@ public class Util {
             try {
                 mJob.run();
             } finally {
-                mHandler.post(mCleanupRunner);
+                mHandler.post(mCleanupRunner);//任务结束之后发送消息
             }
         }
 
@@ -483,7 +491,7 @@ public class Util {
         }
 
         @Override
-        public void onActivityStopped(MonitoredActivity activity) {
+        public void onActivityStopped(MonitoredActivity activity) {//如果Activity都销毁了那就把dialog也消失掉
             if (mDialog != null) {
                 mDialog.hide();
             }

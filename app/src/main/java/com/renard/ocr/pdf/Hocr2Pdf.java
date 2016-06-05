@@ -18,6 +18,9 @@ package com.renard.ocr.pdf;
 
 import java.io.UnsupportedEncodingException;
 
+/**
+ * 将hocr转成pdf
+ */
 public class Hocr2Pdf {
     static {
         System.loadLibrary("pngo");
@@ -25,7 +28,7 @@ public class Hocr2Pdf {
 		System.loadLibrary("hocr2pdfjni");
     }
     
-    private PDFProgressListener mListener;
+    private PDFProgressListener mListener;//监听处理到多少页了
     
     public interface PDFProgressListener{
     	void onNewPage(int pageNumber);

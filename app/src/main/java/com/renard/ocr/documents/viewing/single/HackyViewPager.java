@@ -25,6 +25,8 @@ import android.view.MotionEvent;
  *
  * @author Chris Banes
  */
+
+//不能滚动的ViewPager
 public class HackyViewPager extends ViewPager {
 
 	private boolean isLocked;

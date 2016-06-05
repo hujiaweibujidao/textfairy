@@ -19,6 +19,8 @@ package com.renard.ocr.cropimage.image_processing;
 import com.googlecode.leptonica.android.Pix;
 
 /**
+ * 检测图片的模糊程度
+ *
  * @author renard
  */
 public class Blur {

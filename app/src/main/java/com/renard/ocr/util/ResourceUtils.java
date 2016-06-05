@@ -11,15 +11,17 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
+ * 资源工具鳄梨
+ *
+ * res/xml/iso_639_mapping.xml 文件是一个map，保存了不同国家语言的对应关系，这个类是用来读取对应关系的，返回Map
+ *
  * Created by renard on 08/12/13.
  */
 public class ResourceUtils {
 
     public static Map<String, String> getHashMapResource(Context c, int hashMapResId) {
         Map<String, String> map = null;
-
         XmlResourceParser parser = c.getResources().getXml(hashMapResId);
-
         String key = null, value = null;
 
         try {

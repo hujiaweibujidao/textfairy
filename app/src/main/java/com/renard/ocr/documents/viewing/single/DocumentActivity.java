@@ -16,14 +16,6 @@
 
 package com.renard.ocr.documents.viewing.single;
 
-import com.renard.ocr.documents.viewing.DocumentContentProvider;
-import com.renard.ocr.documents.viewing.DocumentContentProvider.Columns;
-import com.renard.ocr.HintDialog;
-import com.renard.ocr.R;
-import com.renard.ocr.documents.creation.NewDocumentActivity;
-import com.renard.ocr.main_menu.language.OcrLanguage;
-import com.renard.ocr.util.PreferencesUtils;
-
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.ClipData;
@@ -50,19 +42,31 @@ import android.view.MenuItem;
 import android.view.Window;
 import android.widget.Toast;
 
+import com.renard.ocr.HintDialog;
+import com.renard.ocr.R;
+import com.renard.ocr.documents.creation.NewDocumentActivity;
+import com.renard.ocr.documents.viewing.DocumentContentProvider;
+import com.renard.ocr.documents.viewing.DocumentContentProvider.Columns;
+import com.renard.ocr.main_menu.language.OcrLanguage;
+import com.renard.ocr.util.PreferencesUtils;
+
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * 显示文档内容的Activity
+ */
 public class DocumentActivity extends NewDocumentActivity implements LoaderManager.LoaderCallbacks<Cursor>, GetOpinionDialog.FeedbackDialogClickListener {
 
-    public static final String OCR_RESULT_DIALOG = "Ocr Result Dialog";
     private final static String LOG_TAG = DocumentActivity.class.getSimpleName();
+    public static final String OCR_RESULT_DIALOG = "Ocr Result Dialog";
     private static final String STATE_DOCUMENT_URI = "documet_uri";
     public static final int DOCUMENT_CURSOR_LOADER_ID = 45678998;
     private boolean mIsCursorLoaded = false;
     private boolean mMoveToPageFromIntent;
 
 
+    //实现类是 DocumentPagerFragment
     public interface DocumentContainerFragment {
         String getLangOfCurrentlyShownDocument();
         String getTextOfCurrentlyShownDocument();
@@ -96,15 +100,15 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setVolumeControlStream(AudioManager.STREAM_ALARM);
-        supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        setVolumeControlStream(AudioManager.STREAM_ALARM);//
+        supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);//不确定的进度
         setContentView(R.layout.activity_document);
-        if (!init(savedInstanceState)) {
+        if (!init(savedInstanceState)) {//初始化失败了
             finish();
             return;
         }
 
-        if (savedInstanceState == null && isStartedAfterAScan(getIntent())) {
+        if (savedInstanceState == null && isStartedAfterAScan(getIntent())) {//刚刚扫描完成之后看结果
             showResultDialog();
         } else {
             mAnalytics.sendScreenView("Document");
@@ -138,19 +142,20 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
         return intent.getExtras() != null && getIntent().hasExtra(EXTRA_ACCURACY);
     }
 
+    //显示处理结果的对话框
     private void showResultDialog() {
         int accuracy = getIntent().getIntExtra(EXTRA_ACCURACY, -1);
         String language = getIntent().getStringExtra(EXTRA_LANGUAGE);
         mAnalytics.sendOcrResult(language, accuracy);
 
         int numberOfSuccessfulScans = PreferencesUtils.getNumberOfSuccessfulScans(getApplicationContext());
-        if (accuracy >= OCRResultDialog.MEDIUM_ACCURACY) {
+        if (accuracy >= OCRResultDialog.MEDIUM_ACCURACY) {//大于83%以上就算是成功的扫描结果
             PreferencesUtils.setNumberOfSuccessfulScans(getApplicationContext(), ++numberOfSuccessfulScans);
         }
-        if (numberOfSuccessfulScans == 2) {
+        if (numberOfSuccessfulScans == 2) {//成功了两次的话弹出用户使用意见对话框
             GetOpinionDialog.newInstance(language).show(getSupportFragmentManager(), GetOpinionDialog.TAG);
             PreferencesUtils.setNumberOfSuccessfulScans(getApplicationContext(), ++numberOfSuccessfulScans);
-        } else if (accuracy > -1) {
+        } else if (accuracy > -1) {//显示OCR处理结果的对话框
             OCRResultDialog.newInstance(accuracy, language).show(getSupportFragmentManager(), OCRResultDialog.TAG);
             mAnalytics.sendScreenView(OCR_RESULT_DIALOG);
         }
@@ -172,6 +177,7 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
         return true;
     }
 
+    //导出为pdf
     void exportAsPdf() {
         Set<Integer> idForPdf = new HashSet<>();
         idForPdf.add(getParentId());
@@ -188,7 +194,6 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
         }
 
         if (itemId == R.id.item_view_mode) {
-
             DocumentContainerFragment fragment = (DocumentContainerFragment) getSupportFragmentManager().findFragmentById(R.id.document_fragment_container);
             final boolean showText = fragment.getShowText();
             fragment.setShowText(!showText);
@@ -281,6 +286,7 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
         return getDocumentContainer().getLangOfCurrentlyShownDocument();
     }
 
+    //得到所有文档合并之后的文本
     String getPlainDocumentText() {
         final String htmlText = getDocumentContainer().getTextOfAllDocuments();
         if (htmlText != null) {
@@ -369,7 +375,7 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
         savedInstanceState.putParcelable(STATE_DOCUMENT_URI, getIntent().getData());
     }
 
-
+    //初始化
     private boolean init(Bundle savedInstanceState) {
         Uri data = getIntent().getData();
         if (data == null && savedInstanceState != null) {
@@ -431,7 +437,6 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
             ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
             ft.commit();
         }
-
     }
 
     @Override

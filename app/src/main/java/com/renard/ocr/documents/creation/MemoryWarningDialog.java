@@ -1,8 +1,5 @@
 package com.renard.ocr.documents.creation;
 
-import com.renard.ocr.R;
-import com.renard.ocr.documents.viewing.single.TopDialogFragment;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -11,7 +8,12 @@ import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.TextView;
 
+import com.renard.ocr.R;
+import com.renard.ocr.documents.viewing.single.TopDialogFragment;
+
 /**
+ * 提示内存不够的对话框窗口
+ *
  * @author renard
  */
 public class MemoryWarningDialog extends TopDialogFragment {
@@ -19,6 +21,7 @@ public class MemoryWarningDialog extends TopDialogFragment {
     private static final String SCREEN_NAME = "Memory Warning Dialog";
 
     public static final String TAG = MemoryWarningDialog.class.getSimpleName();
+
     private static final String EXTRA_MEMORY = "extra_available_memory";
     private static final String EXTRA_DO_AFTER = "extra_do_after";
 
@@ -35,7 +38,6 @@ public class MemoryWarningDialog extends TopDialogFragment {
         return dialog;
     }
 
-
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -49,6 +51,8 @@ public class MemoryWarningDialog extends TopDialogFragment {
         description.setText(descriptionText);
         builder.setTitle(R.string.memory_low);
         builder.setView(view);
+
+        //忽略警告，仍然执行
         builder.setPositiveButton(R.string.continue_ocr, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -75,6 +79,5 @@ public class MemoryWarningDialog extends TopDialogFragment {
         alertDialog.setOnDismissListener(this);
         return alertDialog;
     }
-
 
 }

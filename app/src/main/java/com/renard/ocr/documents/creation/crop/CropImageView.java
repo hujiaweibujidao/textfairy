@@ -15,8 +15,6 @@
  */
 package com.renard.ocr.documents.creation.crop;
 
-import com.google.common.base.Optional;
-
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
@@ -24,10 +22,15 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 
+import com.google.common.base.Optional;
+
 /**
+ * 支持裁剪的ImageView，主要是因为它上面有一个HighLightView，控制裁剪区域
+ *
  * Created by renard on 13/11/14.
  */
 public class CropImageView extends ImageViewTouchBase {
+
     private Optional<HighLightView> mCropHighlightView = Optional.absent();
     private boolean mIsMoving = false;
     private float mLastX, mLastY;

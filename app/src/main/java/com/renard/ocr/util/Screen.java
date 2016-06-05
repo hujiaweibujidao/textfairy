@@ -24,6 +24,9 @@ import android.os.Build;
 import android.view.Display;
 import android.view.Surface;
 
+/**
+ * 屏幕控制类
+ */
 public class Screen {
 
 	public static class Orientation {
@@ -42,6 +45,7 @@ public class Screen {
 		final Display display = activity.getWindowManager().getDefaultDisplay();
 		final int rotation = display.getRotation();
 
+        //获取屏幕的长宽的方式
 		final int width, height;
 		if (Build.VERSION.SDK_INT >= 13) {
 			Point size = new Point();

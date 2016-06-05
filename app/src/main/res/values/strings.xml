@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <resources>
     <string name="drawer_open">Open Main Menu</string>
-    <string name="drawer_close">Close ain Menu</string>
+    <string name="drawer_close">Close Main Menu</string>
     <string name="whats_new_title">Check out what has changed</string>
     <string name="whats_new">Release notes</string>
     <string name="text_was_copied_to_clipboard">Text copied to clipboard.</string>

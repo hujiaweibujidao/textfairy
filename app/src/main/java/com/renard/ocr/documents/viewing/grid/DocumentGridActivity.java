@@ -15,24 +15,6 @@
  */
 package com.renard.ocr.documents.viewing.grid;
 
-import com.renard.ocr.HintDialog;
-import com.renard.ocr.PermissionGrantedEvent;
-import com.renard.ocr.R;
-import com.renard.ocr.documents.creation.ImageSource;
-import com.renard.ocr.documents.creation.NewDocumentActivity;
-import com.renard.ocr.documents.creation.PixLoadStatus;
-import com.renard.ocr.documents.viewing.DocumentContentProvider;
-import com.renard.ocr.documents.viewing.single.DocumentActivity;
-import com.renard.ocr.main_menu.AboutActivity;
-import com.renard.ocr.main_menu.FeedbackActivity;
-import com.renard.ocr.main_menu.ReleaseNoteDialog;
-import com.renard.ocr.main_menu.TipsActivity;
-import com.renard.ocr.main_menu.language.OCRLanguageActivity;
-import com.renard.ocr.main_menu.language.OcrLanguage;
-import com.renard.ocr.main_menu.language.OcrLanguageDataStore;
-import com.renard.ocr.util.PreferencesUtils;
-import com.renard.ocr.util.Util;
-
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -70,6 +52,24 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.GridView;
 import android.widget.Toast;
 
+import com.renard.ocr.HintDialog;
+import com.renard.ocr.PermissionGrantedEvent;
+import com.renard.ocr.R;
+import com.renard.ocr.documents.creation.ImageSource;
+import com.renard.ocr.documents.creation.NewDocumentActivity;
+import com.renard.ocr.documents.creation.PixLoadStatus;
+import com.renard.ocr.documents.viewing.DocumentContentProvider;
+import com.renard.ocr.documents.viewing.single.DocumentActivity;
+import com.renard.ocr.main_menu.AboutActivity;
+import com.renard.ocr.main_menu.FeedbackActivity;
+import com.renard.ocr.main_menu.ReleaseNoteDialog;
+import com.renard.ocr.main_menu.TipsActivity;
+import com.renard.ocr.main_menu.language.OCRLanguageActivity;
+import com.renard.ocr.main_menu.language.OcrLanguage;
+import com.renard.ocr.main_menu.language.OcrLanguageDataStore;
+import com.renard.ocr.util.PreferencesUtils;
+import com.renard.ocr.util.Util;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -82,20 +82,27 @@ import de.greenrobot.event.EventBus;
 /**
  * main activity of the app
  *
+ * todo
+ * 1.去掉文档合并功能
+ * 2.去掉侧滑菜单功能
+ * 3.去除重命名、修改时间显示格式等
+ *
  * @author renard
  */
 public class DocumentGridActivity extends NewDocumentActivity implements DocumentGridAdapter.OnCheckedChangeListener, LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String LOG_TAG = DocumentGridActivity.class.getSimpleName();
-    private DocumentGridAdapter mDocumentAdapter;
+
     private GridView mGridView;
+    private DocumentGridAdapter mDocumentAdapter;
+
+    private ActionMode mActionMode;
     private static final int MESSAGE_UPDATE_THUMNAILS = 1;
     private static final int DELAY_SHOW_THUMBNAILS = 550;
-    private static final String SAVE_STATE_KEY = "selection";
     private static final int JOIN_PROGRESS_DIALOG = 4;
-    private ActionMode mActionMode;
     private static final int REQUEST_CODE_INSTALL = 234;
     private static boolean sIsInSelectionMode = false;
+    private static final String SAVE_STATE_KEY = "selection";
 
     private boolean mFingerUp = true;
     private int mScrollState = AbsListView.OnScrollListener.SCROLL_STATE_IDLE;
@@ -107,10 +114,12 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_document_grid);
+
         initToolbar();
         initNavigationDrawer();
         initGridView();
         setupAddLanguageButton();
+
         if (savedInstanceState == null) {
             checkForImageIntent(getIntent());
         }
@@ -124,6 +133,7 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
             EventBus.getDefault().register(this);
             mBusIsRegistered = true;
         }
+        //声明需要访问texfee文件夹
         ensurePermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, R.string.permission_explanation);
     }
 
@@ -141,21 +151,23 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         return HINT_DIALOG_ID;
     }
 
-
+    //初始化缩略图的大小
     private void initThumbnailSize() {
         final int columnWidth = Util.determineThumbnailSize(this, null);
         Util.setThumbnailSize(columnWidth, columnWidth, this);
     }
 
+    //处理下载语言包的按钮
     private void setupAddLanguageButton() {
         final View viewById = findViewById(R.id.install_language_button);
-        viewById.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(DocumentGridActivity.this, OCRLanguageActivity.class);
-                startActivity(i);
-            }
-        });
+        if (viewById != null) {
+            viewById.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startActivity(new Intent(DocumentGridActivity.this, OCRLanguageActivity.class));
+                }
+            });
+        }
     }
 
     @Override
@@ -165,15 +177,17 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         checkForImageIntent(intent);
     }
 
+    /**
+     * 从其他应用发送过来的图片进入到这个应用中
+     */
     private void checkForImageIntent(Intent intent) {
-
         String action = intent.getAction();
         String type = intent.getType();
 
         if (Intent.ACTION_SEND.equals(action) && type != null) {
             Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
             if (imageUri != null) {
-                loadBitmapFromContentUri(imageUri, ImageSource.INTENT);
+                loadBitmapFromContentUri(imageUri, ImageSource.INTENT);//加载图片
             } else {
                 showFileError(PixLoadStatus.IMAGE_COULD_NOT_BE_READ, new DialogInterface.OnClickListener() {
 
@@ -213,10 +227,14 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         }
     }
 
+    /**
+     * 初始化导航菜单栏
+     */
     private void initNavigationDrawer() {
         final DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         NavigationView view = (NavigationView) findViewById(R.id.left_drawer);
         handleNavigationMenuSelection(drawerLayout, view);
+
         ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, (Toolbar) findViewById(R.id.toolbar), R.string.drawer_open, R.string.drawer_close) {
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
@@ -232,16 +250,17 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         };
         drawerLayout.setDrawerListener(actionBarDrawerToggle);
 
-
         // Enable ActionBar app icon to behave as action to toggle nav drawer
         getSupportActionBar().setHomeButtonEnabled(true);
         actionBarDrawerToggle.syncState();
         if (checkForFirstStart()) {
             drawerLayout.openDrawer(GravityCompat.START);
         }
-
     }
 
+    /**
+     * 检查是否是第一次启动
+     */
     private boolean checkForFirstStart() {
         final boolean firstStart = PreferencesUtils.isFirstStart(getApplicationContext());
         if (firstStart) {
@@ -250,6 +269,9 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         return firstStart;
     }
 
+    /**
+     * 处理导航菜单栏选择的操作
+     */
     private void handleNavigationMenuSelection(final DrawerLayout drawerLayout, NavigationView view) {
         view.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -261,8 +283,7 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
                         new ReleaseNoteDialog().show(supportFragmentManager, ReleaseNoteDialog.TAG);
                         break;
                     case R.id.add_language:
-                        Intent i = new Intent(DocumentGridActivity.this, OCRLanguageActivity.class);
-                        startActivity(i);
+                        startActivity(new Intent(DocumentGridActivity.this, OCRLanguageActivity.class));
                         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                         break;
                     case R.id.show_tips:
@@ -371,6 +392,8 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         mDocumentAdapter.setSelectedDocumentIds(selection);
     }
 
+    ///////////////// toread  //////////////////
+
     public class DocumentClickListener implements OnItemClickListener {
 
         @Override
@@ -436,6 +459,7 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         }
     }
 
+    //
     private static class ScrollHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
@@ -447,6 +471,7 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         }
     }
 
+    //
     private class FingerTracker implements View.OnTouchListener {
         public boolean onTouch(View view, MotionEvent event) {
             final int action = event.getAction();
@@ -472,6 +497,7 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         return mPendingThumbnailUpdate;
     }
 
+    //更新文档的缩略图
     private void updateDocumentThumbnails() {
         mPendingThumbnailUpdate = false;
 
@@ -505,6 +531,12 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         handler.sendMessage(message);
     }
 
+
+    /**
+     * ActionMode指的是当前用户交互的操作模式，这里是ActionMode的回调函数
+     * 在onCreateActionMode中向menu添加操作菜单
+     * 在onActionItemClicked中处理菜单点击事件
+     */
     private class DocumentActionCallback implements ActionMode.Callback {
 
         @Override
@@ -518,7 +550,7 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
             } else if (itemId == R.id.item_edit_title) {
                 final Set<Integer> selectedDocs = mDocumentAdapter.getSelectedDocumentIds();
                 final int documentId = selectedDocs.iterator().next();
-                getSupportLoaderManager().initLoader(documentId, null, DocumentGridActivity.this);
+                getSupportLoaderManager().initLoader(documentId, null, DocumentGridActivity.this);//toread
                 return true;
             } else if (itemId == R.id.item_export_as_pdf) {
                 new CreatePDFTask(mDocumentAdapter.getSelectedDocumentIds()).execute();
@@ -554,7 +586,6 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
                 cancelMultiSelectionMode();
             }
             mActionMode = null;
-
         }
     }
 

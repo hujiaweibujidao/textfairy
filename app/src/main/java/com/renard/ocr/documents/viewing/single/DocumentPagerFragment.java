@@ -16,12 +16,6 @@
 
 package com.renard.ocr.documents.viewing.single;
 
-import com.renard.ocr.MonitoredActivity;
-import com.renard.ocr.R;
-import com.renard.ocr.documents.viewing.single.DocumentActivity.DocumentContainerFragment;
-import com.renard.ocr.util.PreferencesUtils;
-import com.viewpagerindicator.CirclePageIndicator;
-
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -36,6 +30,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
+import com.renard.ocr.MonitoredActivity;
+import com.renard.ocr.R;
+import com.renard.ocr.documents.viewing.single.DocumentActivity.DocumentContainerFragment;
+import com.renard.ocr.util.PreferencesUtils;
+import com.viewpagerindicator.CirclePageIndicator;
+
+/**
+ * 支持文档分页查看的fragment
+ */
 public class DocumentPagerFragment extends Fragment implements DocumentContainerFragment {
 
     private ViewPager mPager;
@@ -68,7 +71,6 @@ public class DocumentPagerFragment extends Fragment implements DocumentContainer
             showTitleIndicator(true);
         }
     }
-
 
     private void showTitleIndicator(final boolean show) {
         if (mIsTitleIndicatorVisible) {
@@ -104,10 +106,9 @@ public class DocumentPagerFragment extends Fragment implements DocumentContainer
         }
     }
 
+    //初始化viewpager
     private void initPager() {
-
         if (mIsNewCursor && mPager != null) {
-
 
             if (mAdapter != null) {
                 mAdapter.setCursor(mCursor);
@@ -130,7 +131,7 @@ public class DocumentPagerFragment extends Fragment implements DocumentContainer
                 public void onPageSelected(int position) {
                     final DocumentTextFragment fragment = mAdapter.getFragment(mLastPosition);
                     if (fragment != null) {
-                        fragment.saveIfTextHasChanged();
+                        fragment.saveIfTextHasChanged();//每次page发生变化就要处理下保存工作
                     }
                     mLastPosition = position;
                     final String title = mAdapter.getLongTitle(position);

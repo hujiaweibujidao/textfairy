@@ -20,8 +20,13 @@ package com.renard.ocr.documents.creation.crop;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 
+/**
+ * 旋转之后的bitmap
+ */
 public class RotateBitmap {
+
     public static final String TAG = "RotateBitmap";
+
     private Bitmap mBitmap;
     private int mRotation;
 
@@ -62,11 +67,12 @@ public class RotateBitmap {
             int cy = mBitmap.getHeight() / 2;
             matrix.preTranslate(-cx, -cy);
             matrix.postRotate(mRotation);
-            matrix.postTranslate(getWidth() / 2, getHeight() / 2);
+            matrix.postTranslate(getWidth() / 2, getHeight() / 2);//先移动到中心，然后旋转，最后还是移动到中心
         }
         return matrix;
     }
 
+    //判断图片的Orientation是否发生了改变，例如90度改变了，180度没有
     public boolean isOrientationChanged() {
         return (mRotation / 90) % 2 != 0;
     }

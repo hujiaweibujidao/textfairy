@@ -17,8 +17,6 @@
 
 package com.renard.ocr.documents.creation.crop;
 
-import com.renard.ocr.R;
-
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -30,6 +28,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.renard.ocr.R;
+
+//用于裁剪图片的曲边梯形框框
+
 // This class is used by CropImage to display a highlighted cropping trapezoid
 // overlayed with the image. There are two coordinate spaces in use. One is
 // image, another is screen. computeLayout() uses mMatrix to map from image
@@ -38,6 +40,7 @@ class CropHighlightView implements HighLightView {
 
     @SuppressWarnings("unused")
     private static final String LOG_TAG = CropHighlightView.class.getSimpleName();
+
     private View mContext; // The View displaying the image.
 
     /* used during onDraw */
@@ -98,12 +101,11 @@ class CropHighlightView implements HighLightView {
         }
         mDrawRect = computeLayout();
         drawEdges(canvas);
-
     }
 
     private void drawEdges(Canvas canvas) {
         final float[] p = mTrapzoid.getScreenPoints(getMatrix());
-        Path path = new Path();
+        Path path = new Path();//先画曲边梯形的四条边
         path.moveTo((int) p[0], (int) p[1]);
         path.lineTo((int) p[2], (int) p[3]);
         path.lineTo((int) p[4], (int) p[5]);
@@ -152,8 +154,6 @@ class CropHighlightView implements HighLightView {
         x = (p[0] + p[6]) / 2;
         y = (p[1] + p[7]) / 2;
         canvas.drawCircle(x, y, mCropEdgeHandleRadius, mOutlinePaint);
-
-
     }
 
 

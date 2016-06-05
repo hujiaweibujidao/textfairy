@@ -16,11 +16,6 @@
 
 package com.renard.ocr.documents.viewing.grid;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -33,14 +28,20 @@ import android.widget.AbsListView;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
 
-import com.renard.ocr.documents.viewing.DocumentContentProvider;
 import com.renard.ocr.R;
-import com.renard.ocr.documents.viewing.grid.CheckableGridElement.OnCheckedChangeListener;
+import com.renard.ocr.documents.viewing.DocumentContentProvider;
 import com.renard.ocr.documents.viewing.DocumentContentProvider.Columns;
+import com.renard.ocr.documents.viewing.grid.CheckableGridElement.OnCheckedChangeListener;
 import com.renard.ocr.util.Util;
+
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * adapter for the document grid view
+ *
  * @author renard
  *
  */

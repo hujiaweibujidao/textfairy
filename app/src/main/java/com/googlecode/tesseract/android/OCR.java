@@ -15,6 +15,15 @@
  */
 package com.googlecode.tesseract.android;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.RectF;
+import android.os.Bundle;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
+import android.util.Log;
+
 import com.crashlytics.android.Crashlytics;
 import com.googlecode.leptonica.android.Boxa;
 import com.googlecode.leptonica.android.Pix;
@@ -30,17 +39,11 @@ import com.renard.ocr.main_menu.language.OcrLanguage;
 import com.renard.ocr.util.MemoryInfo;
 import com.renard.ocr.util.Util;
 
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.RectF;
-import android.os.Bundle;
-import android.os.Message;
-import android.os.Messenger;
-import android.os.RemoteException;
-import android.util.Log;
-
 import java.io.File;
 
+/**
+ * OCR操作类
+ */
 public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgressListener {
 
     private static final String TAG = OCR.class.getSimpleName();
@@ -65,7 +68,6 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
         System.loadLibrary("tess");
         System.loadLibrary("image_processing_jni");
         nativeInit();
-
     }
 
     private final Analytics mAnalytics;
@@ -86,6 +88,7 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
     private int mPreviewWidthUnScaled;
     private boolean mCompleted;
 
+    //传入的messenger在这个类中主要是用来发送消息的
     public OCR(final MonitoredActivity activity, final Messenger messenger) {
         mApplicationContext = activity.getApplicationContext();
         mAnalytics = activity.getAnaLytics();
@@ -135,7 +138,7 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
         Bundle b = new Bundle();
         b.putParcelable(EXTRA_OCR_BOX, mOCRBoundingBox);
         b.putParcelable(EXTRA_WORD_BOX, mWordBoundingBox);
-        sendMessage(MESSAGE_TESSERACT_PROGRESS, percent, b);
+        sendMessage(MESSAGE_TESSERACT_PROGRESS, percent, b);//发送处理进度的消息
     }
 
     private void logProgressToCrashlytics(int percent) {
@@ -217,6 +220,7 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
         sendMessage(MESSAGE_UTF8_TEXT, utf8Text);
     }
 
+    //这个方法是在native层被调用的，调用之后会发送消息
     private void onLayoutElements(int nativePixaText, int nativePixaImages) {
         sendMessage(MESSAGE_LAYOUT_ELEMENTS, nativePixaText, nativePixaImages);
     }
@@ -249,11 +253,11 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
         sendMessage(what, 0, 0, previewBitmap, null);
     }
 
-
     private void sendMessage(int what, int arg1, Bundle b) {
         sendMessage(what, arg1, 0, null, b);
     }
 
+    //最终都是调用这个sendMessage方法，消息发送之后在OCRActivity中被处理 166行附近
     private synchronized void sendMessage(int what, int arg1, int arg2, Object object, Bundle b) {
         if (mIsActivityAttached && !mStopped) {
 
@@ -282,9 +286,10 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
         mIsActivityAttached = true;
     }
 
+    //确定ocr模式
     private int determineOcrMode(String lang) {
-        boolean hasCubeSupport = OcrLanguage.hasCubeSupport(lang);
-        boolean canCombine = OcrLanguage.canCombineCubeAndTesseract(lang);
+        boolean hasCubeSupport = OcrLanguage.hasCubeSupport(lang);//是否支持cube
+        boolean canCombine = OcrLanguage.canCombineCubeAndTesseract(lang);//
         if (canCombine) {
             return TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED;
         } else if (hasCubeSupport) {
@@ -294,7 +299,7 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
         }
     }
 
-
+    //确定ocr语言
     private String determineOcrLanguage(String ocrLanguage) {
         final String english = "eng";
         if (!ocrLanguage.equals(english) && addEnglishData(ocrLanguage)) {
@@ -324,8 +329,9 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
 
 
     /**
-     * native code takes care of both Pixa, do not use them after calling this
-     * function
+     * 复杂布局，开始进行OCR处理
+     *
+     * native code takes care of both Pixa, do not use them after calling this function
      *
      * @param pixaText   must contain the binary text parts
      * @param pixaImages pixaImages must contain the image parts
@@ -412,7 +418,7 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
         }).start();
     }
 
-
+    //初始化tess api
     private boolean initTessApi(String tessDir, String lang, int ocrMode) {
         logTessParams(lang, ocrMode);
         mTess = new TessBaseAPI(OCR.this);
@@ -421,10 +427,11 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
             sendMessage(MESSAGE_ERROR, R.string.error_tess_init);
             return false;
         }
-        mTess.setVariable(TessBaseAPI.VAR_CHAR_BLACKLIST, "ﬀﬁﬂﬃﬄﬅﬆ");
+        mTess.setVariable(TessBaseAPI.VAR_CHAR_BLACKLIST, "ﬀﬁﬂﬃﬄﬅﬆ");//toread setVariable(VAR_TESSEDIT_CHAR_BLACKLIST, "xyz"); to ignore x, y and z.
         return true;
     }
 
+    //记录tess参数
     private void logTessParams(String lang, int ocrMode) {
         if (TextFairyApplication.isRelease()) {
             String pageSegMode = "";
@@ -442,8 +449,9 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
     }
 
     /**
-     * native code takes care of the Pix, do not use it after calling this
-     * function
+     * 开始进行布局分析
+     * <p/>
+     * native code takes care of the Pix, do not use it after calling this function
      *
      * @param pixs source pix on which to do layout analysis
      */
@@ -467,8 +475,9 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
     }
 
     /**
-     * native code takes care of the Pix, do not use it after calling this
-     * function
+     * 简单布局，开始进行OCR处理
+     *
+     * native code takes care of the Pix, do not use it after calling this function
      *
      * @param context used to access the file system
      * @param pixs    source pix to do ocr on
@@ -495,6 +504,7 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
                     mOriginalWidth = pixText.getWidth();
                     sendMessage(MESSAGE_EXPLANATION_TEXT, R.string.progress_ocr);
                     sendMessage(MESSAGE_FINAL_IMAGE, nativeTextPix);
+
                     synchronized (OCR.this) {
                         if (mStopped) {
                             return;
@@ -506,6 +516,7 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
                         mTess.setPageSegMode(PageSegMode.PSM_AUTO);
                         mTess.setImage(pixText);
                     }
+
                     String hocrText = mTess.getHOCRText(0);
                     int accuracy = mTess.meanConfidence();
                     final String utf8Text = mTess.getUTF8Text();
@@ -550,6 +561,7 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
 
     }
 
+    //记录此时的剩余内存情况
     private void logMemory(Context context) {
         if (TextFairyApplication.isRelease()) {
             final long freeMemory = MemoryInfo.getFreeMemory(context);
@@ -591,6 +603,7 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
 
     /**
      * takes ownership of nativePix.
+     *
      * @param nativePix
      * @return binarized and dewarped version of input pix
      */

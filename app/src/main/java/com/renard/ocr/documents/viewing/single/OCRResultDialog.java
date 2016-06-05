@@ -1,10 +1,5 @@
 package com.renard.ocr.documents.viewing.single;
 
-import com.googlecode.tesseract.android.OCR;
-import com.renard.ocr.R;
-import com.renard.ocr.main_menu.ContactActivity;
-import com.renard.ocr.main_menu.TipsActivity;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
@@ -14,9 +9,16 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.googlecode.tesseract.android.OCR;
+import com.renard.ocr.R;
+import com.renard.ocr.main_menu.ContactActivity;
+import com.renard.ocr.main_menu.TipsActivity;
+
 import java.io.File;
 
 /**
+ * 显示OCR处理结果的对话框
+ *
  * @author renard
  */
 public class OCRResultDialog extends TopDialogFragment implements View.OnClickListener {
@@ -43,6 +45,7 @@ public class OCRResultDialog extends TopDialogFragment implements View.OnClickLi
         builder.setCancelable(true);
         View view = getActivity().getLayoutInflater().inflate(R.layout.dialog_ocr_result, null);
         TextView speech = (TextView) view.findViewById(R.id.help_header);
+
         final int accuracy = getArguments().getInt(EXTRA_ACCURACY);
         if (accuracy <= LOW_ACCURACY) {
             speech.setText(R.string.ocr_result_is_bad);
@@ -51,11 +54,10 @@ public class OCRResultDialog extends TopDialogFragment implements View.OnClickLi
             explanation.setVisibility(View.VISIBLE);
             View divider0 = view.findViewById(R.id.divider0);
             divider0.setVisibility(View.VISIBLE);
-
         } else if (accuracy < MEDIUM_ACCURACY) {
             speech.setText(R.string.ocr_result_is_ok);
         } else {
-            speech.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_fairy_happy, 0, 0, 0);
+            speech.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_fairy_happy, 0, 0, 0);//textview左侧设置一个happy fairy
             speech.setText(R.string.ocr_result_is_good);
             hideTipsAndFeedback(view);
         }
@@ -65,6 +67,7 @@ public class OCRResultDialog extends TopDialogFragment implements View.OnClickLi
         return builder.create();
     }
 
+    //隐藏文本操作的按钮
     private void hideTextActions(View view) {
         view.findViewById(R.id.divider3).setVisibility(View.GONE);
         view.findViewById(R.id.divider4).setVisibility(View.GONE);

@@ -7,6 +7,9 @@ import android.support.v4.app.DialogFragment;
 import com.renard.ocr.HintDialog;
 import com.renard.ocr.R;
 
+/**
+ * 更新日志窗口
+ */
 public class ReleaseNoteDialog extends DialogFragment {
 
 	public final static String TAG = ReleaseNoteDialog.class.getSimpleName();

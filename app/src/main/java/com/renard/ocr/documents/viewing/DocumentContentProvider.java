@@ -30,6 +30,9 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
+/**
+ * 文档内容提供器
+ */
 public class DocumentContentProvider extends ContentProvider {
 
     private final static String TAG = DocumentContentProvider.class.getSimpleName();
@@ -37,6 +40,7 @@ public class DocumentContentProvider extends ContentProvider {
 
     public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/documents");
 
+    //数据表的列
     public static class Columns {
 
         public static final String ID = "_id";
@@ -61,6 +65,7 @@ public class DocumentContentProvider extends ContentProvider {
         sUriMatcher.addURI(AUTHORITY, "documents", DOCUMENTS);
     }
 
+    //数据库辅助类
     private static class DBHelper extends SQLiteOpenHelper {
 
         private static final String TABLE_NAME = "documents";

@@ -1,103 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:id="@+id/empty_view"
-                android:orientation="vertical"
-                android:layout_marginLeft="@dimen/default_padding"
-                android:padding="@dimen/default_padding"
-                android:background="@color/document_grid_background"
-                android:layout_height="match_parent"
-                android:layout_width="match_parent">
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/empty_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginLeft="@dimen/default_padding"
+    android:background="@color/document_grid_background"
+    android:orientation="vertical"
+    android:padding="@dimen/default_padding">
 
     <View
-            android:layout_marginBottom="-36dp"
-            android:id="@+id/gallery_hint_arrow"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="6dp"
-            android:layout_height="0dp"
-            android:layout_toRightOf="@+id/gallery_hint"
-            android:background="@drawable/hint_arrow"
-            android:layout_width="30dp"
-            android:layout_above="@+id/gallery_hint"
-            android:layout_alignTop="@+id/camera_hint_arrow"/>
+        android:id="@+id/gallery_hint_arrow"
+        android:layout_width="30dp"
+        android:layout_height="0dp"
+        android:layout_above="@+id/gallery_hint"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/camera_hint_arrow"
+        android:layout_marginBottom="-36dp"
+        android:layout_marginRight="6dp"
+        android:layout_toRightOf="@+id/gallery_hint"
+        android:background="@drawable/hint_arrow"/>
 
     <View
-            android:layout_marginBottom="-36dp"
-            android:id="@+id/camera_hint_arrow"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="55dp"
-            android:layout_height="0dp"
-            android:background="@drawable/hint_arrow"
-            android:layout_width="45dp"
-            android:layout_above="@+id/camera_hint"/>
+        android:id="@+id/camera_hint_arrow"
+        android:layout_width="45dp"
+        android:layout_height="0dp"
+        android:layout_above="@+id/camera_hint"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="-36dp"
+        android:layout_marginRight="55dp"
+        android:background="@drawable/hint_arrow"/>
 
     <TextView
-            android:id="@+id/greeting"
-            android:textSize="48dp"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_marginBottom="@dimen/default_padding"
-            android:text="@string/greeting"/>
+        android:id="@+id/greeting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="@dimen/default_padding"
+        android:text="@string/greeting"
+        android:textSize="48dp"/>
 
     <TextView
-            android:layout_marginRight="@dimen/default_padding"
-            android:layout_below="@+id/greeting"
-            android:layout_toLeftOf="@+id/camera_hint_arrow"
-            android:id="@+id/camera_hint"
-            android:textSize="20dp"
-            android:textColor="@color/grey3"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:layout_marginTop="@dimen/default_element_padding"
-            android:layout_marginBottom="@dimen/default_element_padding"
-            android:text="@string/empty_grid_camera"/>
+        android:id="@+id/camera_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/greeting"
+        android:layout_marginBottom="@dimen/default_element_padding"
+        android:layout_marginRight="@dimen/default_padding"
+        android:layout_marginTop="@dimen/default_element_padding"
+        android:layout_toLeftOf="@+id/camera_hint_arrow"
+        android:text="@string/empty_grid_camera"
+        android:textColor="@color/grey3"
+        android:textSize="20dp"/>
 
     <TextView
-            android:layout_marginBottom="@dimen/default_element_padding"
-            android:layout_marginTop="@dimen/default_element_padding"
-            android:layout_marginRight="@dimen/default_padding"
-            android:layout_toLeftOf="@+id/camera_hint_arrow"
-            android:layout_below="@+id/camera_hint"
-            android:id="@+id/gallery_hint"
-            android:textSize="20dp"
-            android:textColor="@color/grey3"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:text="@string/empty_grid_gallery"/>
+        android:id="@+id/gallery_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/camera_hint"
+        android:layout_marginBottom="@dimen/default_element_padding"
+        android:layout_marginRight="@dimen/default_padding"
+        android:layout_marginTop="@dimen/default_element_padding"
+        android:layout_toLeftOf="@+id/camera_hint_arrow"
+        android:text="@string/empty_grid_gallery"
+        android:textColor="@color/grey3"
+        android:textSize="20dp"/>
 
     <TextView
-            android:layout_marginTop="@dimen/default_element_padding"
-            android:layout_below="@+id/gallery_hint"
-            android:id="@+id/install_language"
-            android:layout_marginRight="@dimen/default_padding"
-            android:textSize="20dp"
-            android:textColor="@color/grey3"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:text="@string/empty_grid_language"/>
+        android:id="@+id/install_language"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/gallery_hint"
+        android:layout_marginRight="@dimen/default_padding"
+        android:layout_marginTop="@dimen/default_element_padding"
+        android:text="@string/empty_grid_language"
+        android:textColor="@color/grey3"
+        android:textSize="20dp"/>
 
     <Button
-            android:theme="@style/ColoredButton"
-            style="@style/Base.TextAppearance.AppCompat.Medium"
-            android:layout_below="@+id/install_language"
-            android:id="@+id/install_language_button"
-            android:gravity="center"
-            android:layout_marginTop="@dimen/default_padding"
-            android:drawableLeft="@drawable/ic_action_language"
-            android:textColor="@android:color/white"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:text="@string/empty_grid_download_language"/>
+        android:id="@+id/install_language_button"
+        style="@style/Base.TextAppearance.AppCompat.Medium"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/install_language"
+        android:layout_marginTop="@dimen/default_padding"
+        android:drawableLeft="@drawable/ic_action_language"
+        android:gravity="center"
+        android:text="@string/empty_grid_download_language"
+        android:textColor="@android:color/white"
+        android:theme="@style/ColoredButton"/>
 
     <TextView
-            android:id="@+id/fairy_hint"
-            android:textSize="15dp"
-            android:layout_marginBottom="@dimen/default_padding"
-            android:layout_alignParentBottom="true"
-            android:textColor="@color/grey3"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:text="@string/empty_grid_fairy"/>
+        android:id="@+id/fairy_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/default_padding"
+        android:text="@string/empty_grid_fairy"
+        android:textColor="@color/grey3"
+        android:textSize="15dp"/>
 </RelativeLayout>

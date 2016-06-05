@@ -15,21 +15,6 @@
  */
 package com.renard.ocr.documents.creation.visualisation;
 
-import com.googlecode.leptonica.android.Pix;
-import com.googlecode.leptonica.android.Pixa;
-import com.googlecode.tesseract.android.OCR;
-import com.renard.ocr.MonitoredActivity;
-import com.renard.ocr.PermissionGrantedEvent;
-import com.renard.ocr.R;
-import com.renard.ocr.documents.creation.visualisation.LayoutQuestionDialog.LayoutChoseListener;
-import com.renard.ocr.documents.creation.visualisation.LayoutQuestionDialog.LayoutKind;
-import com.renard.ocr.documents.viewing.DocumentContentProvider;
-import com.renard.ocr.documents.viewing.DocumentContentProvider.Columns;
-import com.renard.ocr.documents.viewing.grid.DocumentGridActivity;
-import com.renard.ocr.documents.viewing.single.DocumentActivity;
-import com.renard.ocr.util.Screen;
-import com.renard.ocr.util.Util;
-
 import android.Manifest;
 import android.content.ContentProviderClient;
 import android.content.ContentValues;
@@ -49,6 +34,21 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.googlecode.leptonica.android.Pix;
+import com.googlecode.leptonica.android.Pixa;
+import com.googlecode.tesseract.android.OCR;
+import com.renard.ocr.MonitoredActivity;
+import com.renard.ocr.PermissionGrantedEvent;
+import com.renard.ocr.R;
+import com.renard.ocr.documents.creation.visualisation.LayoutQuestionDialog.LayoutChoseListener;
+import com.renard.ocr.documents.creation.visualisation.LayoutQuestionDialog.LayoutKind;
+import com.renard.ocr.documents.viewing.DocumentContentProvider;
+import com.renard.ocr.documents.viewing.DocumentContentProvider.Columns;
+import com.renard.ocr.documents.viewing.grid.DocumentGridActivity;
+import com.renard.ocr.documents.viewing.single.DocumentActivity;
+import com.renard.ocr.util.Screen;
+import com.renard.ocr.util.Util;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -59,6 +59,8 @@ import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
 
 /**
+ * ocr界面
+ * <p/>
  * this activity is shown during the ocr process
  *
  * @author renard
@@ -95,6 +97,7 @@ public class OCRActivity extends MonitoredActivity implements LayoutChoseListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EventBus.getDefault().register(this);
+
         long nativePix = getIntent().getLongExtra(DocumentGridActivity.EXTRA_NATIVE_PIX, -1);
         mParentId = getIntent().getIntExtra(EXTRA_PARENT_DOCUMENT_ID, -1);
         if (nativePix == -1) {
@@ -110,7 +113,6 @@ public class OCRActivity extends MonitoredActivity implements LayoutChoseListene
         ButterKnife.bind(this);
         initToolbar();
         ensurePermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, R.string.permission_explanation);
-
     }
 
 
@@ -123,28 +125,29 @@ public class OCRActivity extends MonitoredActivity implements LayoutChoseListene
         askUserAboutDocumentLayout();
     }
 
+    //用户选好了布局之后该方法就会被调用
     @Override
     public void onLayoutChosen(LayoutKind layoutKind, String ocrLanguage) {
         long nativePix = getIntent().getLongExtra(DocumentGridActivity.EXTRA_NATIVE_PIX, -1);
         final Pix pixOrg = new Pix(nativePix);
-        if (layoutKind == LayoutKind.DO_NOTHING) {
+        if (layoutKind == LayoutKind.DO_NOTHING) {//todo 貌似不可能是DO_NOTHING
             saveDocument(pixOrg, null, null, 0);
         } else {
             mOcrLanguage = ocrLanguage;
-
             setToolbarMessage(R.string.progress_start);
 
-            if (layoutKind == LayoutKind.SIMPLE) {
+            if (layoutKind == LayoutKind.SIMPLE) {//简单布局
                 mOCR.startOCRForSimpleLayout(OCRActivity.this, ocrLanguage, pixOrg, mImageView.getWidth(), mImageView.getHeight());
-            } else if (layoutKind == LayoutKind.COMPLEX) {
+            } else if (layoutKind == LayoutKind.COMPLEX) {//复杂布局
                 mAccuracy = 0;
-                mOCR.startLayoutAnalysis(OCRActivity.this, pixOrg, mImageView.getWidth(), mImageView.getHeight());
+                mOCR.startLayoutAnalysis(OCRActivity.this, pixOrg, mImageView.getWidth(), mImageView.getHeight());//
             }
         }
-
     }
 
     /**
+     * 接收OCR处理进度的Handler
+     * <p/>
      * receives progress status messages from the background ocr task and
      * displays them in the current activity
      *
@@ -167,7 +170,7 @@ public class OCRActivity extends MonitoredActivity implements LayoutChoseListene
                     setToolbarMessage(msg.arg1);
                     break;
                 }
-                case OCR.MESSAGE_TESSERACT_PROGRESS: {
+                case OCR.MESSAGE_TESSERACT_PROGRESS: {//显示进度
                     if (!mHasStartedOcr) {
                         mAnalytics.sendScreenView("Ocr");
                         mHasStartedOcr = true;
@@ -199,7 +202,7 @@ public class OCRActivity extends MonitoredActivity implements LayoutChoseListene
                     break;
                 }
 
-                case OCR.MESSAGE_LAYOUT_ELEMENTS: {
+                case OCR.MESSAGE_LAYOUT_ELEMENTS: { //解析出图片中的布局元素，即分成多少块
                     int nativePixaText = msg.arg1;
                     int nativePixaImages = msg.arg2;
                     final Pixa texts = new Pixa(nativePixaText, 0, 0);
@@ -208,7 +211,7 @@ public class OCRActivity extends MonitoredActivity implements LayoutChoseListene
                     ArrayList<RectF> scaledBoxes = new ArrayList<>(boxes.size());
                     float xScale = (1.0f * mPreviewWith) / mOriginalWidth;
                     float yScale = (1.0f * mPreviewHeight) / mOriginalHeight;
-                    // scale the to the preview image space
+                    // scale to the preview image space
                     for (Rect r : boxes) {
                         scaledBoxes.add(new RectF(r.left * xScale, r.top * yScale,
                                 r.right * xScale, r.bottom * yScale));
@@ -236,7 +239,6 @@ public class OCRActivity extends MonitoredActivity implements LayoutChoseListene
                                     || selectedImages.length > 0) {
                                 mImageView.clearAllProgressInfo();
 
-
                                 mOCR.startOCRForComplexLayout(OCRActivity.this,
                                         mOcrLanguage, texts,
                                         images, selectedTexts, selectedImages);
@@ -250,9 +252,7 @@ public class OCRActivity extends MonitoredActivity implements LayoutChoseListene
                         }
                     });
                     mAnalytics.sendScreenView("Pick Columns");
-
                     setToolbarMessage(R.string.progress_choose_columns);
-
                     break;
                 }
                 case OCR.MESSAGE_HOCR_TEXT: {
@@ -264,7 +264,7 @@ public class OCRActivity extends MonitoredActivity implements LayoutChoseListene
                     this.utf8String = (String) msg.obj;
                     break;
                 }
-                case OCR.MESSAGE_END: {
+                case OCR.MESSAGE_END: {//OCR处理结束
                     saveDocument(mFinalPix, hocrString, utf8String, mAccuracy);
                     break;
                 }
@@ -277,6 +277,7 @@ public class OCRActivity extends MonitoredActivity implements LayoutChoseListene
 
     }
 
+    //OCR处理结束之后开始保存文档
     private void saveDocument(final Pix pix, final String hocrString, final String utf8String, final int accuracy) {
 
         Util.startBackgroundJob(OCRActivity.this, "",
@@ -295,38 +296,28 @@ public class OCRActivity extends MonitoredActivity implements LayoutChoseListene
 
                                 @Override
                                 public void run() {
-                                    Toast.makeText(
-                                            getApplicationContext(),
-                                            getText(R.string.error_create_file),
-                                            Toast.LENGTH_LONG).show();
+                                    Toast.makeText(getApplicationContext(), getText(R.string.error_create_file), Toast.LENGTH_LONG).show();
                                 }
                             });
                         }
 
                         try {
-
                             documentUri = saveDocumentToDB(imageFile, hocrString, utf8String);
                             if (imageFile != null) {
                                 Util.createThumbnail(OCRActivity.this, imageFile, Integer.valueOf(documentUri.getLastPathSegment()));
                             }
                         } catch (RemoteException e) {
                             e.printStackTrace();
-
                             runOnUiThread(new Runnable() {
-
                                 @Override
                                 public void run() {
-                                    Toast.makeText(
-                                            getApplicationContext(),
-                                            getText(R.string.error_create_file),
-                                            Toast.LENGTH_LONG).show();
-                                }
+                                    Toast.makeText(getApplicationContext(), getText(R.string.error_create_file), Toast.LENGTH_LONG).show(); }
                             });
                         } finally {
                             recycleResultPix(pix);
                             if (documentUri != null && !isFinishing()) {
                                 Intent i;
-                                i = new Intent(OCRActivity.this, DocumentActivity.class);
+                                i = new Intent(OCRActivity.this, DocumentActivity.class);//跳到DocumentActivity
                                 i.putExtra(DocumentActivity.EXTRA_ACCURACY, accuracy);
                                 i.putExtra(DocumentActivity.EXTRA_LANGUAGE, mOcrLanguage);
                                 i.setData(documentUri);
@@ -348,7 +339,7 @@ public class OCRActivity extends MonitoredActivity implements LayoutChoseListene
         }
     }
 
-
+    //保存最终的Pix到sd卡中
     private File saveImage(Pix p) throws IOException {
         CharSequence id = DateFormat.format("ssmmhhddMMyy", new Date(System.currentTimeMillis()));
         return Util.savePixToSD(p, id.toString());
@@ -389,11 +380,11 @@ public class OCRActivity extends MonitoredActivity implements LayoutChoseListene
         return -1;
     }
 
+    //询问布局情况
     private void askUserAboutDocumentLayout() {
         LayoutQuestionDialog dialog = LayoutQuestionDialog.newInstance();
         dialog.show(getSupportFragmentManager(), LayoutQuestionDialog.TAG);
     }
-
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -430,6 +421,5 @@ public class OCRActivity extends MonitoredActivity implements LayoutChoseListene
             mFinalPix = null;
         }
         mImageView.clear();
-
     }
 }

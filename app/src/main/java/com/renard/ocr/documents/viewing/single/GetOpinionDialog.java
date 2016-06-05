@@ -1,10 +1,5 @@
 package com.renard.ocr.documents.viewing.single;
 
-import com.googlecode.tesseract.android.OCR;
-import com.renard.ocr.R;
-import com.renard.ocr.main_menu.ContactActivity;
-import com.renard.ocr.main_menu.FeedbackActivity;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -16,9 +11,16 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
+import com.googlecode.tesseract.android.OCR;
+import com.renard.ocr.R;
+import com.renard.ocr.main_menu.ContactActivity;
+import com.renard.ocr.main_menu.FeedbackActivity;
+
 import java.io.File;
 
 /**
+ * 用户使用意见对话框
+ *
  * @author renard
  */
 public class GetOpinionDialog extends TopDialogFragment implements DialogInterface.OnClickListener {

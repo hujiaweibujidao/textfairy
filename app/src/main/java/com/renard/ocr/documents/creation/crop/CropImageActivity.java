@@ -17,22 +17,6 @@
 
 package com.renard.ocr.documents.creation.crop;
 
-import com.google.common.base.Optional;
-
-import com.googlecode.leptonica.android.Box;
-import com.googlecode.leptonica.android.Clip;
-import com.googlecode.leptonica.android.Convert;
-import com.googlecode.leptonica.android.Pix;
-import com.googlecode.leptonica.android.Projective;
-import com.googlecode.leptonica.android.Rotate;
-import com.googlecode.tesseract.android.OCR;
-import com.renard.ocr.HintDialog;
-import com.renard.ocr.MonitoredActivity;
-import com.renard.ocr.R;
-import com.renard.ocr.documents.viewing.grid.DocumentGridActivity;
-import com.renard.ocr.util.PreferencesUtils;
-import com.renard.ocr.util.Util;
-
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -56,15 +40,33 @@ import android.widget.ImageView;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
+import com.google.common.base.Optional;
+import com.googlecode.leptonica.android.Box;
+import com.googlecode.leptonica.android.Clip;
+import com.googlecode.leptonica.android.Convert;
+import com.googlecode.leptonica.android.Pix;
+import com.googlecode.leptonica.android.Projective;
+import com.googlecode.leptonica.android.Rotate;
+import com.googlecode.tesseract.android.OCR;
+import com.renard.ocr.HintDialog;
+import com.renard.ocr.MonitoredActivity;
+import com.renard.ocr.R;
+import com.renard.ocr.documents.viewing.grid.DocumentGridActivity;
+import com.renard.ocr.util.PreferencesUtils;
+import com.renard.ocr.util.Util;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
 
 /**
+ * 图片裁剪的界面
+ *
  * The activity can crop specific region of interest from an image.
  */
 public class CropImageActivity extends MonitoredActivity implements BlurWarningDialog.BlurDialogClickListener {
+
     public static final int RESULT_NEW_IMAGE = RESULT_FIRST_USER + 1;
     private static final int HINT_DIALOG_ID = 2;
     public static final String SCREEN_NAME = "Crop Image";
@@ -103,12 +105,14 @@ public class CropImageActivity extends MonitoredActivity implements BlurWarningD
         getWindow().setFormat(PixelFormat.RGBA_8888);
         setContentView(R.layout.activity_cropimage);
         ButterKnife.bind(this);
+
         initToolbar();
         setToolbarMessage(R.string.crop_title);
         initNavigationAsUp();
         startCropping();
     }
 
+    //第一次扫描时的提示信息
     private void showCropOnBoarding(final CropData cropData) {
         PreferencesUtils.setFirstScan(this, false);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -144,6 +148,7 @@ public class CropImageActivity extends MonitoredActivity implements BlurWarningD
         onRotateClicked(1);
     }
 
+    //旋转图片
     private void onRotateClicked(int delta) {
         if (mCropData.isPresent()) {
             if (delta < 0) {
@@ -151,11 +156,12 @@ public class CropImageActivity extends MonitoredActivity implements BlurWarningD
             }
             mRotation += delta;
             mRotation = mRotation % 4;
-            mImageView.setImageBitmapResetBase(mCropData.get().getBitmap(), false, mRotation * 90);
+            mImageView.setImageBitmapResetBase(mCropData.get().getBitmap(), false, mRotation * 90);//角度在这里乘以90
             showDefaultCroppingRectangle(mCropData.get().getBitmap());
         }
     }
 
+    //开始裁剪，在布局完成之后，准备加载图片信息以供裁剪
     private void startCropping() {
         mImageView.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
 
@@ -194,6 +200,7 @@ public class CropImageActivity extends MonitoredActivity implements BlurWarningD
         return HINT_DIALOG_ID;
     }
 
+    //在这里接收需要裁剪的图片准备阶段返回的结果 （由PreparePixForCropTask发送结果返回CropData）
     @SuppressWarnings("unused")
     public void onEventMainThread(final CropData cropData) {
         if (cropData.getBitmap() == null) {
@@ -207,7 +214,7 @@ public class CropImageActivity extends MonitoredActivity implements BlurWarningD
 
         mCropData = Optional.of(cropData);
         adjustOptionsMenu();
-        mViewSwitcher.setDisplayedChild(1);
+        mViewSwitcher.setDisplayedChild(1);//显示图片，不显示进度条了
 
         mImageView.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
 
@@ -226,14 +233,14 @@ public class CropImageActivity extends MonitoredActivity implements BlurWarningD
             }
 
         });
-
     }
 
+    //不同模糊状态下的图片的处理
     private void handleBlurResult(CropData cropData) {
         switch (cropData.getBlurriness().getBlurriness()) {
             case NOT_BLURRED:
                 mAnalytics.sendScreenView(SCREEN_NAME);
-                showDefaultCroppingRectangle(cropData.getBitmap());
+                showDefaultCroppingRectangle(cropData.getBitmap());//没啥问题就显示默认的裁剪区域
                 break;
             case MEDIUM_BLUR:
             case STRONG_BLUR:
@@ -255,7 +262,7 @@ public class CropImageActivity extends MonitoredActivity implements BlurWarningD
         return super.onCreateDialog(id, args);
     }
 
-
+    //调整操作按钮的显示情况
     private void adjustOptionsMenu() {
         if (mCropData.isPresent()) {
             mRotateLeft.setVisibility(View.VISIBLE);
@@ -275,6 +282,7 @@ public class CropImageActivity extends MonitoredActivity implements BlurWarningD
         }
         mSaving = true;
 
+        //开启后台裁剪图片的任务
         Util.startBackgroundJob(this, null, getText(R.string.cropping_image).toString(), new Runnable() {
             public void run() {
                 try {
@@ -316,10 +324,12 @@ public class CropImageActivity extends MonitoredActivity implements BlurWarningD
                     if (bilinear == null) {
                         throw new IllegalStateException();
                     }
+
                     Intent result = new Intent();
                     OCR.savePixToCacheDir(CropImageActivity.this, bilinear.copy());
-                    result.putExtra(DocumentGridActivity.EXTRA_NATIVE_PIX, bilinear.getNativePix());
-                    setResult(RESULT_OK, result);
+                    //DocumentGridActivity.EXTRA_NATIVE_PIX = NewDocumentActivity.EXTRA_NATIVE_PIX
+                    result.putExtra(DocumentGridActivity.EXTRA_NATIVE_PIX, bilinear.getNativePix());//裁剪之后的图片Pix
+                    setResult(RESULT_OK, result);//进入代码在NewDocumentActivity 470行附近
                 } catch (IllegalStateException e) {
                     setResult(RESULT_CANCELED);
                 } finally {
@@ -391,7 +401,7 @@ public class CropImageActivity extends MonitoredActivity implements BlurWarningD
         mImageView.zoomTo(3, pts[0], pts[1], 2000);
     }
 
-
+    //显示默认的裁剪矩形
     private void showDefaultCroppingRectangle(Bitmap bitmap) {
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
@@ -399,10 +409,10 @@ public class CropImageActivity extends MonitoredActivity implements BlurWarningD
         Rect imageRect = new Rect(0, 0, width, height);
 
         // make the default size about 4/5 of the width or height
-        int cropWidth = Math.min(width, height) * 4 / 5;
+        int cropWidth = Math.min(width, height) * 4 / 5;//裁剪矩形默认是图片矩形的4/5
 
 
-        int x = (width - cropWidth) / 2;
+        int x = (width - cropWidth) / 2;//这里除以2是因为左右，下面除以2是因为上下
         int y = (height - cropWidth) / 2;
 
         RectF cropRect = new RectF(x, y, x + cropWidth, y + cropWidth);
@@ -410,7 +420,7 @@ public class CropImageActivity extends MonitoredActivity implements BlurWarningD
         CropHighlightView hv = new CropHighlightView(mImageView, imageRect, cropRect);
 
         mImageView.resetMaxZoom();
-        mImageView.add(hv);
+        mImageView.add(hv);//创建CropHighlightView添加到CropImageView上
         mCrop = hv;
         mCrop.setFocus(true);
         mImageView.invalidate();
@@ -428,7 +438,7 @@ public class CropImageActivity extends MonitoredActivity implements BlurWarningD
 
     @Override
     public void onNewImageClicked() {
-        setResult(RESULT_NEW_IMAGE);
+        setResult(RESULT_NEW_IMAGE);//返回结果的处理在NewDocumentActivity的405行附近
         mPix.recycle();
         finish();
     }

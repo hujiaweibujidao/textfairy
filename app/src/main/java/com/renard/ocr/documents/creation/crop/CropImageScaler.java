@@ -20,6 +20,8 @@ import com.googlecode.leptonica.android.Scale;
 import com.renard.ocr.util.Util;
 
 /**
+ * 获取需要裁剪的图片在屏幕上显示时的最佳缩放比例
+ *
  * Created by renard.
  */
 public class CropImageScaler {

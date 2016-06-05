@@ -1,8 +1,5 @@
 package com.renard.ocr.documents.creation.crop;
 
-import com.renard.ocr.R;
-import com.renard.ocr.documents.viewing.single.TopDialogFragment;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -14,7 +11,12 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import com.renard.ocr.R;
+import com.renard.ocr.documents.viewing.single.TopDialogFragment;
+
 /**
+ * 提醒图片过于模糊的对话框
+ *
  * @author renard
  */
 public class BlurWarningDialog extends TopDialogFragment implements DialogInterface.OnClickListener, DialogInterface.OnCancelListener {
@@ -45,7 +47,6 @@ public class BlurWarningDialog extends TopDialogFragment implements DialogInterf
         super.onCancel(dialog);
         BlurDialogClickListener listener = (BlurDialogClickListener) getActivity();
         listener.onContinueClicked();
-
     }
 
     interface BlurDialogClickListener {

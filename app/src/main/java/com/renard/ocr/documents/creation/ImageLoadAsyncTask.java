@@ -1,12 +1,5 @@
 package com.renard.ocr.documents.creation;
 
-import com.crashlytics.android.Crashlytics;
-import com.googlecode.leptonica.android.Pix;
-import com.googlecode.leptonica.android.ReadFile;
-import com.googlecode.leptonica.android.Scale;
-import com.googlecode.tesseract.android.OCR;
-import com.renard.ocr.TextFairyApplication;
-
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -14,15 +7,26 @@ import android.os.AsyncTask;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.crashlytics.android.Crashlytics;
+import com.googlecode.leptonica.android.Pix;
+import com.googlecode.leptonica.android.ReadFile;
+import com.googlecode.leptonica.android.Scale;
+import com.googlecode.tesseract.android.OCR;
+import com.renard.ocr.TextFairyApplication;
+
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 
 
 /**
+ * 图片加载task
+ *
  * @author renard
  */
 public class ImageLoadAsyncTask extends AsyncTask<Void, Void, ImageLoadAsyncTask.LoadResult> {
 
+    private static final String LOG_TAG = ImageLoadAsyncTask.class.getSimpleName();
+
+    //加载结果
     public class LoadResult {
         private final Pix mPix;
         private final PixLoadStatus mStatus;
@@ -36,7 +40,6 @@ public class ImageLoadAsyncTask extends AsyncTask<Void, Void, ImageLoadAsyncTask
             mStatus = PixLoadStatus.SUCCESS;
             mPix = p;
         }
-
     }
 
     final static String EXTRA_PIX = "pix";
@@ -44,9 +47,10 @@ public class ImageLoadAsyncTask extends AsyncTask<Void, Void, ImageLoadAsyncTask
     final static String EXTRA_SKIP_CROP = "skip_crop";
     final static String ACTION_IMAGE_LOADED = ImageLoadAsyncTask.class.getName() + ".image.loaded";
     final static String ACTION_IMAGE_LOADING_START = ImageLoadAsyncTask.class.getName() + ".image.loading.start";
+
     public static final int MIN_PIXEL_COUNT = 3 * 1024 * 1024;
     private final boolean skipCrop;
-    private final Context context;
+    private final Context context;//ApplicationContext
     private final Uri cameraPicUri;
 
     ImageLoadAsyncTask(NewDocumentActivity activity, boolean skipCrop, Uri cameraPicUri) {
@@ -55,15 +59,11 @@ public class ImageLoadAsyncTask extends AsyncTask<Void, Void, ImageLoadAsyncTask
         this.cameraPicUri = cameraPicUri;
     }
 
-
-    private static final String LOG_TAG = ImageLoadAsyncTask.class.getSimpleName();
-
-
     @Override
     protected void onPreExecute() {
         Log.i(LOG_TAG, "onPreExecute");
         Intent intent = new Intent(ACTION_IMAGE_LOADING_START);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);//先发送一个广播，声明开始加载图片了
     }
 
     @Override
@@ -75,7 +75,7 @@ public class ImageLoadAsyncTask extends AsyncTask<Void, Void, ImageLoadAsyncTask
         }
         intent.putExtra(EXTRA_STATUS, result.mStatus.ordinal());
         intent.putExtra(EXTRA_SKIP_CROP, skipCrop);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);//图片加载完成之后再发送一个广播
     }
 
     @Override
@@ -86,7 +86,7 @@ public class ImageLoadAsyncTask extends AsyncTask<Void, Void, ImageLoadAsyncTask
         }
         try {
             OCR.startCaptureLogs();
-            Pix p = ReadFile.loadWithPicasso(context, cameraPicUri);
+            Pix p = ReadFile.loadWithPicasso(context, cameraPicUri);//用picasso去加载图片得到bitmap再转换成pix
             if (p == null) {
                 if (TextFairyApplication.isRelease()) {
                     Crashlytics.setString("image uri", cameraPicUri.toString());
@@ -98,7 +98,7 @@ public class ImageLoadAsyncTask extends AsyncTask<Void, Void, ImageLoadAsyncTask
             final long pixPixelCount = p.getWidth() * p.getHeight();
             if (pixPixelCount < MIN_PIXEL_COUNT) {
                 double scale = Math.sqrt(((double) MIN_PIXEL_COUNT) / pixPixelCount);
-                Pix scaledPix = Scale.scale(p, (float) scale);
+                Pix scaledPix = Scale.scale(p, (float) scale);//图片缩放
                 if (scaledPix.getNativePix() == 0) {
                     if (TextFairyApplication.isRelease()) {
                         Crashlytics.log("pix = (" + p.getWidth() + ", " + p.getHeight() + ")");
@@ -109,8 +109,6 @@ public class ImageLoadAsyncTask extends AsyncTask<Void, Void, ImageLoadAsyncTask
                     p = scaledPix;
                 }
             }
-
-
             return new LoadResult(p);
         } finally {
             final String msg = OCR.stopCaptureLogs();
@@ -120,7 +118,6 @@ public class ImageLoadAsyncTask extends AsyncTask<Void, Void, ImageLoadAsyncTask
                 Log.e(LOG_TAG, msg);
             }
         }
-
     }
 
 }

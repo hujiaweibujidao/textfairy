@@ -1,8 +1,5 @@
 package com.renard.ocr.documents.viewing.single;
 
-import com.renard.ocr.analytics.Analytics;
-import com.renard.ocr.MonitoredActivity;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.res.TypedArray;
@@ -11,7 +8,12 @@ import android.view.Gravity;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.renard.ocr.MonitoredActivity;
+import com.renard.ocr.analytics.Analytics;
+
 /**
+ * 置顶的对话框窗口
+ *
  * @author renard
  */
 public class TopDialogFragment extends DialogFragment {
@@ -25,6 +27,7 @@ public class TopDialogFragment extends DialogFragment {
         mAnalytics = monitoredActivity.getAnaLytics();
     }
 
+    //这里需要拿到它的依赖的MonitoredActivity的Analytics对象
     public Analytics getAnalytics() {
         if (mAnalytics == null && getActivity() != null) {
             MonitoredActivity activity = (MonitoredActivity) getActivity();
@@ -33,6 +36,7 @@ public class TopDialogFragment extends DialogFragment {
         return mAnalytics;
     }
 
+    //将dialog置顶
     protected void positionDialogAtTop(AlertDialog alertDialog) {
         Window window = alertDialog.getWindow();
         WindowManager.LayoutParams wlp = window.getAttributes();

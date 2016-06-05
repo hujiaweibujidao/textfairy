@@ -19,6 +19,8 @@ import com.googlecode.leptonica.android.Box;
 import com.googlecode.leptonica.android.Pix;
 
 /**
+ * 图片模糊情况的检测结果
+ *
  * Created by renard.
  */
 public class BlurDetectionResult {
@@ -30,8 +32,6 @@ public class BlurDetectionResult {
     private final Pix mPixBlur;
     private final double mBlurValue;
     private final Box mMostBlurredRegion;
-
-
 
 
     public BlurDetectionResult(long blurPixPointer, double mBlurValue, long blurRegionPointer) {

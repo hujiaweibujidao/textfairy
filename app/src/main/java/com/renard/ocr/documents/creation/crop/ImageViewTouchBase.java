@@ -26,10 +26,12 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Handler;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.ImageView;
 
+/**
+ * 支持触摸操作的ImageView
+ */
 public abstract class ImageViewTouchBase extends ImageView {
 
     @SuppressWarnings("unused")
@@ -50,7 +52,7 @@ public abstract class ImageViewTouchBase extends ImageView {
     //
     // This matrix remains the same when we go from the thumbnail image
     // to the full size image.
-    protected Matrix mSuppMatrix = new Matrix();
+    protected Matrix mSuppMatrix = new Matrix();//辅助作用的matrix
 
     // This is the final matrix which is computed as the concatentation
     // of the base matrix and the supplementary matrix.
@@ -60,7 +62,7 @@ public abstract class ImageViewTouchBase extends ImageView {
     private final float[] mMatrixValues = new float[9];
 
     // The current bitmap being displayed.
-    final protected RotateBitmap mBitmapDisplayed = new RotateBitmap(null);
+    final protected RotateBitmap mBitmapDisplayed = new RotateBitmap(null);//当前界面显示的bitmap，可能是发生了旋转
 
     int mThisWidth = -1, mThisHeight = -1;
 
@@ -173,6 +175,7 @@ public abstract class ImageViewTouchBase extends ImageView {
 
     // This function changes bitmap, reset base matrix according to the size
     // of the bitmap, and optionally reset the supplementary matrix.
+    //图片发生了旋转，所以要重置图片的matrix，甚至要重置图片的辅助matrix
     public void setImageBitmapResetBase(final Bitmap bitmap, final boolean resetSupp, int rotation) {
         setImageRotateBitmapResetBase(new RotateBitmap(bitmap, rotation), resetSupp);
 

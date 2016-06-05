@@ -15,8 +15,6 @@
  */
 package com.renard.ocr.main_menu.language;
 
-import com.renard.ocr.util.Util;
-
 import android.app.DownloadManager;
 import android.app.IntentService;
 import android.content.Context;
@@ -25,6 +23,8 @@ import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
+import com.renard.ocr.util.Util;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,6 +32,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * 安装ocr语言的服务
+ */
 public class OCRLanguageInstallService extends IntentService {
 
     static final String ACTION_INSTALL_COMPLETED = "com.renard.ocr.ACTION_OCR_LANGUAGE_INSTALLED";

@@ -24,14 +24,16 @@ import android.util.Log;
 import static com.renard.ocr.documents.creation.crop.CropHighlightView.*;
 
 /**
+ * 裁剪用的曲边梯形
+ *
  * Created by renard on 26/02/15.
  */
 public class CroppingTrapezoid {
 
     private final static String LOG_TAG = CroppingTrapezoid.class.getSimpleName();
     private final float[] mPoints = new float[8];
-    private final float[] mMappedPoints = new float[8];
-    private final Rect mImageRect;
+    private final float[] mMappedPoints = new float[8];//
+    private final Rect mImageRect;//曲边梯形在图片中对应的矩形
 
     public CroppingTrapezoid(RectF cropRect, Rect imageRect) {
         mImageRect = new Rect(imageRect);
@@ -226,7 +228,6 @@ public class CroppingTrapezoid {
             mPoints[7] += dy;
         }
 
-
         capPoints(edge);
     }
 
@@ -349,7 +350,6 @@ public class CroppingTrapezoid {
             mPoints[7] = Math.max(mPoints[7], topBound);
             mPoints[5] = Math.max(mPoints[5], topBound);
         }
-
 
     }
 

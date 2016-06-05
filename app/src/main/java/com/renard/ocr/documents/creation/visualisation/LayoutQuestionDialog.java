@@ -15,13 +15,6 @@
  */
 package com.renard.ocr.documents.creation.visualisation;
 
-import com.renard.ocr.analytics.Analytics;
-import com.renard.ocr.MonitoredActivity;
-import com.renard.ocr.R;
-import com.renard.ocr.main_menu.language.OcrLanguage;
-import com.renard.ocr.main_menu.language.OcrLanguageDataStore;
-import com.renard.ocr.util.PreferencesUtils;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -43,11 +36,22 @@ import android.widget.Spinner;
 import android.widget.ViewFlipper;
 import android.widget.ViewSwitcher;
 
+import com.renard.ocr.MonitoredActivity;
+import com.renard.ocr.R;
+import com.renard.ocr.analytics.Analytics;
+import com.renard.ocr.main_menu.language.OcrLanguage;
+import com.renard.ocr.main_menu.language.OcrLanguageDataStore;
+import com.renard.ocr.util.PreferencesUtils;
+
 import java.util.List;
 
+/**
+ * 询问布局的对话框
+ */
 public class LayoutQuestionDialog extends DialogFragment {
 
     public static final String TAG = LayoutQuestionDialog.class.getSimpleName();
+
     private static final String SCREEN_NAME = "Layout Question Dialog";
 
     private Analytics mAnalytics;
@@ -82,7 +86,6 @@ public class LayoutQuestionDialog extends DialogFragment {
         mAnalytics = monitoredActivity.getAnaLytics();
     }
 
-
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -101,12 +104,10 @@ public class LayoutQuestionDialog extends DialogFragment {
         mLanguage = language.first;
 
         AlertDialog.Builder builder;
-
         builder = new AlertDialog.Builder(context);
         builder.setCancelable(false);
         View layout = View.inflate(context, R.layout.dialog_layout_question, null);
         builder.setView(layout);
-
 
         final ViewFlipper titleViewFlipper = (ViewFlipper) layout.findViewById(R.id.layout_title);
         final ImageView columnLayout = (ImageView) layout.findViewById(R.id.column_layout);
@@ -121,20 +122,19 @@ public class LayoutQuestionDialog extends DialogFragment {
         fairy.setInAnimation(context, android.R.anim.fade_in);
         fairy.setOutAnimation(context, android.R.anim.fade_out);
 
+        //选中的布局会有一个tint着色
         final int color = context.getResources().getColor(R.color.progress_color);
-
         final PorterDuffColorFilter colorFilter = new PorterDuffColorFilter(color, PorterDuff.Mode.LIGHTEN);
-
 
         columnLayout.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mLayout != LayoutKind.COMPLEX) {
-                    fairy.setImageResource(R.drawable.fairy_looks_left);
+                    mLayout = LayoutKind.COMPLEX;
                     titleViewFlipper.setDisplayedChild(2);
+                    fairy.setImageResource(R.drawable.fairy_looks_left);
                     columnLayout.setColorFilter(colorFilter);
                     pageLayout.clearColorFilter();
-                    mLayout = LayoutKind.COMPLEX;
                 }
 
             }
@@ -172,7 +172,7 @@ public class LayoutQuestionDialog extends DialogFragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 final OcrLanguage item = adapter.getItem(position);
                 mLanguage = item.getValue();
-                PreferencesUtils.saveOCRLanguage(context, item);
+                PreferencesUtils.saveOCRLanguage(context, item);//保存上一次选中的语言
                 getAnalytics().sendOcrLanguageChanged(item);
             }
 
@@ -182,7 +182,7 @@ public class LayoutQuestionDialog extends DialogFragment {
             }
         });
 
-
+        //选择好了之后回调Activity中实现的onLayoutChosen
         builder.setPositiveButton(R.string.start_scan,
                 new DialogInterface.OnClickListener() {
 

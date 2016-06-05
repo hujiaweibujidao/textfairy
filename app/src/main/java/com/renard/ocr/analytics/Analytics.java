@@ -5,6 +5,8 @@ import com.renard.ocr.documents.creation.visualisation.LayoutQuestionDialog;
 import com.renard.ocr.main_menu.language.OcrLanguage;
 
 /**
+ * 需要统计分析的操作事件
+ * <p/>
  * Created by renard on 19/03/16.
  */
 public interface Analytics {

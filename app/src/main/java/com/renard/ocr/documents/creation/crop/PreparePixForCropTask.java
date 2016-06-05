@@ -1,13 +1,15 @@
 package com.renard.ocr.documents.creation.crop;
 
+import android.graphics.Bitmap;
+import android.os.AsyncTask;
+import android.util.Log;
+
 import com.googlecode.leptonica.android.Pix;
 import com.googlecode.leptonica.android.WriteFile;
 import com.renard.ocr.cropimage.image_processing.Blur;
 import com.renard.ocr.cropimage.image_processing.BlurDetectionResult;
 
-import android.graphics.Bitmap;
-import android.os.AsyncTask;
-import android.util.Log;
+import de.greenrobot.event.EventBus;
 
 class CropData {
     private final Bitmap mBitmap;
@@ -38,10 +40,11 @@ class CropData {
     }
 }
 
-
+/**
+ * 从Pix中获取要裁减的图像数据
+ */
 public class PreparePixForCropTask extends AsyncTask<Void, Void, CropData> {
     private static final String TAG = PreparePixForCropTask.class.getName();
-
 
     private final Pix mPix;
     private final int mWidth;
@@ -67,7 +70,7 @@ public class PreparePixForCropTask extends AsyncTask<Void, Void, CropData> {
     @Override
     protected void onPostExecute(CropData cropData) {
         super.onPostExecute(cropData);
-        de.greenrobot.event.EventBus.getDefault().post(cropData);
+        EventBus.getDefault().post(cropData);//处理完成之后将结果发送出去
     }
 
     @Override
@@ -80,11 +83,11 @@ public class PreparePixForCropTask extends AsyncTask<Void, Void, CropData> {
         if (isCancelled()) {
             return null;
         }
-        scaleResult = scaler.scale(mPix, mWidth, mHeight);
+        scaleResult = scaler.scale(mPix, mWidth, mHeight);//
         if (isCancelled()) {
             return null;
         }
-        Bitmap bitmap = WriteFile.writeBitmap(scaleResult.getPix());
+        Bitmap bitmap = WriteFile.writeBitmap(scaleResult.getPix());//将Pix转成了Bitmap以供界面显示
         if (isCancelled()) {
             return null;
         }
@@ -94,8 +97,6 @@ public class PreparePixForCropTask extends AsyncTask<Void, Void, CropData> {
             //TODO LOG to GA along with with and height as well as pix pointer
         }
         return new CropData(bitmap, scaleResult, blurDetectionResult);
-
     }
-
 
 }

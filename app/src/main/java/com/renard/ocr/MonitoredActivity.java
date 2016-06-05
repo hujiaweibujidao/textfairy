@@ -17,12 +17,6 @@
 
 package com.renard.ocr;
 
-import com.google.android.gms.analytics.Tracker;
-import com.google.common.base.Optional;
-
-import com.renard.ocr.analytics.Analytics;
-import com.renard.ocr.documents.creation.crop.BaseActivityInterface;
-
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
@@ -45,26 +39,35 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.common.base.Optional;
+import com.renard.ocr.analytics.Analytics;
+import com.renard.ocr.documents.creation.crop.BaseActivityInterface;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import de.greenrobot.event.EventBus;
 
-
+/**
+ * 受监控的Activity，这个类基本上是该项目中所有的Activity的基类
+ */
 public abstract class MonitoredActivity extends AppCompatActivity implements BaseActivityInterface, OnGlobalLayoutListener {
 
     private static final String LOG_TAG = MonitoredActivity.class.getSimpleName();
+
     static final int MY_PERMISSIONS_REQUEST = 232;
 
-    private final ArrayList<LifeCycleListener> mListeners = new ArrayList<LifeCycleListener>();
-    private int mDialogId = -1;
     private final Handler mHandler = new Handler();
+    private final ArrayList<LifeCycleListener> mListeners = new ArrayList<LifeCycleListener>();
+
+    private int mDialogId = -1;
     private ImageView mAppIcon = null;
     private TextView mToolbarMessage;
     private AlertDialog mPermissionDialog;
+
     protected Analytics mAnalytics;
 
-
+    //Activity生命周期监听器
     public interface LifeCycleListener {
         void onActivityCreated(MonitoredActivity activity);
 
@@ -79,6 +82,7 @@ public abstract class MonitoredActivity extends AppCompatActivity implements Bas
         void onActivityStopped(MonitoredActivity activity);
     }
 
+    //Activity生命周期监听器的适配器
     public static class LifeCycleAdapter implements LifeCycleListener {
         public void onActivityCreated(MonitoredActivity activity) {
         }
@@ -164,7 +168,6 @@ public abstract class MonitoredActivity extends AppCompatActivity implements Bas
         mToolbarMessage.setText(message);
     }
 
-
     protected abstract int getHintDialogId();
 
     @Override
@@ -201,7 +204,7 @@ public abstract class MonitoredActivity extends AppCompatActivity implements Bas
         switch (item.getItemId()) {
             case android.R.id.home:
                 if (mDialogId != -1) {
-                    showDialog(mDialogId);
+                    showDialog(mDialogId);//todo 过时，要求使用DialogFragment
                 }
 
                 return true;
@@ -210,6 +213,7 @@ public abstract class MonitoredActivity extends AppCompatActivity implements Bas
         }
     }
 
+    //图标的动画
     private static class IconAnimationRunnable implements Runnable {
         final AnimationDrawable animation;
         final Handler mHandler;
@@ -221,13 +225,14 @@ public abstract class MonitoredActivity extends AppCompatActivity implements Bas
 
         @Override
         public void run() {
-            animation.setVisible(false, true);
+            animation.setVisible(false, true);//setVisible(boolean visible, boolean restart) 不可见，但是如果可见了的话动画从头开始
             animation.start();
             final int delayMillis = (int) ((Math.random() * 15 + 15) * 1000);
-            mHandler.postDelayed(this, delayMillis);
+            mHandler.postDelayed(this, delayMillis);//随机过段时间这个动画就开始播放
         }
     }
 
+    //点击应用图标之后打开dialog，在不同的界面打开的窗口不同
     private static class AppIconClickListener implements View.OnClickListener {
         private final WeakReference<Activity> mActivityWeakReference;
         private final int mDialogId;
@@ -251,16 +256,16 @@ public abstract class MonitoredActivity extends AppCompatActivity implements Bas
         // start fairy animation at random intervals
         if (mAppIcon.getDrawable() instanceof AnimationDrawable) {
             final AnimationDrawable animation = (AnimationDrawable) mAppIcon.getDrawable();
-            Optional<IconAnimationRunnable> runnable = Optional.of(new IconAnimationRunnable(animation, mHandler));
+            Optional<IconAnimationRunnable> runnable = Optional.of(new IconAnimationRunnable(animation, mHandler));//可能是IconAnimationRunnable，也可能是null
             mHandler.removeCallbacksAndMessages(null);
             mHandler.post(runnable.get());
         }
         if (mDialogId != -1) {
             // show hint dialog when user clicks on the app icon
-            mAppIcon.setOnClickListener(new AppIconClickListener(this, mDialogId));
+            mAppIcon.setOnClickListener(new AppIconClickListener(this, mDialogId));//给应用图标添加监听器
         }
         if (mAppIcon.getViewTreeObserver().isAlive()) {
-            mAppIcon.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+            mAppIcon.getViewTreeObserver().removeGlobalOnLayoutListener(this);//删除OnGlobalLayoutListener监听器
         }
     }
 
@@ -273,7 +278,6 @@ public abstract class MonitoredActivity extends AppCompatActivity implements Bas
         final ViewTreeObserver viewTreeObserver = appIcon.getViewTreeObserver();
         if (viewTreeObserver.isAlive()) {
             viewTreeObserver.addOnGlobalLayoutListener(this);
-
         }
     }
 
@@ -284,17 +288,15 @@ public abstract class MonitoredActivity extends AppCompatActivity implements Bas
 
     public void ensurePermission(String permission, @StringRes int explanation) {
         if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {//解释需要权限
                 explainPermission(permission, explanation);
-            } else {
+            } else {//申请获取权限
                 ActivityCompat.requestPermissions(this, new String[]{permission}, MY_PERMISSIONS_REQUEST);
-
             }
         } else {
-            EventBus.getDefault().post(new PermissionGrantedEvent(permission));
+            EventBus.getDefault().post(new PermissionGrantedEvent(permission));//已经拿到了权限，发送通知，回调onEventMainThread(final PermissionGrantedEvent event)方法
         }
     }
-
 
     private void explainPermission(final String permission, int explanation) {
         //PermissionExplanationDialog.newInstance(R.string.permission_explanation_title, explanation, permission);
@@ -311,7 +313,6 @@ public abstract class MonitoredActivity extends AppCompatActivity implements Bas
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 ActivityCompat.requestPermissions(MonitoredActivity.this, new String[]{permission}, MY_PERMISSIONS_REQUEST);
-
             }
         });
         mPermissionDialog = builder.show();

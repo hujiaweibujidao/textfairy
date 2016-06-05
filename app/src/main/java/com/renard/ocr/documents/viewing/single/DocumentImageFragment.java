@@ -1,12 +1,7 @@
 package com.renard.ocr.documents.viewing.single;
 
-import com.renard.ocr.R;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.Picasso;
-
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,9 +9,15 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.renard.ocr.R;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
+
 import java.io.File;
 
 /**
+ * 内容为图片的fragment
+ *
  * @author renard
  */
 public class DocumentImageFragment extends Fragment {

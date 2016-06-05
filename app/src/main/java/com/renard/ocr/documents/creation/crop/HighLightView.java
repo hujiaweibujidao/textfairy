@@ -5,6 +5,8 @@ import android.graphics.Matrix;
 import android.graphics.Rect;
 
 /**
+ * 裁剪框框需要实现的接口
+ *
  * Created by renard on 07/06/15.
  */
 public interface HighLightView {

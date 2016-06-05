@@ -1,11 +1,14 @@
 package com.renard.ocr.analytics;
 
+import android.util.Log;
+
 import com.renard.ocr.cropimage.image_processing.BlurDetectionResult;
 import com.renard.ocr.documents.creation.visualisation.LayoutQuestionDialog;
 import com.renard.ocr.main_menu.language.OcrLanguage;
 
-import android.util.Log;
-
+/**
+ * 记录使用者的操作日志分析
+ */
 public class LoggingAnalytics implements Analytics {
 
     private static final String LOG_TAG = LoggingAnalytics.class.getSimpleName();
@@ -28,7 +31,6 @@ public class LoggingAnalytics implements Analytics {
     @Override
     public void sendStartDownload(OcrLanguage language) {
         Log.i(LOG_TAG, "sendStartDownload " + language.getValue());
-
     }
 
     @Override
@@ -184,12 +186,10 @@ public class LoggingAnalytics implements Analytics {
     @Override
     public void sendIgnoreMemoryWarning(long availableMegs) {
         Log.i(LOG_TAG, "sendIgnoreMemoryWarning(" + availableMegs + ")");
-
     }
 
     @Override
     public void sendHeedMemoryWarning(long availableMegs) {
         Log.i(LOG_TAG, "sendHeedMemoryWarning(" + availableMegs + ")");
-
     }
 }

@@ -16,8 +16,6 @@
 
 package com.renard.ocr.documents.viewing.single;
 
-import com.renard.ocr.documents.viewing.DocumentContentProvider.Columns;
-
 import android.database.Cursor;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -25,9 +23,14 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.renard.ocr.documents.viewing.DocumentContentProvider.Columns;
+
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * DocumentPagerFragment 中使用的 DocumentAdapter
+ */
 public class DocumentAdapter extends FragmentStatePagerAdapter {
     private int mIndexLanguage;
     private int mIndexImagePath;
@@ -58,13 +61,11 @@ public class DocumentAdapter extends FragmentStatePagerAdapter {
             mPageReferenceMap.put(position,null);
         }
         return o;
-
     }
 
     public void setShowText(boolean text) {
         mShowText = text;
         notifyDataSetChanged();
-
     }
 
     @Override
@@ -81,7 +82,6 @@ public class DocumentAdapter extends FragmentStatePagerAdapter {
             return DocumentTextFragment.newInstance(text, documentId, imagePath);
         }else {
             return DocumentImageFragment.newInstance(imagePath);
-
         }
     }
 

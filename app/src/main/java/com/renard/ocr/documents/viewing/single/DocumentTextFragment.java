@@ -16,11 +16,6 @@
 
 package com.renard.ocr.documents.viewing.single;
 
-import com.renard.ocr.documents.viewing.DocumentContentProvider;
-import com.renard.ocr.R;
-import com.renard.ocr.documents.creation.NewDocumentActivity;
-import com.renard.ocr.util.PreferencesUtils;
-
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -37,9 +32,17 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ViewSwitcher;
 
+import com.renard.ocr.R;
+import com.renard.ocr.documents.creation.NewDocumentActivity;
+import com.renard.ocr.documents.viewing.DocumentContentProvider;
+import com.renard.ocr.util.PreferencesUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 内容为文本的fragment
+ */
 public class DocumentTextFragment extends Fragment implements TextWatcher {
 
     private final static String LOG_TAG = DocumentTextFragment.class.getSimpleName();
@@ -114,7 +117,7 @@ public class DocumentTextFragment extends Fragment implements TextWatcher {
         }
     }
 
-
+    //如果文本发生了变化，这里需要保存下来
     void saveIfTextHasChanged() {
         if (mHasTextChanged) {
             mHasTextChanged = false;
@@ -123,7 +126,7 @@ public class DocumentTextFragment extends Fragment implements TextWatcher {
             List<Spanned> texts = new ArrayList<>();
             ids.add(uri);
             texts.add(mEditText.getText());
-            NewDocumentActivity.SaveDocumentTask saveTask = new NewDocumentActivity.SaveDocumentTask(getActivity(), ids, texts);
+            NewDocumentActivity.SaveDocumentTask saveTask = new NewDocumentActivity.SaveDocumentTask(getActivity(), ids, texts);//这里列表中都只有一个元素
             saveTask.execute();
         }
     }
@@ -133,7 +136,6 @@ public class DocumentTextFragment extends Fragment implements TextWatcher {
         super.onStart();
         PreferencesUtils.applyTextPreferences(mEditText, getActivity());
     }
-
 
     @Override
     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -150,6 +152,7 @@ public class DocumentTextFragment extends Fragment implements TextWatcher {
 
     }
 
+    //html转成spanned text
     private static class HtmlToSpannedAsyncTask extends AsyncTask<String, Void, Spanned> {
 
         private final EditText mEditText;

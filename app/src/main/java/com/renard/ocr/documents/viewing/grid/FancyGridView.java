@@ -21,6 +21,8 @@ import android.view.MotionEvent;
 import android.widget.GridView;
 
 /**
+ * 对子元素实现了3d效果的GridView
+ *
  * a gridview that applies 3d effects to its children
  * 
  * @author renard

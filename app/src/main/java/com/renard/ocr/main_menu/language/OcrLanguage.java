@@ -8,6 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * ocr语言
+ * InstallStatus是语言的安装状态，是否安装是根据installedSize来判断
+ * 不同语言需要下载的文件不太一样，文件下载的来源也不都相同
+ * mValue是语言的简称，mDisplayText是语言的显示文本
+ *
  * @author renard
  */
 public class OcrLanguage implements Parcelable {

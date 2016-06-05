@@ -16,21 +16,6 @@
 
 package com.renard.ocr.documents.creation;
 
-import com.crashlytics.android.Crashlytics;
-import com.renard.ocr.MonitoredActivity;
-import com.renard.ocr.R;
-import com.renard.ocr.TextFairyApplication;
-import com.renard.ocr.documents.creation.crop.CropImageActivity;
-import com.renard.ocr.documents.creation.visualisation.OCRActivity;
-import com.renard.ocr.documents.viewing.DocumentContentProvider;
-import com.renard.ocr.documents.viewing.DocumentContentProvider.Columns;
-import com.renard.ocr.documents.viewing.grid.DocumentGridActivity;
-import com.renard.ocr.documents.viewing.single.DocumentActivity;
-import com.renard.ocr.pdf.Hocr2Pdf;
-import com.renard.ocr.pdf.Hocr2Pdf.PDFProgressListener;
-import com.renard.ocr.util.MemoryInfo;
-import com.renard.ocr.util.Util;
-
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
@@ -71,6 +56,21 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
+import com.renard.ocr.MonitoredActivity;
+import com.renard.ocr.R;
+import com.renard.ocr.TextFairyApplication;
+import com.renard.ocr.documents.creation.crop.CropImageActivity;
+import com.renard.ocr.documents.creation.visualisation.OCRActivity;
+import com.renard.ocr.documents.viewing.DocumentContentProvider;
+import com.renard.ocr.documents.viewing.DocumentContentProvider.Columns;
+import com.renard.ocr.documents.viewing.grid.DocumentGridActivity;
+import com.renard.ocr.documents.viewing.single.DocumentActivity;
+import com.renard.ocr.pdf.Hocr2Pdf;
+import com.renard.ocr.pdf.Hocr2Pdf.PDFProgressListener;
+import com.renard.ocr.util.MemoryInfo;
+import com.renard.ocr.util.Util;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -83,8 +83,10 @@ import java.util.Locale;
 import java.util.Set;
 
 /**
+ * DocumentGridActivity 和 DocumentActivity 的父类，处理了打开摄像头或者图片选择图片的过程，也处理了保存文件的过程
+ * <p/>
  * activities which extend this activity can create a new document. this class
- * also containes the code for functionality which is shared by
+ * also contains the code for functionality which is shared by
  * {@link DocumentGridActivity} and {@link DocumentActivity}
  *
  * @author renard
@@ -92,15 +94,17 @@ import java.util.Set;
 public abstract class NewDocumentActivity extends MonitoredActivity {
 
     private final static String LOG_TAG = NewDocumentActivity.class.getSimpleName();
+
     public final static String EXTRA_NATIVE_PIX = "pix_pointer";
     private final static String IMAGE_LOAD_PROGRESS_TAG = "image_load_progress";
 
-
+    //各种不同的dialog对应的id
     private static final int PDF_PROGRESS_DIALOG_ID = 0;
     private static final int DELETE_PROGRESS_DIALOG_ID = 1;
     protected static final int HINT_DIALOG_ID = 2;
     private static final int EDIT_TITLE_DIALOG_ID = 3;
 
+    //dialog的参数
     private static final String DIALOG_ARG_MAX = "max";
     private static final String DIALOG_ARG_MESSAGE = "message";
     private static final String DIALOG_ARG_PROGRESS = "progress";
@@ -108,21 +112,23 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
     private static final String DIALOG_ARG_TITLE = "title";
     private static final String DIALOG_ARG_DOCUMENT_URI = "document_uri";
 
-    private final static int REQUEST_CODE_MAKE_PHOTO = 0;
-    private final static int REQUEST_CODE_PICK_PHOTO = 1;
-    final static int REQUEST_CODE_CROP_PHOTO = 2;
-    protected final static int REQUEST_CODE_OCR = 3;
+    //请求码
+    private final static int REQUEST_CODE_MAKE_PHOTO = 0;//拍照
+    private final static int REQUEST_CODE_PICK_PHOTO = 1;//选择照片
+    final static int REQUEST_CODE_CROP_PHOTO = 2;//裁剪图片
+    protected final static int REQUEST_CODE_OCR = 3;//ocr
 
     private static final String DATE_CAMERA_INTENT_STARTED_STATE = "com.renard.ocr.android.photo.TakePhotoActivity.dateCameraIntentStarted";
     private static final String STATE_RECEIVER_REGISTERED = "state_receiver_registered";
-    private static final String IMAGE_SOURCE = "image_source";
-    private static Date dateCameraIntentStarted = null;
     private static final String CAMERA_PIC_URI_STATE = "com.renard.ocr.android.photo.TakePhotoActivity.CAMERA_PIC_URI_STATE";
+    private static final String IMAGE_SOURCE = "image_source";
+
+    private static Date dateCameraIntentStarted = null;
     private static Uri cameraPicUri = null;
     private boolean mReceiverRegistered = false;
     private ImageSource mImageSource = ImageSource.CAMERA;
 
-
+    //摄像头返回的结果
     private static class CameraResult {
         public CameraResult(int requestCode, int resultCode, Intent data, ImageSource source) {
             mRequestCode = requestCode;
@@ -141,15 +147,15 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
 
     private ProgressDialog pdfProgressDialog;
     private ProgressDialog deleteProgressDialog;
-    private AsyncTask<Void, Void, ImageLoadAsyncTask.LoadResult> mBitmapLoadTask;
     private CameraResult mCameraResult;
+    private AsyncTask<Void, Void, ImageLoadAsyncTask.LoadResult> mBitmapLoadTask;
 
-
+    //检查目前可用的ram，如果ram足够的话就进行相应的操作
     private void checkRam(MemoryWarningDialog.DoAfter doAfter) {
 
         long availableMegs = MemoryInfo.getFreeMemory(this);
         Log.i(LOG_TAG, "available ram = " + availableMegs);
-        if (availableMegs < MemoryInfo.MINIMUM_RECOMMENDED_RAM) {
+        if (availableMegs < MemoryInfo.MINIMUM_RECOMMENDED_RAM) {//可用内存小于推荐最小值，弹出提示信息
             MemoryWarningDialog.newInstance(availableMegs, doAfter).show(getSupportFragmentManager(), MemoryWarningDialog.TAG);
         } else if (doAfter == MemoryWarningDialog.DoAfter.START_CAMERA) {
             startCamera();
@@ -158,11 +164,12 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
         }
     }
 
+    //启动图库
     protected void startGallery() {
         mAnalytics.startGallery();
         cameraPicUri = null;
         Intent i;
-        if (Build.VERSION.SDK_INT >= 19) {
+        if (Build.VERSION.SDK_INT >= 19) {//请求图库中的图片，设置一些参数
             i = new Intent(Intent.ACTION_GET_CONTENT, null);
             i.addCategory(Intent.CATEGORY_OPENABLE);
             i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -173,7 +180,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
             i.setType("image/png,image/jpg, image/jpeg");
         }
 
-        Intent chooser = Intent.createChooser(i, getString(R.string.image_source));
+        Intent chooser = Intent.createChooser(i, getString(R.string.image_source));//选择一种图片来源
         try {
             startActivityForResult(chooser, REQUEST_CODE_PICK_PHOTO);
         } catch (ActivityNotFoundException e) {
@@ -181,6 +188,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
         }
     }
 
+    //启动摄像头
     protected void startCamera() {
         mAnalytics.startCamera();
         try {
@@ -197,12 +205,12 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
                 if (!storageDir.exists()) {
                     storageDir.mkdirs();
                 }
-                image = new File(storageDir, imageFileName + ".jpg");
+                image = new File(storageDir, imageFileName + ".jpg");//默认保存为jpg格式
                 if (image.exists()) {
                     image.createNewFile();
                 }
                 cameraPicUri = Uri.fromFile(image);
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, cameraPicUri);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, cameraPicUri);//设置好拍照结果图片的保存位置
                 startActivityForResult(intent, REQUEST_CODE_MAKE_PHOTO);
             } catch (IOException e) {
                 showFileError(PixLoadStatus.IO_ERROR);
@@ -246,6 +254,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
         Log.i(LOG_TAG, "onRestoreInstanceState " + this);
         super.onRestoreInstanceState(savedInstanceState);
 
+        //如果出现了异常，需要把请求camera拍照的时间和对应图片的保存uri给保存起来
         if (savedInstanceState.containsKey(DATE_CAMERA_INTENT_STARTED_STATE)) {
             dateCameraIntentStarted = new Date(savedInstanceState.getLong(DATE_CAMERA_INTENT_STARTED_STATE));
         }
@@ -275,10 +284,11 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.base_document_activity_options, menu);
+        getMenuInflater().inflate(R.menu.base_document_activity_options, menu);//添加两个操作按钮
         return true;
     }
 
+    //拍照结果返回，接下来就是根据cameraPicUri去加载图片数据了
     private void onTakePhotoActivityResult(CameraResult cameraResult) {
         if (cameraResult.mResultCode == RESULT_OK) {
             if (cameraResult.mRequestCode == REQUEST_CODE_MAKE_PHOTO) {
@@ -290,22 +300,20 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
                     if (f.isFile() && f.exists() && f.canRead()) {
                         //all is well
                         Log.i(LOG_TAG, "onTakePhotoActivityResult");
-                        loadBitmapFromContentUri(cameraPicUri, ImageSource.CAMERA);
+                        loadBitmapFromContentUri(cameraPicUri, ImageSource.CAMERA);//加载对应的图片
                         return;
                     }
 
                 }
                 //try to look up the image by querying the media content provider
                 try {
-                    // Create a Cursor to obtain the file Path for the large
-                    // image
+                    // Create a Cursor to obtain the file Path for the large image
                     String[] largeFileProjection = {MediaStore.Images.ImageColumns._ID, MediaStore.Images.ImageColumns.DATA, MediaStore.Images.ImageColumns.ORIENTATION, MediaStore.Images.ImageColumns.DATE_TAKEN};
                     String largeFileSort = MediaStore.Images.ImageColumns._ID + " DESC";
                     myCursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, largeFileProjection, null, null, largeFileSort);
                     if (myCursor != null) {
                         myCursor.moveToFirst();
-                        // This will actually give you the file path location of the
-                        // image.
+                        // This will actually give you the file path location of the image.
                         String largeImagePath = myCursor.getString(myCursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DATA));
                         Uri tempCameraPicUri = Uri.fromFile(new File(largeImagePath));
                         dateOfPicture = new Date(myCursor.getLong(myCursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DATE_TAKEN)));
@@ -337,6 +345,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
         }
     }
 
+    //根据图片uri去加载图片数据
     protected void loadBitmapFromContentUri(final Uri cameraPicUri, ImageSource source) {
         if (TextFairyApplication.isRelease()) {
             Crashlytics.log("Loading " + cameraPicUri.toString() + " from " + source.name());
@@ -345,14 +354,15 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
         if (mBitmapLoadTask != null) {
             mBitmapLoadTask.cancel(true);
         }
+
+        //判断是否跳过图片裁剪步骤
         AccessibilityManager am = (AccessibilityManager) getSystemService(ACCESSIBILITY_SERVICE);
         boolean isAccessibilityEnabled = am.isEnabled();
         boolean isExploreByTouchEnabled = AccessibilityManagerCompat.isTouchExplorationEnabled(am);
         final boolean skipCrop = isExploreByTouchEnabled && isAccessibilityEnabled;
 
         registerImageLoaderReceiver();
-        mBitmapLoadTask = new ImageLoadAsyncTask(this, skipCrop, cameraPicUri).execute();
-
+        mBitmapLoadTask = new ImageLoadAsyncTask(this, skipCrop, cameraPicUri).execute();//启动图片加载
     }
 
     private synchronized void unRegisterImageLoadedReceiver() {
@@ -363,13 +373,13 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
         }
     }
 
-
+    //注册图片加载receiver，图片加载完成了的话就会收到信息
     private synchronized void registerImageLoaderReceiver() {
         if (!mReceiverRegistered) {
             Log.i(LOG_TAG, "registerImageLoaderReceiver " + mMessageReceiver);
             final IntentFilter intentFilter = new IntentFilter(ImageLoadAsyncTask.ACTION_IMAGE_LOADED);
             intentFilter.addAction(ImageLoadAsyncTask.ACTION_IMAGE_LOADING_START);
-            LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, intentFilter);
+            LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, intentFilter);//LocalBroadcastManager 进程内部的广播管理器
             mReceiverRegistered = true;
         }
     }
@@ -377,10 +387,9 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-        if (RESULT_OK == resultCode) {
+        if (RESULT_OK == resultCode) {//返回了成功
             switch (requestCode) {
-                case REQUEST_CODE_CROP_PHOTO: {
+                case REQUEST_CODE_CROP_PHOTO: {//图片裁剪成功，可以进入到ocr中了
                     long nativePix = data.getLongExtra(EXTRA_NATIVE_PIX, 0);
                     startOcrActivity(nativePix, false);
                     break;
@@ -392,7 +401,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
                     mCameraResult = new CameraResult(requestCode, resultCode, data, ImageSource.PICK);
                     break;
             }
-        } else if (CropImageActivity.RESULT_NEW_IMAGE == resultCode) {
+        } else if (CropImageActivity.RESULT_NEW_IMAGE == resultCode) {//在裁剪图片的时候可能没有成功，会返回到这里重新获取图片
             switch (mImageSource) {
                 case PICK:
                     startGallery();
@@ -403,10 +412,10 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
                     startCamera();
                     break;
             }
-
         }
     }
 
+    //启动ocr Activity去进行ocr操作
     void startOcrActivity(long nativePix, boolean accessibilityMode) {
         Intent intent = new Intent(this, OCRActivity.class);
         intent.putExtra(EXTRA_NATIVE_PIX, nativePix);
@@ -424,6 +433,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
         }
     }
 
+    //处理图片加载完成之后的事件监听
     // handler for received Intents for the image loaded event
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
@@ -434,26 +444,27 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
             //Additionally i use commitAllowStateLoss as its not terribly important to preserve the state of the loading dialog
             if (mReceiverRegistered) {
                 Log.i(LOG_TAG, "onReceive " + NewDocumentActivity.this);
-                if (intent.getAction().equalsIgnoreCase(ImageLoadAsyncTask.ACTION_IMAGE_LOADED)) {
+                if (intent.getAction().equalsIgnoreCase(ImageLoadAsyncTask.ACTION_IMAGE_LOADED)) {//图片加载完成之后开始处理图片
                     unRegisterImageLoadedReceiver();
                     final long nativePix = intent.getLongExtra(ImageLoadAsyncTask.EXTRA_PIX, 0);
                     final int statusNumber = intent.getIntExtra(ImageLoadAsyncTask.EXTRA_STATUS, PixLoadStatus.SUCCESS.ordinal());
                     final boolean skipCrop = intent.getBooleanExtra(ImageLoadAsyncTask.EXTRA_SKIP_CROP, false);
                     handleLoadedImage(nativePix, PixLoadStatus.values()[statusNumber], skipCrop);
-                } else if (intent.getAction().equalsIgnoreCase(ImageLoadAsyncTask.ACTION_IMAGE_LOADING_START)) {
+                } else if (intent.getAction().equalsIgnoreCase(ImageLoadAsyncTask.ACTION_IMAGE_LOADING_START)) {//开始加载图片了显示进度条
                     showLoadingImageProgressDialog();
                 }
             }
         }
     };
 
+    //处理加载的图片
     private void handleLoadedImage(long nativePix, PixLoadStatus pixLoadStatus, boolean skipCrop) {
         dismissLoadingImageProgressDialog();
 
-        if (pixLoadStatus == PixLoadStatus.SUCCESS) {
+        if (pixLoadStatus == PixLoadStatus.SUCCESS) {//跳过了图片裁剪
             if (skipCrop) {
                 startOcrActivity(nativePix, true);
-            } else {
+            } else {//进入图片裁剪阶段
                 Intent actionIntent = new Intent(this, CropImageActivity.class);
                 actionIntent.putExtra(NewDocumentActivity.EXTRA_NATIVE_PIX, nativePix);
                 startActivityForResult(actionIntent, NewDocumentActivity.REQUEST_CODE_CROP_PHOTO);
@@ -487,6 +498,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
         showFileError(status, null);
     }
 
+    //显示图片加载的各种异常错误
     protected void showFileError(PixLoadStatus second, OnClickListener positiveListener) {
         int textId;
         switch (second) {
@@ -533,7 +545,6 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
     @Override
     protected Dialog onCreateDialog(int id, Bundle args) {
         switch (id) {
-
             case PDF_PROGRESS_DIALOG_ID:
                 int max = args.getInt(DIALOG_ARG_MAX);
                 String message = args.getString(DIALOG_ARG_MESSAGE);
@@ -577,7 +588,6 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
                     }
                 });
                 builder.setNegativeButton(R.string.cancel, new OnClickListener() {
-
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
@@ -676,6 +686,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
      * ASYNC TASKS
      */
 
+    //创建pdf文件的任务
     protected class CreatePDFTask extends AsyncTask<Void, Integer, Pair<ArrayList<Uri>, ArrayList<Uri>>> implements PDFProgressListener {
 
         private Set<Integer> mIds = new HashSet<Integer>();
@@ -738,10 +749,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
                     } catch (ActivityNotFoundException e) {
                         sharePDFBySending(files);
                     }
-
                 }
-
-
             } else {
                 Toast.makeText(getApplicationContext(), getText(R.string.error_create_file), Toast.LENGTH_LONG).show();
             }
@@ -844,6 +852,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
         }
     }
 
+    //删除文档的任务
     protected class DeleteDocumentTask extends AsyncTask<Void, Void, Integer> {
         Set<Integer> mIds = new HashSet<Integer>();
         private final static int RESULT_REMOTE_EXCEPTION = -1;
@@ -913,6 +922,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
         }
     }
 
+    //保存文档的任务
     public static class SaveDocumentTask extends AsyncTask<Void, Integer, Integer> {
 
         private final Context mContext;

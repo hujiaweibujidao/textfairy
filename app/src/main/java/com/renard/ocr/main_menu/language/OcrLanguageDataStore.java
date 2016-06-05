@@ -1,10 +1,10 @@
 package com.renard.ocr.main_menu.language;
 
-import com.renard.ocr.R;
-import com.renard.ocr.util.Util;
-
 import android.content.Context;
 import android.net.Uri;
+
+import com.renard.ocr.R;
+import com.renard.ocr.util.Util;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -14,13 +14,15 @@ import java.util.List;
 import static com.renard.ocr.main_menu.language.OcrLanguage.InstallStatus;
 
 /**
+ * ocr语言训练包存储
+ *
  * @author renard
  */
 public class OcrLanguageDataStore {
 
-
     public static final File[] EMPTY_FILE_ARRAY = new File[0];
 
+    //获取已经安装的ocr语言训练包
     public static List<OcrLanguage> getInstalledOCRLanguages(Context appContext) {
         final List<OcrLanguage> ocrLanguages = getAvailableOcrLanguages(appContext);
         final List<OcrLanguage> result = new ArrayList<>();
@@ -51,7 +53,6 @@ public class OcrLanguageDataStore {
         }
         return languages;
     }
-
 
     public static InstallStatus isLanguageInstalled(final String ocrLang, Context context) {
         final File[] languageFiles = getAllFilesFor(ocrLang, context);

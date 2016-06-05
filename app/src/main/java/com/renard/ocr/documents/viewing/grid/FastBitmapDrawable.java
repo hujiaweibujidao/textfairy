@@ -22,6 +22,9 @@ import android.graphics.ColorFilter;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 
+/**
+ * 快速将bitmap转换成Drawable使用
+ */
 public class FastBitmapDrawable extends Drawable {
     private final Bitmap mBitmap;
 

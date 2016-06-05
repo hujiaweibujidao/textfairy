@@ -15,15 +15,15 @@
  */
 package com.renard.ocr.util;
 
-import com.renard.ocr.R;
-import com.renard.ocr.main_menu.language.OcrLanguage;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.util.Pair;
 import android.view.Gravity;
 import android.widget.TextView;
+
+import com.renard.ocr.R;
+import com.renard.ocr.main_menu.language.OcrLanguage;
 
 public class PreferencesUtils {
 
@@ -45,17 +45,20 @@ public class PreferencesUtils {
     private static final String PREFERENCES_IS_FIRST_START = "is_first_start";
     private static final String PREFERENCES_IS_FIRST_SCAN = "is_first_scan";
 
+    /**
+     * 初始化应用的配置信息
+     */
     public static void initPreferencesWithDefaultsIfEmpty(Context appContext) {
         SharedPreferences prefs = getPreferences(appContext);
         Editor edit = prefs.edit();
         setIfEmpty(edit, prefs, PREFERENCES_ALIGNMENT_KEY, R.id.align_left);
         // setIfEmpty(edit, prefs, PREFERENCES_DESIGN_KEY, R.id.design_day);
         setIfEmpty(edit, prefs, PREFERENCES_SPACING_KEY, R.id.spacing_1_5);
-        final String defaultLanguage = appContext.getString(R.string.default_ocr_language);
-        final String defaultLanguageDisplay = appContext.getString(R.string.default_ocr_display_language);
+        final String defaultLanguage = appContext.getString(R.string.default_ocr_language);//eng
+        final String defaultLanguageDisplay = appContext.getString(R.string.default_ocr_display_language);//English
         setIfEmpty(edit, prefs, PREFERENCES_OCR_LANG, defaultLanguage);
         setIfEmpty(edit, prefs, PREFERENCES_OCR_LANG_DISPLAY, defaultLanguageDisplay);
-        edit.apply();
+        edit.apply();//并没有提交
     }
 
     private static void setIfEmpty(final Editor edit, final SharedPreferences prefs, final String id, final int value) {

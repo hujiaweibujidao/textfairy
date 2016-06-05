@@ -28,6 +28,8 @@ import java.util.Map;
  * switch to the framework's implementation.  See the framework SDK
  * documentation for a class overview.
  */
+
+//LRU缓存的实现，用于兼容低版本，但是高版本也使用这个类
 public class LruCache<K, V> {
     private final LinkedHashMap<K, V> map;
 
