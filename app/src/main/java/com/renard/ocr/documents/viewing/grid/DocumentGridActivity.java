@@ -81,7 +81,9 @@ import de.greenrobot.event.EventBus;
 
 /**
  * main activity of the app
- *
+ * <p/>
+ * 应用的主界面
+ * <p/>
  * todo
  * 1.去掉文档合并功能
  * 2.去掉侧滑菜单功能
@@ -116,7 +118,7 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         setContentView(R.layout.activity_document_grid);
 
         initToolbar();
-        initNavigationDrawer();
+        //initNavigationDrawer();//去掉左侧滑动菜单
         initGridView();
         setupAddLanguageButton();
 

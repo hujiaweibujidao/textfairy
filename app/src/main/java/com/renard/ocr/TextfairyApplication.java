@@ -15,17 +15,17 @@
  */
 package com.renard.ocr;
 
+import android.app.Application;
+import android.os.StrictMode;
+import android.util.Log;
+import android.view.ViewConfiguration;
+
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.ndk.CrashlyticsNdk;
 import com.renard.ocr.analytics.Analytics;
 import com.renard.ocr.analytics.AnalyticsFactory;
 import com.renard.ocr.util.PreferencesUtils;
 import com.squareup.leakcanary.LeakCanary;
-
-import android.app.Application;
-import android.os.StrictMode;
-import android.util.Log;
-import android.view.ViewConfiguration;
 
 import java.lang.reflect.Field;
 
@@ -38,9 +38,12 @@ public class TextFairyApplication extends Application {
 
     public void onCreate() {
         super.onCreate();
-        trackCrashes();
+
+        trackCrashes();//Fabric是用来跟踪应用崩溃信息的
         createAnalytics();
+
         initTextPreferences();
+
         enableStrictMode();
         alwaysShowOverflowButton();
     }
@@ -54,15 +57,16 @@ public class TextFairyApplication extends Application {
     }
 
     private void trackCrashes() {
-        if (BuildConfig.FLAVOR.contains("playstore")) {
+        if (BuildConfig.FLAVOR.contains("playstore")) {//如果包含playstore那就表示是release版本，也就需要启动应用崩溃跟踪分析
             Log.i(LOG_TAG, "Starting Crashlytics");
             final Fabric fabric = new Fabric.Builder(this).kits(new Crashlytics(), new CrashlyticsNdk()).debuggable(BuildConfig.DEBUG).build();
             Fabric.with(fabric);
         }
     }
 
+    //toread StrictMode
     private void enableStrictMode() {
-        if (BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG) {//如果是debug模式的话，需要启动LeakCanary来检查内存泄露
             LeakCanary.install(this);
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
                     .detectAll()
@@ -73,8 +77,7 @@ public class TextFairyApplication extends Application {
     }
 
     private void alwaysShowOverflowButton() {
-        // force overflow button for actionbar for devices with hardware option
-        // button
+        // force overflow button for actionbar for devices with hardware option button
         try {
             ViewConfiguration config = ViewConfiguration.get(this);
             Field menuKeyField = ViewConfiguration.class.getDeclaredField("sHasPermanentMenuKey");
@@ -91,8 +94,7 @@ public class TextFairyApplication extends Application {
         return mAnalytics;
     }
 
-
     public static boolean isRelease() {
-        return com.renard.ocr.BuildConfig.FLAVOR.contains("playstore");
+        return com.renard.ocr.BuildConfig.FLAVOR.contains("playstore");//如果包含playstore那就表示是release版本
     }
 }
