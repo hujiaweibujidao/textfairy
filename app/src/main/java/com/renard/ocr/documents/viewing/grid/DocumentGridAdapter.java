@@ -111,7 +111,8 @@ public class DocumentGridAdapter extends CursorAdapter implements OnCheckedChang
 			holder.date.setText(title);
 		} else {
 			long created = cursor.getLong(mIndexCreated);
-			CharSequence formattedDate = DateFormat.format("MMM dd, yyyy h:mmaa", new Date(created));
+			//hujiawei 修改时间显示格式 MMM dd, yyyy h:mmaa
+			CharSequence formattedDate = DateFormat.format("yyyyMMdd hh:mm", new Date(created));
 			holder.date.setText(formattedDate);
 		}
 
