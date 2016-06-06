@@ -84,10 +84,9 @@ import de.greenrobot.event.EventBus;
  * <p/>
  * 应用的主界面
  * <p/>
- * todo
- * 1.去掉文档合并功能
- * 2.去掉侧滑菜单功能
- * 3.去除重命名、修改时间显示格式等
+ * update:
+ * 1.去掉左侧的菜单栏
+ * 2.修改界面布局
  *
  * @author renard
  */
@@ -147,7 +146,6 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         initThumbnailSize();
     }
 
-
     @Override
     protected int getHintDialogId() {
         return HINT_DIALOG_ID;
@@ -204,11 +202,14 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
     }
 
     /**
+     * 如果应用启动之后发现没有安装任何语言，这个时候就会去将assets目录下的tessdata.zip复制到sd卡中，并安装这些默认的语言包
+     *
      * Start the InstallActivity if possible and needed.
      */
     private void startInstallActivityIfNeeded() {
         final List<OcrLanguage> installedOCRLanguages = OcrLanguageDataStore.getInstalledOCRLanguages(this);
         final String state = Environment.getExternalStorageState();
+
         if (state.equals(Environment.MEDIA_MOUNTED)) {
             if (installedOCRLanguages.isEmpty()) {
                 Intent intent = new Intent(Intent.ACTION_VIEW);

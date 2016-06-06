@@ -8,6 +8,6 @@
     <string name="empty_grid_camera">点击这里通过拍照获取图片并进行OCR处理</string>
     <string name="empty_grid_fairy">清华大学电子系图文信息处理实验室</string>
     <string name="empty_grid_gallery">点击这里从图库中选择图片并进行OCR处理</string>
-    <string name="empty_grid_language">本应用支持中文简体、中文繁体和英文三种语言</string>
+    <string name="empty_grid_language">本应用支持中文简体、中文繁体和英文三种语言的文本识别</string>
     <string name="start_app">开始体验!</string>
 </resources>

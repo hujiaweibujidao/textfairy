@@ -18,7 +18,7 @@
         android:layout_above="@+id/gallery_hint"
         android:layout_alignParentRight="true"
         android:layout_alignTop="@+id/camera_hint_arrow"
-        android:layout_marginBottom="-36dp"
+        android:layout_marginBottom="-30dp"
         android:layout_marginRight="6dp"
         android:layout_toRightOf="@+id/gallery_hint"
         android:background="@drawable/hint_arrow"/>
@@ -30,7 +30,7 @@
         android:layout_above="@+id/camera_hint"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:layout_marginBottom="-36dp"
+        android:layout_marginBottom="-30dp"
         android:layout_marginRight="55dp"
         android:background="@drawable/hint_arrow"/>
 
@@ -94,7 +94,7 @@
         android:text="@string/empty_grid_download_language"
         android:textColor="@android:color/white"
         android:theme="@style/ColoredButton"
-        android:visibility="gone"
+        android:visibility="visible"
         tools:visibility="visible"/>
 
     <TextView

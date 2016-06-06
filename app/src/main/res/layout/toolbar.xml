@@ -19,7 +19,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_marginBottom="1dp"
+            android:layout_marginBottom="2dp"
             android:contentDescription="@string/content_description_fairy"
             android:src="@drawable/textfairy_title"/>
 
@@ -33,8 +33,9 @@
             android:paddingBottom="12dp"
             android:textColor="@android:color/white"
             android:visibility="gone"
-            tools:text="Text Fairy"
+            tools:text="@string/app_name"
             tools:visibility="visible"/>
+
     </RelativeLayout>
 
 </android.support.v7.widget.Toolbar>

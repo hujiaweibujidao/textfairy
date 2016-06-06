@@ -50,6 +50,9 @@ import de.greenrobot.event.EventBus;
 
 /**
  * 受监控的Activity，这个类基本上是该项目中所有的Activity的基类
+ * <p>
+ * update
+ * 1.去掉appicon上的点击事件
  */
 public abstract class MonitoredActivity extends AppCompatActivity implements BaseActivityInterface, OnGlobalLayoutListener {
 
@@ -260,9 +263,10 @@ public abstract class MonitoredActivity extends AppCompatActivity implements Bas
             mHandler.removeCallbacksAndMessages(null);
             mHandler.post(runnable.get());
         }
+
         if (mDialogId != -1) {
             // show hint dialog when user clicks on the app icon
-            mAppIcon.setOnClickListener(new AppIconClickListener(this, mDialogId));//给应用图标添加监听器
+            //mAppIcon.setOnClickListener(new AppIconClickListener(this, mDialogId));//给应用图标添加监听器,去掉该事件
         }
         if (mAppIcon.getViewTreeObserver().isAlive()) {
             mAppIcon.getViewTreeObserver().removeGlobalOnLayoutListener(this);//删除OnGlobalLayoutListener监听器
