@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class OcrLanguage implements Parcelable {
 
-
+    //语言的安装状态，一个是是否安装了，另一个是全部文件大小
     public static class InstallStatus {
         private final boolean isInstalled;
         private final long installedSize;
@@ -37,7 +37,6 @@ public class OcrLanguage implements Parcelable {
     }
 
     private static final String[] CUBE_FILES = {".cube.fold", ".cube.lm", ".cube.nn", ".cube.params", ".cube.word-freq"};
-
 
     private boolean mDownloading;
     private final String mValue;
@@ -59,7 +58,6 @@ public class OcrLanguage implements Parcelable {
         mDisplayText = displayText;
 
     }
-
 
     public static final Creator CREATOR = new Creator() {
         public OcrLanguage createFromParcel(Parcel in) {
@@ -116,12 +114,12 @@ public class OcrLanguage implements Parcelable {
         mDownloading = downloading;
     }
 
-
     @Override
     public String toString() {
         return getDisplayText();
     }
 
+    //获取语言的下载地址
     public List<Uri> getDownloadUris() {
         List<Uri> result = new ArrayList<>();
         final String part2 = ".traineddata";
@@ -140,6 +138,7 @@ public class OcrLanguage implements Parcelable {
         return result;
     }
 
+    //只有三种语言支持cube
     public static boolean hasCubeSupport(String lang) {
         return "ara".equalsIgnoreCase(lang) || "hin".equalsIgnoreCase(lang) || "rus".equalsIgnoreCase(lang);
     }
@@ -151,7 +150,6 @@ public class OcrLanguage implements Parcelable {
     private boolean needsCubeData() {
         return hasCubeSupport(mValue);
     }
-
 
     private List<String> getCubeFileNames() {
         List<String> result = new ArrayList<>();

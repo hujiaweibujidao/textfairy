@@ -308,11 +308,12 @@ public class Util {
         }
     }
 
+    //获取训练数据的目录
     public static File getTrainingDataDir(Context appContext) {
         String tessDir = PreferencesUtils.getTessDir(appContext);
         if (tessDir == null) {
-            File parent = new File(Environment.getExternalStorageDirectory(), EXTERNAL_APP_DIRECTORY);
-            return new File(parent, Util.OCR_DATA_DIRECTORY);
+            File parent = new File(Environment.getExternalStorageDirectory(), EXTERNAL_APP_DIRECTORY);//textfee
+            return new File(parent, Util.OCR_DATA_DIRECTORY);//tessdata
         } else {
             return new File(tessDir, Util.OCR_DATA_DIRECTORY);
         }

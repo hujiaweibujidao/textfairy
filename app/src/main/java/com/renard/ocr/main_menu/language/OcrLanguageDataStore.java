@@ -34,6 +34,7 @@ public class OcrLanguageDataStore {
         return result;
     }
 
+    //获取所有支持的OCR语言，读取一个string array，R.array.ocr_languages
     public static List<OcrLanguage> getAvailableOcrLanguages(Context context) {
         List<OcrLanguage> languages = new ArrayList<>();
         // actual values uses by tesseract
@@ -54,6 +55,7 @@ public class OcrLanguageDataStore {
         return languages;
     }
 
+    //判断某种语言是否安装了
     public static InstallStatus isLanguageInstalled(final String ocrLang, Context context) {
         final File[] languageFiles = getAllFilesFor(ocrLang, context);
         if (languageFiles.length == 0) {
@@ -65,9 +67,9 @@ public class OcrLanguageDataStore {
         final boolean isInstalled = languageFiles.length >= downloadUris.size();
 
         return new InstallStatus(isInstalled, sumFileSizes(languageFiles));
-
     }
 
+    //获取某种语言的所有数据文件
     private static File[] getAllFilesFor(final String ocrLang, Context context) {
         final File tessDir = Util.getTrainingDataDir(context);
         if (!tessDir.exists()) {
@@ -99,6 +101,7 @@ public class OcrLanguageDataStore {
         return sum;
     }
 
+    //判断某个文件是否是某种语言的
     private static boolean isLanguageFileFor(File pathname, String ocrLang) {
         return pathname.getName().startsWith(ocrLang + ".") && pathname.isFile();
     }

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="greeting">您好!</string>
+    <string name="installing">正在安装语言包...</string>
+    <string name="install_error_disk_space">安装失败:没有足够的空间</string>
+    <string name="install_error">安装失败:无法安装配置文件</string>
+    <string name="app_name">THU OCR</string>
+    <string name="empty_grid_camera">点击这里通过拍照获取图片并进行OCR处理</string>
+    <string name="empty_grid_fairy">清华大学电子系图文信息处理实验室</string>
+    <string name="empty_grid_gallery">点击这里从图库中选择图片并进行OCR处理</string>
+    <string name="empty_grid_language">本应用支持中文简体、中文繁体和英文三种语言</string>
+</resources>

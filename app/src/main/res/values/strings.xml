@@ -345,4 +345,5 @@
         image with the buttons at the bottom.
     </string>
     <string name="got_it">got it</string>
+    <string name="installing">Installing languages...</string>
 </resources>

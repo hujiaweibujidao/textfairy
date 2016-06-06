@@ -16,58 +16,59 @@
 
 package com.renard.ocr.install;
 
-import com.renard.ocr.MonitoredActivity;
-import com.renard.ocr.PermissionGrantedEvent;
-import com.renard.ocr.R;
-
 import android.Manifest;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
-import android.content.Intent;
 import android.graphics.drawable.AnimationDrawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.renard.ocr.MonitoredActivity;
+import com.renard.ocr.PermissionGrantedEvent;
+import com.renard.ocr.R;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
 
 /**
+ * 安装语言包Activity
  * wrapper activity for the AssetsManager
+ * <p>
+ * update
+ * 1.简化界面布局
+ * 2.删除多余的功能
+ * 3.简化安装过程的动画
  */
 public class InstallActivity extends MonitoredActivity implements TaskFragment.TaskCallbacks {
+
     private static final String TAG_TASK_FRAGMENT = "task_fragment";
     @SuppressWarnings("unused")
     private static final String LOG_TAG = InstallActivity.class.getSimpleName();
 
     @Bind(R.id.button_start_app)
     protected TextView mButtonStartApp;
-    @Bind(R.id.content_view)
-    protected View mContentView;
-    @Bind(R.id.fairy_container)
-    protected View mFairyContainer;
     @Bind(R.id.imageView_fairy)
     protected ImageView mImageViewFairy;
-    @Bind(R.id.fairy_text_bubble)
-    protected View mFairySpeechBubble;
     @Bind(R.id.fairy_text)
     protected TextView mFairyText;
 
-    @Bind(R.id.tip1)
-    protected View mTip1;
-    @Bind(R.id.tip2)
-    protected View mTip2;
-    @Bind(R.id.tip3)
-    protected View mTip3;
-    @Bind(R.id.promo)
-    protected View mYoutube;
+//    @Bind(R.id.content_view)
+//    protected View mContentView;
+//    @Bind(R.id.fairy_container)
+//    protected View mFairyContainer;
+//    @Bind(R.id.fairy_text_bubble)
+//    protected View mFairySpeechBubble;
+//    @Bind(R.id.tip1)
+//    protected View mTip1;
+//    @Bind(R.id.tip2)
+//    protected View mTip2;
+//    @Bind(R.id.tip3)
+//    protected View mTip3;
+//    @Bind(R.id.promo)
+//    protected View mYoutube;
 
     private TaskFragment mTaskFragment;
     private AnimationDrawable mFairyAnimation;
@@ -81,15 +82,15 @@ public class InstallActivity extends MonitoredActivity implements TaskFragment.T
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EventBus.getDefault().register(this);
+
         setContentView(R.layout.activity_install);
         ButterKnife.bind(this);
 
         mFairyAnimation = (AnimationDrawable) mImageViewFairy.getDrawable();
-        android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
+        FragmentManager fm = getSupportFragmentManager();
         mTaskFragment = (TaskFragment) fm.findFragmentByTag(TAG_TASK_FRAGMENT);
 
-        // If the Fragment is non-null, then it is currently being
-        // retained across a configuration change.
+        // If the Fragment is non-null, then it is currently being retained across a configuration change.
         if (mTaskFragment == null) {
             Log.i(LOG_TAG, "ensuring permission for: " + this);
             ensurePermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, R.string.permission_explanation_install);
@@ -107,20 +108,20 @@ public class InstallActivity extends MonitoredActivity implements TaskFragment.T
     @SuppressWarnings("unused")
     public void onEventMainThread(final PermissionGrantedEvent event) {
         Log.i(LOG_TAG, "PermissionGrantedEvent : " + this);
-        EventBus.getDefault().unregister(this);
+        EventBus.getDefault().unregister(this);//对应前面的ensurePermission
         mTaskFragment = new TaskFragment();
         final FragmentManager supportFragmentManager = getSupportFragmentManager();
         supportFragmentManager.beginTransaction().add(mTaskFragment, TAG_TASK_FRAGMENT).commitAllowingStateLoss();
     }
 
 
-    @OnClick(R.id.promo)
-    public void clickOnYoutubeLink() {
-        mAnalytics.sendClickYoutube();
-        final String link = getString(R.string.youtube_promo_link);
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
-        startActivity(intent);
-    }
+//    @OnClick(R.id.promo)
+//    public void clickOnYoutubeLink() {
+//        mAnalytics.sendClickYoutube();
+//        final String link = getString(R.string.youtube_promo_link);
+//        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
+//        startActivity(intent);
+//    }
 
 
     @Override
@@ -129,22 +130,24 @@ public class InstallActivity extends MonitoredActivity implements TaskFragment.T
     }
 
     private void startInstallAnimation() {
-        mTip1.setAlpha(0);
-        mTip2.setAlpha(0);
-        mTip3.setAlpha(0);
-        mYoutube.setAlpha(0);
 
-        ObjectAnimator anim1 = ObjectAnimator.ofFloat(mTip1, "alpha", 1);
-        ObjectAnimator anim2 = ObjectAnimator.ofFloat(mTip2, "alpha", 1);
-        ObjectAnimator anim3 = ObjectAnimator.ofFloat(mTip3, "alpha", 1);
-        ObjectAnimator anim4 = ObjectAnimator.ofFloat(mYoutube, "alpha", 1);
-        AnimatorSet set = new AnimatorSet();
-        set.setStartDelay(300);
-        set.setDuration(600);
-        set.playTogether(anim1, anim2, anim3, anim4);
-        set.start();
+//        mTip1.setAlpha(0);
+//        mTip2.setAlpha(0);
+//        mTip3.setAlpha(0);
+//        mYoutube.setAlpha(0);
+//
+//        ObjectAnimator anim1 = ObjectAnimator.ofFloat(mTip1, "alpha", 1);
+//        ObjectAnimator anim2 = ObjectAnimator.ofFloat(mTip2, "alpha", 1);
+//        ObjectAnimator anim3 = ObjectAnimator.ofFloat(mTip3, "alpha", 1);
+//        ObjectAnimator anim4 = ObjectAnimator.ofFloat(mYoutube, "alpha", 1);
+//        AnimatorSet set = new AnimatorSet();
+//        set.setStartDelay(300);
+//        set.setDuration(600);
+//        set.playTogether(anim1, anim2, anim3, anim4);
+//        set.start();
+
         mFairyAnimation.start();
-
+        mFairyText.setText(R.string.installing);
     }
 
     @Override
@@ -153,6 +156,7 @@ public class InstallActivity extends MonitoredActivity implements TaskFragment.T
         EventBus.getDefault().unregister(this);
     }
 
+    //标记完成
     private void markAsDone(InstallResult result) {
         fadeInStartButton();
         mFairyAnimation.stop();
@@ -161,14 +165,13 @@ public class InstallActivity extends MonitoredActivity implements TaskFragment.T
                 final View.OnClickListener onClickListener = new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
                         setResult(RESULT_OK);
                         finish();
                     }
                 };
                 mButtonStartApp.setOnClickListener(onClickListener);
-                mFairyContainer.setOnClickListener(onClickListener);
-                mFairySpeechBubble.setVisibility(View.VISIBLE);
+                //mFairyContainer.setOnClickListener(onClickListener);
+                //mFairySpeechBubble.setVisibility(View.VISIBLE);
                 mFairyText.setText(R.string.start_app);
                 break;
             case NOT_ENOUGH_DISK_SPACE:
@@ -204,34 +207,33 @@ public class InstallActivity extends MonitoredActivity implements TaskFragment.T
         mButtonStartApp.animate().alpha(1);
     }
 
-
     @Override
     public void onPreExecute() {
         startInstallAnimation();
     }
 
     @Override
-    public void onProgressUpdate(int progress) {
-        final float translateX = getTranslateX(progress);
-        translateTextfairy((int) translateX);
+    public void onProgressUpdate(int progress) {//去掉这里的复杂的fairy移动动画
+//        final float translateX = getTranslateX(progress);
+//        translateTextfairy((int) translateX);
     }
 
-    private void translateTextfairy(int translateX) {
-        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) mFairyContainer.getLayoutParams();
-        lp.leftMargin = translateX;
-        mFairyContainer.setLayoutParams(lp);
-    }
-
-    private float getTranslateX(float progress) {
-        final int fairyEndX = mContentView.getWidth() / 2;
-        final int fairyStartX = mImageViewFairy.getWidth() / 2;
-        final int maxTravelDistance = Math.min(fairyEndX - fairyStartX, mContentView.getWidth() - mFairyContainer.getWidth());
-        return maxTravelDistance * (progress / 100);
-    }
+//    private void translateTextfairy(int translateX) {
+//        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) mFairyContainer.getLayoutParams();
+//        lp.leftMargin = translateX;
+//        mFairyContainer.setLayoutParams(lp);
+//    }
+//
+//    private float getTranslateX(float progress) {
+//        final int fairyEndX = mContentView.getWidth() / 2;
+//        final int fairyStartX = mImageViewFairy.getWidth() / 2;
+//        final int maxTravelDistance = Math.min(fairyEndX - fairyStartX, mContentView.getWidth() - mFairyContainer.getWidth());
+//        return maxTravelDistance * (progress / 100);
+//    }
 
     @Override
     public void onCancelled() {
-
+        mFairyAnimation.stop();//hujiawei
     }
 
     @Override

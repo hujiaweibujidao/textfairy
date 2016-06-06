@@ -1,9 +1,13 @@
 package com.renard.ocr.install;
 
 /**
+ * 语言包安装的结果
+ *
  * @author renard
  */
 class InstallResult {
+
+    //没有足够的空间、成功、未知错误
     public enum Result {
         NOT_ENOUGH_DISK_SPACE, OK, UNSPECIFIED_ERROR
     }

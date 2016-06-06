@@ -16,13 +16,13 @@
 
 package com.renard.ocr.install;
 
-import com.renard.ocr.install.InstallResult.Result;
-import com.renard.ocr.util.Util;
-
 import android.content.res.AssetManager;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
+
+import com.renard.ocr.install.InstallResult.Result;
+import com.renard.ocr.util.Util;
 
 import java.io.DataOutputStream;
 import java.io.File;
@@ -32,6 +32,9 @@ import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+/**
+ * 安装语言包的任务
+ */
 class InstallTask extends AsyncTask<Void, Integer, InstallResult> {
 
     private static final String DEBUG_TAG = InstallTask.class.getSimpleName();
@@ -69,6 +72,8 @@ class InstallTask extends AsyncTask<Void, Integer, InstallResult> {
     }
 
     /**
+     * 解压之后的大小 21913078 (mac)
+     *
      * @return the total size of the language-assets in the zip file
      */
     private long getTotalUnzippedSize() {
@@ -76,6 +81,7 @@ class InstallTask extends AsyncTask<Void, Integer, InstallResult> {
     }
 
 
+    //安装过程中的回调
     @Override
     protected void onProgressUpdate(Integer... progress) {
         if (mCallbacks != null) {
@@ -118,6 +124,8 @@ class InstallTask extends AsyncTask<Void, Integer, InstallResult> {
     }
 
     /**
+     * 解压语言包
+     *
      * unzips all language-assets from the package
      */
     private InstallResult unzipLanguageAssets(AssetManager manager) {
@@ -129,13 +137,11 @@ class InstallTask extends AsyncTask<Void, Integer, InstallResult> {
         InstallResult result = null;
 
         try {
-
             InputStream in = manager.open(TESSDATA_FILE_NAME);
             zipStream = new ZipInputStream(in);
 
             ZipEntry entry = null;
             while ((entry = zipStream.getNextEntry()) != null) {
-
                 String filename = entry.getName();
                 File file = new File(externalStorageDir, entry.getName());
                 if (entry.isDirectory()) {
@@ -164,6 +170,8 @@ class InstallTask extends AsyncTask<Void, Integer, InstallResult> {
 
 
     /**
+     * 从zip包中复制内容到sd卡中
+     *
      * copy from the zip on the disk
      */
     private InstallResult copyInputStream(final InputStream in, final long in_size, final String outname, final File outfile) {

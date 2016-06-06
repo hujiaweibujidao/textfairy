@@ -8,6 +8,8 @@ import android.support.v4.app.Fragment;
 import java.util.concurrent.ExecutionException;
 
 /**
+ * 这个Fragment处理一个单独的后台任务
+ *
  * This Fragment manages a single background task and retains
  * itself across configuration changes.
  */
@@ -50,7 +52,7 @@ public class TaskFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRetainInstance(true);
+        setRetainInstance(true);//toread 保留实例以使得该fragment可以在多个Activity中使用
         mTask = new InstallTask((TaskCallbacks) getActivity(), getActivity().getAssets());
     }
 
@@ -81,7 +83,7 @@ public class TaskFragment extends Fragment {
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
-            return new InstallResult(InstallResult.Result.UNSPECIFIED_ERROR);
+            return new InstallResult(InstallResult.Result.UNSPECIFIED_ERROR);//未知错误
         } else {
             return null;
         }

@@ -2,7 +2,6 @@
 
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/empty_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -85,24 +84,19 @@
         style="@style/Base.TextAppearance.AppCompat.Medium"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_above="@+id/fairy_hint"
+        android:layout_below="@+id/install_language"
         android:layout_marginTop="@dimen/default_padding"
-        android:layout_marginBottom="@dimen/default_padding"
         android:drawableLeft="@drawable/ic_action_language"
         android:gravity="center"
         android:text="@string/empty_grid_download_language"
         android:textColor="@android:color/white"
-        android:theme="@style/ColoredButton"
-        android:visibility="gone"
-        tools:visibility="visible"/>
+        android:theme="@style/ColoredButton"/>
 
     <TextView
         android:id="@+id/fairy_hint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
         android:layout_marginBottom="@dimen/default_padding"
         android:text="@string/empty_grid_fairy"
         android:textColor="@color/grey3"
