@@ -101,6 +101,7 @@ public class CropImageActivity extends MonitoredActivity implements BlurWarningD
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+
         EventBus.getDefault().register(this);
         getWindow().setFormat(PixelFormat.RGBA_8888);
         setContentView(R.layout.activity_cropimage);
@@ -136,7 +137,6 @@ public class CropImageActivity extends MonitoredActivity implements BlurWarningD
     private boolean isFirstStart() {
         return PreferencesUtils.isFirstScan(this);
     }
-
 
     @OnClick(R.id.item_rotate_left)
     public void onRotateLeft() {
@@ -182,7 +182,7 @@ public class CropImageActivity extends MonitoredActivity implements BlurWarningD
         });
     }
 
-
+    //toolbar左侧变成返回键
     private void initNavigationAsUp() {
         final Drawable upArrow = getResources().getDrawable(R.drawable.ic_arrow_back_white);
         getSupportActionBar().setHomeAsUpIndicator(upArrow);
@@ -198,7 +198,7 @@ public class CropImageActivity extends MonitoredActivity implements BlurWarningD
     @Override
     protected int getHintDialogId() {
         return HINT_DIALOG_ID;
-    }
+    } //提示信息的dialog id
 
     //在这里接收需要裁剪的图片准备阶段返回的结果 （由PreparePixForCropTask发送结果返回CropData）
     @SuppressWarnings("unused")
@@ -222,12 +222,13 @@ public class CropImageActivity extends MonitoredActivity implements BlurWarningD
             public void onGlobalLayout() {
                 mImageView.setImageBitmapResetBase(cropData.getBitmap(), true, mRotation * 90);
 
-                if (isFirstStart()) {
-                    showCropOnBoarding(cropData);
-                } else {
-                    handleBlurResult(cropData);
-                }
+                //if (isFirstStart()) {
+                //    showCropOnBoarding(cropData);
+                //} else {
+                //    handleBlurResult(cropData);
+                //}
 
+                handleBlurResult(cropData);//之间进入这里,不需要提示上面的内容
 
                 mImageView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
             }
@@ -244,7 +245,7 @@ public class CropImageActivity extends MonitoredActivity implements BlurWarningD
                 break;
             case MEDIUM_BLUR:
             case STRONG_BLUR:
-                setTitle(R.string.image_is_blurred);
+                setTitle(R.string.image_is_blurred);//显示图片过于模糊的情况
                 BlurWarningDialog dialog = BlurWarningDialog.newInstance((float) cropData.getBlurriness().getBlurValue());
                 final FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
                 fragmentTransaction.add(dialog, BlurWarningDialog.TAG).commitAllowingStateLoss();
@@ -264,7 +265,7 @@ public class CropImageActivity extends MonitoredActivity implements BlurWarningD
 
     //调整操作按钮的显示情况
     private void adjustOptionsMenu() {
-        if (mCropData.isPresent()) {
+        if (mCropData.isPresent()) {//图片数据在的时候就可以旋转
             mRotateLeft.setVisibility(View.VISIBLE);
             mRotateRight.setVisibility(View.VISIBLE);
             mSave.setVisibility(View.VISIBLE);
@@ -276,13 +277,13 @@ public class CropImageActivity extends MonitoredActivity implements BlurWarningD
     }
 
     @OnClick(R.id.item_save)
-    void onSaveClicked() {
+    void onSaveClicked() {//点击保存
         if (!mCropData.isPresent() || mSaving || (mCrop == null)) {
             return;
         }
         mSaving = true;
 
-        //开启后台裁剪图片的任务
+        //在后台开启裁剪图片的任务,前端显示进度条旋转
         Util.startBackgroundJob(this, null, getText(R.string.cropping_image).toString(), new Runnable() {
             public void run() {
                 try {
@@ -326,9 +327,9 @@ public class CropImageActivity extends MonitoredActivity implements BlurWarningD
                     }
 
                     Intent result = new Intent();
-                    OCR.savePixToCacheDir(CropImageActivity.this, bilinear.copy());
+                    OCR.savePixToCacheDir(CropImageActivity.this, bilinear.copy());//将裁剪之后的数据保存起来
                     //DocumentGridActivity.EXTRA_NATIVE_PIX = NewDocumentActivity.EXTRA_NATIVE_PIX
-                    result.putExtra(DocumentGridActivity.EXTRA_NATIVE_PIX, bilinear.getNativePix());//裁剪之后的图片Pix
+                    result.putExtra(DocumentGridActivity.EXTRA_NATIVE_PIX, bilinear.getNativePix());//裁剪之后的图片Pix放入到extra中
                     setResult(RESULT_OK, result);//进入代码在NewDocumentActivity 470行附近
                 } catch (IllegalStateException e) {
                     setResult(RESULT_CANCELED);

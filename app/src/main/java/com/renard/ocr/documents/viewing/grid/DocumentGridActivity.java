@@ -86,7 +86,7 @@ import de.greenrobot.event.EventBus;
  * <p/>
  * update:
  * 1.去掉左侧的菜单栏
- * 2.修改界面布局
+ * 2.修改界面布局,添加thu声明
  *
  * @author renard
  */
@@ -211,10 +211,10 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         final String state = Environment.getExternalStorageState();
 
         if (state.equals(Environment.MEDIA_MOUNTED)) {
-            if (installedOCRLanguages.isEmpty()) {
+            if (installedOCRLanguages.isEmpty()) {//只有在安装语言为空的时候才会去安装,以前不论安装了哪些语言都不再重新安装
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setClassName(this, com.renard.ocr.install.InstallActivity.class.getName());
-                startActivityForResult(intent, REQUEST_CODE_INSTALL);
+                startActivityForResult(intent, REQUEST_CODE_INSTALL);//进入安装语言包
             }
         } else {
             AlertDialog.Builder alert = new AlertDialog.Builder(this);
@@ -313,10 +313,8 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         if (requestCode == REQUEST_CODE_INSTALL) {
             if (RESULT_OK == resultCode) {
                 // install successfull, show happy fairy or introduction text
-
             } else {
-                // install failed, quit immediately
-                finish();
+                finish();// install failed, quit immediately
             }
 
         } else {

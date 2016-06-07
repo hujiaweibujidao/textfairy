@@ -97,7 +97,7 @@ public class LayoutQuestionDialog extends DialogFragment {
         final OcrLanguage.InstallStatus installStatus = OcrLanguageDataStore.isLanguageInstalled(language.first, context);
 
         if (!installStatus.isInstalled()) {
-            final String defaultLanguage = context.getString(R.string.default_ocr_language);
+            final String defaultLanguage = context.getString(R.string.default_ocr_language);//不同语言的系统使用不同的默认语言
             final String defaultLanguageDisplay = context.getString(R.string.default_ocr_display_language);
             language = Pair.create(defaultLanguage, defaultLanguageDisplay);
         }

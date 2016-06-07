@@ -21,7 +21,9 @@
             android:layout_alignParentBottom="true"
             android:layout_marginBottom="2dp"
             android:contentDescription="@string/content_description_fairy"
-            android:src="@drawable/textfairy_title"/>
+            android:src="@drawable/textfairy_title"
+            android:visibility="gone"
+            tools:visibility="gone"/>
 
         <TextView
             android:id="@+id/toolbar_text"

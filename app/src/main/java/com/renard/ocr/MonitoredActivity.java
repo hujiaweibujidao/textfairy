@@ -157,6 +157,7 @@ public abstract class MonitoredActivity extends AppCompatActivity implements Bas
     protected void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         mToolbarMessage = (TextView) toolbar.findViewById(R.id.toolbar_text);
+        setToolbarMessage(R.string.app_name);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         initAppIcon(getHintDialogId(), (ImageView) toolbar.findViewById(R.id.app_icon));

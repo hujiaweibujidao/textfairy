@@ -152,7 +152,6 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
 
     //检查目前可用的ram，如果ram足够的话就进行相应的操作
     private void checkRam(MemoryWarningDialog.DoAfter doAfter) {
-
         long availableMegs = MemoryInfo.getFreeMemory(this);
         Log.i(LOG_TAG, "available ram = " + availableMegs);
         if (availableMegs < MemoryInfo.MINIMUM_RECOMMENDED_RAM) {//可用内存小于推荐最小值，弹出提示信息
@@ -284,7 +283,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.base_document_activity_options, menu);//添加两个操作按钮
+        getMenuInflater().inflate(R.menu.base_document_activity_options, menu);//添加两个操作按钮 拍照 图库
         return true;
     }
 
@@ -389,7 +388,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (RESULT_OK == resultCode) {//返回了成功
             switch (requestCode) {
-                case REQUEST_CODE_CROP_PHOTO: {//图片裁剪成功，可以进入到ocr中了
+                case REQUEST_CODE_CROP_PHOTO: {//图片裁剪成功，可以进入到ocr了
                     long nativePix = data.getLongExtra(EXTRA_NATIVE_PIX, 0);
                     startOcrActivity(nativePix, false);
                     break;
@@ -401,7 +400,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
                     mCameraResult = new CameraResult(requestCode, resultCode, data, ImageSource.PICK);
                     break;
             }
-        } else if (CropImageActivity.RESULT_NEW_IMAGE == resultCode) {//在裁剪图片的时候可能没有成功，会返回到这里重新获取图片
+        } else if (CropImageActivity.RESULT_NEW_IMAGE == resultCode) {//在裁剪图片的时候出现任何错误都会返回到这里重新获取图片
             switch (mImageSource) {
                 case PICK:
                     startGallery();
@@ -421,7 +420,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
         intent.putExtra(EXTRA_NATIVE_PIX, nativePix);
         intent.putExtra(OCRActivity.EXTRA_USE_ACCESSIBILITY_MODE, accessibilityMode);
         intent.putExtra(OCRActivity.EXTRA_PARENT_DOCUMENT_ID, getParentId());
-        startActivityForResult(intent, REQUEST_CODE_OCR);
+        startActivityForResult(intent, REQUEST_CODE_OCR);//for result
     }
 
     @Override
@@ -467,13 +466,14 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
             } else {//进入图片裁剪阶段
                 Intent actionIntent = new Intent(this, CropImageActivity.class);
                 actionIntent.putExtra(NewDocumentActivity.EXTRA_NATIVE_PIX, nativePix);
-                startActivityForResult(actionIntent, NewDocumentActivity.REQUEST_CODE_CROP_PHOTO);
+                startActivityForResult(actionIntent, NewDocumentActivity.REQUEST_CODE_CROP_PHOTO);//
             }
         } else {
             showFileError(pixLoadStatus);
         }
     }
 
+    //关闭图片加载对话框
     private void dismissLoadingImageProgressDialog() {
         Fragment prev = getSupportFragmentManager().findFragmentByTag(IMAGE_LOAD_PROGRESS_TAG);
         if (prev != null) {
@@ -485,6 +485,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
         }
     }
 
+    //显示正在加载图片 -> IMAGE_LOAD_PROGRESS_TAG
     private void showLoadingImageProgressDialog() {
         Log.i(LOG_TAG, "showLoadingImageProgressDialog");
         //dialog.show(getSupportFragmentManager(), null);

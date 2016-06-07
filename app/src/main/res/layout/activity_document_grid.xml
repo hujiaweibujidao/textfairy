@@ -7,7 +7,8 @@
 
     <RelativeLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@color/document_grid_background">
 
         <include
             android:id="@+id/toolbar"
@@ -18,6 +19,7 @@
             layout="@layout/empty_document_grid"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_above="@+id/fairy_hint"
             android:layout_below="@+id/toolbar"/>
 
         <com.renard.ocr.documents.viewing.grid.FancyGridView
@@ -25,6 +27,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_below="@+id/toolbar"
+            android:layout_above="@+id/fairy_hint"
             android:background="@color/document_grid_background"
             android:choiceMode="none"
             android:drawSelectorOnTop="false"
@@ -32,6 +35,18 @@
             android:listSelector="@android:color/transparent"
             android:scrollingCache="true"
             android:verticalSpacing="@dimen/grid_spacing"/>
+
+        <TextView
+            android:id="@+id/fairy_hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="@dimen/default_padding"
+            android:text="@string/empty_grid_fairy"
+            android:textColor="@color/grey3"
+            android:textSize="15dp"/>
 
     </RelativeLayout>
 

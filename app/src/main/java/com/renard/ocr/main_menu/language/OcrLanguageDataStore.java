@@ -90,6 +90,7 @@ public class OcrLanguageDataStore {
         }
     }
 
+    //统计某些文件的大小之和
     private static long sumFileSizes(File[] languageFiles) {
         if (languageFiles == null) {
             return 0;

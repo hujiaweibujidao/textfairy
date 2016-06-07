@@ -108,7 +108,7 @@ public class OCRActivity extends MonitoredActivity implements LayoutChoseListene
         }
 
         mOCR = new OCR(this, mMessageReceiver);
-        Screen.lockOrientation(this);
+        Screen.lockOrientation(this);//锁定屏幕
         setContentView(R.layout.activity_ocr);
         ButterKnife.bind(this);
         initToolbar();
@@ -316,14 +316,14 @@ public class OCRActivity extends MonitoredActivity implements LayoutChoseListene
                         } finally {
                             recycleResultPix(pix);
                             if (documentUri != null && !isFinishing()) {
-                                Intent i;
-                                i = new Intent(OCRActivity.this, DocumentActivity.class);//跳到DocumentActivity
-                                i.putExtra(DocumentActivity.EXTRA_ACCURACY, accuracy);
-                                i.putExtra(DocumentActivity.EXTRA_LANGUAGE, mOcrLanguage);
-                                i.setData(documentUri);
-                                i.putExtra(DocumentGridActivity.EXTRA_NATIVE_PIX, pix.getNativePix());
-                                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                startActivity(i);
+                                Intent intent;
+                                intent = new Intent(OCRActivity.this, DocumentActivity.class);//跳到DocumentActivity
+                                intent.putExtra(DocumentActivity.EXTRA_ACCURACY, accuracy);
+                                intent.putExtra(DocumentActivity.EXTRA_LANGUAGE, mOcrLanguage);
+                                intent.setData(documentUri);
+                                intent.putExtra(DocumentGridActivity.EXTRA_NATIVE_PIX, pix.getNativePix());
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                startActivity(intent);
                                 finish();
                                 Screen.unlockOrientation(OCRActivity.this);
                             }
@@ -380,7 +380,7 @@ public class OCRActivity extends MonitoredActivity implements LayoutChoseListene
         return -1;
     }
 
-    //询问布局情况
+    //询问用户关于图片中文字的布局情况
     private void askUserAboutDocumentLayout() {
         LayoutQuestionDialog dialog = LayoutQuestionDialog.newInstance();
         dialog.show(getSupportFragmentManager(), LayoutQuestionDialog.TAG);

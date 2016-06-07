@@ -55,16 +55,19 @@ import java.util.Set;
 
 /**
  * 显示文档内容的Activity
+ *
+ * update:
+ * 1.简化菜单选项,目前只保留了切换视图和创建PDF的功能选项
+ *
  */
 public class DocumentActivity extends NewDocumentActivity implements LoaderManager.LoaderCallbacks<Cursor>, GetOpinionDialog.FeedbackDialogClickListener {
 
     private final static String LOG_TAG = DocumentActivity.class.getSimpleName();
     public static final String OCR_RESULT_DIALOG = "Ocr Result Dialog";
     private static final String STATE_DOCUMENT_URI = "documet_uri";
-    public static final int DOCUMENT_CURSOR_LOADER_ID = 45678998;
+    public static final int DOCUMENT_CURSOR_LOADER_ID = 45678998;//toread 这个值是随意的?
     private boolean mIsCursorLoaded = false;
     private boolean mMoveToPageFromIntent;
-
 
     //实现类是 DocumentPagerFragment
     public interface DocumentContainerFragment {
@@ -100,6 +103,7 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setVolumeControlStream(AudioManager.STREAM_ALARM);//
         supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);//不确定的进度
         setContentView(R.layout.activity_document);
@@ -108,14 +112,16 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
             return;
         }
 
-        if (savedInstanceState == null && isStartedAfterAScan(getIntent())) {//刚刚扫描完成之后看结果
-            showResultDialog();
+        if (savedInstanceState == null && isStartedAfterAScan(getIntent())) {//刚刚扫描完成之后看结果 -> 去掉
+            //showResultDialog();
         } else {
             mAnalytics.sendScreenView("Document");
         }
+
         setDocumentFragmentType();
         initToolbar();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         mActionCallback = new TtsActionCallback(this);
     }
 
@@ -131,7 +137,7 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
         if (isStartedAfterAScan(intent)) {
             mMoveToPageFromIntent = true;
             setIntent(intent);
-            showResultDialog();
+            //showResultDialog();
         } else {
             mAnalytics.sendScreenView("Document");
         }
@@ -142,7 +148,7 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
         return intent.getExtras() != null && getIntent().hasExtra(EXTRA_ACCURACY);
     }
 
-    //显示处理结果的对话框
+    //显示处理结果的对话框 -> 去掉该功能
     private void showResultDialog() {
         int accuracy = getIntent().getIntExtra(EXTRA_ACCURACY, -1);
         String language = getIntent().getStringExtra(EXTRA_LANGUAGE);
@@ -152,15 +158,28 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
         if (accuracy >= OCRResultDialog.MEDIUM_ACCURACY) {//大于83%以上就算是成功的扫描结果
             PreferencesUtils.setNumberOfSuccessfulScans(getApplicationContext(), ++numberOfSuccessfulScans);
         }
-        if (numberOfSuccessfulScans == 2) {//成功了两次的话弹出用户使用意见对话框
-            GetOpinionDialog.newInstance(language).show(getSupportFragmentManager(), GetOpinionDialog.TAG);
-            PreferencesUtils.setNumberOfSuccessfulScans(getApplicationContext(), ++numberOfSuccessfulScans);
-        } else if (accuracy > -1) {//显示OCR处理结果的对话框
+
+        if (accuracy > -1) {//显示OCR处理结果的对话框
             OCRResultDialog.newInstance(accuracy, language).show(getSupportFragmentManager(), OCRResultDialog.TAG);
             mAnalytics.sendScreenView(OCR_RESULT_DIALOG);
         }
 
+//        if (numberOfSuccessfulScans == 2) {//成功了两次的话弹出用户使用意见对话框 -> 去掉不显示
+//            GetOpinionDialog.newInstance(language).show(getSupportFragmentManager(), GetOpinionDialog.TAG);
+//            PreferencesUtils.setNumberOfSuccessfulScans(getApplicationContext(), ++numberOfSuccessfulScans);
+//        } else if (accuracy > -1) {//显示OCR处理结果的对话框
+//            OCRResultDialog.newInstance(accuracy, language).show(getSupportFragmentManager(), OCRResultDialog.TAG);
+//            mAnalytics.sendScreenView(OCR_RESULT_DIALOG);
+//        }
     }
+
+    //导出为pdf
+    void exportAsPdf() {
+        Set<Integer> idForPdf = new HashSet<>();
+        idForPdf.add(getParentId());
+        new CreatePDFTask(idForPdf).execute();
+    }
+
 
     @Override
     public void onContinueClicked() {
@@ -174,16 +193,13 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.document_activity_options, menu);
+
+        //去掉这两个菜单项
+        menu.removeItem(R.id.item_camera);
+        menu.removeItem(R.id.item_gallery);
+
         return true;
     }
-
-    //导出为pdf
-    void exportAsPdf() {
-        Set<Integer> idForPdf = new HashSet<>();
-        idForPdf.add(getParentId());
-        new CreatePDFTask(idForPdf).execute();
-    }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -193,46 +209,47 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
             return true;
         }
 
+        //目前只保留了切换视图和创建PDF的功能选项
         if (itemId == R.id.item_view_mode) {
             DocumentContainerFragment fragment = (DocumentContainerFragment) getSupportFragmentManager().findFragmentById(R.id.document_fragment_container);
             final boolean showText = fragment.getShowText();
             fragment.setShowText(!showText);
             mAnalytics.optionDocumentViewMode(!showText);
             return true;
-        } else if (itemId == R.id.item_text_options) {
-            Intent i = new Intent(this, TextSettingsActivity.class);
-            startActivityForResult(i, REQUEST_CODE_OPTIONS);
-            mAnalytics.optionTextSettings();
-            return true;
-        } else if (itemId == R.id.item_content) {
-            Intent tocIndent = new Intent(this, TableOfContentsActivity.class);
-            Uri uri = Uri.parse(DocumentContentProvider.CONTENT_URI + "/" + getParentId());
-            tocIndent.setData(uri);
-            startActivityForResult(tocIndent, REQUEST_CODE_TABLE_OF_CONTENTS);
-            mAnalytics.optionTableOfContents();
-            return true;
-        } else if (itemId == R.id.item_delete) {
-            deleteDocument();
-            mAnalytics.optionsDeleteDocument();
-            return true;
         } else if (itemId == R.id.item_export_as_pdf) {
             mAnalytics.optionsCreatePdf();
             exportAsPdf();
             return true;
-        } else if (itemId == R.id.item_copy_to_clipboard) {
-            mAnalytics.optionsCopyToClipboard();
-            copyTextToClipboard();
-            return true;
-        } else if (itemId == R.id.item_text_to_speech) {
-            mAnalytics.optionsStartTts();
-            startTextToSpeech();
-            return true;
-        } else if (itemId == R.id.item_share_text) {
-            mAnalytics.optionsShareText();
-            shareText();
-            return true;
-
         }
+//        else if (itemId == R.id.item_text_options) {
+//            Intent i = new Intent(this, TextSettingsActivity.class);
+//            startActivityForResult(i, REQUEST_CODE_OPTIONS);
+//            mAnalytics.optionTextSettings();
+//            return true;
+//        } else if (itemId == R.id.item_content) {
+//            Intent tocIndent = new Intent(this, TableOfContentsActivity.class);
+//            Uri uri = Uri.parse(DocumentContentProvider.CONTENT_URI + "/" + getParentId());
+//            tocIndent.setData(uri);
+//            startActivityForResult(tocIndent, REQUEST_CODE_TABLE_OF_CONTENTS);
+//            mAnalytics.optionTableOfContents();
+//            return true;
+//        } else if (itemId == R.id.item_delete) {
+//            deleteDocument();
+//            mAnalytics.optionsDeleteDocument();
+//            return true;
+//        } else if (itemId == R.id.item_copy_to_clipboard) {
+//            mAnalytics.optionsCopyToClipboard();
+//            copyTextToClipboard();
+//            return true;
+//        } else if (itemId == R.id.item_text_to_speech) {
+//            mAnalytics.optionsStartTts();
+//            startTextToSpeech();
+//            return true;
+//        } else if (itemId == R.id.item_share_text) {
+//            mAnalytics.optionsShareText();
+//            shareText();
+//            return true;
+//        }
         return super.onOptionsItemSelected(item);
     }
 

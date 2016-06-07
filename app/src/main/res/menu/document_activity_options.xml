@@ -1,52 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:yourapp="http://schemas.android.com/apk/res-auto">
+      xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/item_view_mode"
         android:icon="@drawable/ic_action_mode"
         android:title="@string/option_view_mode"
-        yourapp:showAsAction="ifRoom">
-    </item>
-    <item
-        android:id="@+id/item_text_options"
-        android:icon="@drawable/ic_action_preferences_dark"
-        android:title="@string/option_text"
-        yourapp:showAsAction="ifRoom">
-    </item>
-    <item
-        android:id="@+id/item_content"
-        android:icon="@drawable/ic_action_content"
-        android:title="@string/option_content"
-        yourapp:showAsAction="ifRoom">
-    </item>
-    <item
-        android:id="@+id/item_delete"
-        android:icon="@drawable/ic_action_delete"
-        android:title="@string/delete"
-        yourapp:showAsAction="ifRoom">
+        app:showAsAction="ifRoom">
     </item>
     <item
         android:id="@+id/item_export_as_pdf"
-        android:icon="@drawable/ic_action_pdf"
+        android:icon="@drawable/ic_action_pdf_light"
         android:title="@string/export_as_pdf"
-        yourapp:showAsAction="ifRoom">
+        app:showAsAction="ifRoom">
     </item>
-    <item
-        android:id="@+id/item_share_text"
-        android:icon="@drawable/ic_action_share"
-        android:title="@string/share_text"
-        yourapp:showAsAction="ifRoom">
-    </item>
-    <item
-        android:id="@+id/item_copy_to_clipboard"
-        android:icon="@drawable/ic_action_content_copy"
-        android:title="@string/copy_to_clipboard"
-        yourapp:showAsAction="ifRoom">
-    </item>
-    <item
-        android:id="@+id/item_text_to_speech"
-        android:icon="@drawable/ic_action_text_to_speech"
-        android:title="@string/text_to_speech"
-        yourapp:showAsAction="ifRoom">
-    </item>
+
+    <!--android:icon="@drawable/ic_action_pdf"-->
 </menu>

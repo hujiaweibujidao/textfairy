@@ -1,7 +1,5 @@
 package com.renard.ocr.documents.creation;
 
-import com.renard.ocr.R;
-
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
@@ -9,6 +7,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.renard.ocr.R;
+
+/**
+ * 加载对话框
+ *
+ * update
+ * 1.删除布局中的精灵图片
+ */
 public class ProgressDialogFragment extends DialogFragment {
 
 	private static final String MESSAGE_ID = "message_id";
@@ -26,7 +32,7 @@ public class ProgressDialogFragment extends DialogFragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setStyle(DialogFragment.STYLE_NO_TITLE,getTheme());
+		setStyle(DialogFragment.STYLE_NO_TITLE,getTheme());//去掉title
         setRetainInstance(true);
     }
 
