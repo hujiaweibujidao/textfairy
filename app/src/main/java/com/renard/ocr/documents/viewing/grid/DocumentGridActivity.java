@@ -614,16 +614,21 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
             // change state of action mode depending on the selection
             //final MenuItem editItem = mActionMode.getMenu().findItem(R.id.item_edit_title);
             final MenuItem joinItem = mActionMode.getMenu().findItem(R.id.item_join);
-            if (checkedIds.size() == 1) {
+            final MenuItem pdfItem = mActionMode.getMenu().findItem(R.id.item_export_as_pdf);
+            if (checkedIds.size() == 1) {//一个文档的时候可以导出pdf,多个文档的时候可以合并文档
                 //editItem.setVisible(true);
                 //editItem.setEnabled(true);
                 joinItem.setVisible(false);
                 joinItem.setEnabled(false);
+                pdfItem.setVisible(true);
+                pdfItem.setEnabled(true);
             } else {
                 //editItem.setVisible(false);
                 //editItem.setEnabled(false);
                 joinItem.setVisible(true);
                 joinItem.setEnabled(true);
+                pdfItem.setVisible(false);
+                pdfItem.setEnabled(false);
             }
         }
     }

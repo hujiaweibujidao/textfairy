@@ -54,7 +54,7 @@ import java.io.OutputStream;
 
 public class Util {
 
-    public final static String EXTERNAL_APP_DIRECTORY = "textfee";//一些存放在sd卡上的文件夹目录
+    public final static String EXTERNAL_APP_DIRECTORY = "thuocr";//一些存放在sd卡上的文件夹目录 textfee
     private final static String CACHE_DIRECTORY = EXTERNAL_APP_DIRECTORY + "/thumbnails";
     private final static String IMAGE_DIRECTORY = EXTERNAL_APP_DIRECTORY + "/pictures";
     private final static String PDF_DIRECTORY = EXTERNAL_APP_DIRECTORY + "/pdfs";
