@@ -18,24 +18,24 @@ package com.renard.ocr.main_menu;
 import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
 
-import com.google.android.youtube.player.YouTubeInitializationResult;
-import com.google.android.youtube.player.YouTubePlayer;
-import com.google.android.youtube.player.YouTubePlayerSupportFragment;
-import com.renard.ocr.R;
 import com.renard.ocr.MonitoredActivity;
+import com.renard.ocr.R;
 
-public class TipsActivity extends MonitoredActivity implements YouTubePlayer.OnInitializedListener {
-
+/**
+ * 帮助界面
+ */
+public class TipsActivity extends MonitoredActivity /*implements YouTubePlayer.OnInitializedListener*/ {
 
     protected void onCreate(android.os.Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_help);
+
         initToolbar();
         setToolbarMessage(R.string.tips);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        YouTubePlayerSupportFragment youTubePlayerFragment = (YouTubePlayerSupportFragment) getSupportFragmentManager().findFragmentById(R.id.youtube_fragment);
-        youTubePlayerFragment.initialize("AIzaSyBDZn3rmXgEP64ID0Rp32OwSScns6ZdaF8", this);
 
+        //YouTubePlayerSupportFragment youTubePlayerFragment = (YouTubePlayerSupportFragment) getSupportFragmentManager().findFragmentById(R.id.youtube_fragment);
+        //youTubePlayerFragment.initialize("AIzaSyBDZn3rmXgEP64ID0Rp32OwSScns6ZdaF8", this);
     }
 
     @Override
@@ -65,13 +65,13 @@ public class TipsActivity extends MonitoredActivity implements YouTubePlayer.OnI
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onInitializationSuccess(YouTubePlayer.Provider provider, YouTubePlayer youTubePlayer, boolean b) {
-        youTubePlayer.cueVideo(getString(R.string.crop_image_tutorial));
-    }
-
-    @Override
-    public void onInitializationFailure(YouTubePlayer.Provider provider, YouTubeInitializationResult youTubeInitializationResult) {
-
-    }
+//    @Override
+//    public void onInitializationSuccess(YouTubePlayer.Provider provider, YouTubePlayer youTubePlayer, boolean b) {
+//        youTubePlayer.cueVideo(getString(R.string.crop_image_tutorial));
+//    }
+//
+//    @Override
+//    public void onInitializationFailure(YouTubePlayer.Provider provider, YouTubeInitializationResult youTubeInitializationResult) {
+//
+//    }
 }

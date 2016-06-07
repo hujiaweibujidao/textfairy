@@ -1,111 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_height="match_parent"
-                android:layout_width="match_parent">
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <include layout="@layout/toolbar"
-             android:id="@+id/toolbar"/>
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/toolbar"/>
 
     <ScrollView
-            android:background="@android:color/white"
-            android:layout_below="@+id/toolbar"
-            android:fillViewport="true"
-            android:layout_height="match_parent"
-            android:layout_width="match_parent">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/toolbar"
+        android:background="@android:color/white"
+        android:fillViewport="true">
 
-        <RelativeLayout
-                android:layout_marginRight="@dimen/activity_horizontal_margin"
-                android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                android:layout_marginBottom="@dimen/activity_horizontal_margin"
-                android:paddingTop="@dimen/activity_horizontal_margin"
-                android:paddingBottom="@dimen/activity_horizontal_margin"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+        <!--<RelativeLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginBottom="@dimen/activity_horizontal_margin"-->
+            <!--android:layout_marginLeft="@dimen/activity_horizontal_margin"-->
+            <!--android:layout_marginRight="@dimen/activity_horizontal_margin"-->
+            <!--android:paddingBottom="@dimen/activity_horizontal_margin"-->
+            <!--android:paddingTop="@dimen/activity_horizontal_margin">-->
 
-            <TextView
-                    android:textAppearance="@android:style/TextAppearance.Large"
-                    android:id="@+id/explanation_text"
-                    android:text="@string/explanation_crop_video"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentTop="true"
-                    android:layout_centerHorizontal="true"/>
+            <!--<TextView-->
+                <!--android:id="@+id/explanation_text"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_alignParentTop="true"-->
+                <!--android:layout_centerHorizontal="true"-->
+                <!--android:text="@string/explanation_crop_video"-->
+                <!--android:textAppearance="@android:style/TextAppearance.Large"/>-->
 
-            <fragment
+            <!--<fragment-->
+                <!--android:id="@+id/youtube_fragment"-->
+                <!--android:name="com.google.android.youtube.player.YouTubePlayerSupportFragment"-->
+                <!--android:layout_width="250dp"-->
+                <!--android:layout_height="426dp"-->
+                <!--android:layout_below="@+id/explanation_text"-->
+                <!--android:layout_centerHorizontal="true"-->
+                <!--/>-->
 
-                    android:name="com.google.android.youtube.player.YouTubePlayerSupportFragment"
-                    android:id="@+id/youtube_fragment"
-                    android:layout_width="250dp"
-                    android:layout_height="426dp"
-                    android:layout_below="@+id/explanation_text"
-                    android:layout_centerHorizontal="true"
-            />
+            <!--<LinearLayout-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_below="@id/youtube_fragment"-->
+                <!--android:layout_marginTop="@dimen/activity_horizontal_margin"-->
+                <!--android:orientation="vertical">-->
 
-            <LinearLayout
-                    android:layout_marginTop="@dimen/activity_horizontal_margin"
-                    android:layout_below="@id/youtube_fragment"
-                    android:orientation="vertical"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                <!--<TextView-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text="@string/ocr_tip_heading"-->
+                    <!--android:textAppearance="@android:style/TextAppearance.Large"/>-->
 
-                <TextView
-                        android:textAppearance="@android:style/TextAppearance.Large"
-                        android:text="@string/ocr_tip_heading"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"/>
+                <!--<TextView-->
+                    <!--style="@style/ocr_tip_style_check"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text="@string/ocr_tip_1"/>-->
 
-                <TextView
-                        android:text="@string/ocr_tip_1"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        style="@style/ocr_tip_style_check"/>
+                <!--<TextView-->
+                    <!--style="@style/ocr_tip_style_check"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text="@string/ocr_tip_2"/>-->
 
-                <TextView
-                        style="@style/ocr_tip_style_check"
-                        android:text="@string/ocr_tip_2"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"/>
+                <!--<TextView-->
+                    <!--style="@style/ocr_tip_style_check"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text="@string/ocr_tip_3"/>-->
 
-                <TextView
-                        style="@style/ocr_tip_style_check"
-                        android:text="@string/ocr_tip_3"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"/>
+                <!--<TextView-->
+                    <!--style="@style/ocr_tip_style_check"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text="@string/ocr_tip_4"/>-->
 
-                <TextView
-                        style="@style/ocr_tip_style_check"
-                        android:text="@string/ocr_tip_4"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"/>
+                <!--<TextView-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_marginTop="@dimen/activity_horizontal_margin"-->
+                    <!--android:text="@string/additional_tips"-->
+                    <!--android:textAppearance="@android:style/TextAppearance.Large"/>-->
 
-                <TextView
-                        android:layout_marginTop="@dimen/activity_horizontal_margin"
-                        android:textAppearance="@android:style/TextAppearance.Large"
-                        android:text="@string/additional_tips"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"/>
+                <!--<TextView-->
+                    <!--style="@style/ocr_tip_style_check"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text="@string/ocr_tip_5"/>-->
 
-                <TextView
-                        style="@style/ocr_tip_style_check"
-                        android:text="@string/ocr_tip_5"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"/>
+                <!--<TextView-->
+                    <!--style="@style/ocr_tip_style_cross"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text="@string/ocr_tip_6"/>-->
 
-                <TextView
-                        style="@style/ocr_tip_style_cross"
-                        android:text="@string/ocr_tip_6"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"/>
+                <!--<TextView-->
+                    <!--style="@style/ocr_tip_style_cross"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text="@string/ocr_tip_7"/>-->
+            <!--</LinearLayout>-->
 
-                <TextView
-                        style="@style/ocr_tip_style_cross"
-                        android:text="@string/ocr_tip_7"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"/>
-            </LinearLayout>
-
-        </RelativeLayout>
-
+        <!--</RelativeLayout>-->
 
     </ScrollView>
 </RelativeLayout>
