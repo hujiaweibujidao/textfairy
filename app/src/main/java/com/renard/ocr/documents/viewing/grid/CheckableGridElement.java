@@ -74,7 +74,9 @@ public class CheckableGridElement extends RelativeLayout implements Checkable {
 
         this.setWillNotDraw(false);
         if (!isInEditMode()) {
-            setStaticTransformationsEnabled(true);//如果为true,父容器view会调用子view的getChildStaticTransformation方法来启动变换
+
+            //toread!!! 这行代码作用特别大!!!
+            //setStaticTransformationsEnabled(true);//如果为true,父容器view会调用子view的getChildStaticTransformation方法来启动变换
 
             mSelectionTransformation = new Transformation();
             mAlphaTransformation = new Transformation();
@@ -237,7 +239,8 @@ public class CheckableGridElement extends RelativeLayout implements Checkable {
         }
     }
 
-    //配合setStaticTransformationsEnabled(true);一起使用
+    //配合setStaticTransformationsEnabled(true);一起使用 <- hujiawei 那行代码注释掉了,那么这个方法就不会被回调了
+    //这两个方法的调用会导致grid在滑动的时候出现缩略图消失的情况
     @Override
     protected boolean getChildStaticTransformation(View child, Transformation t) {
         boolean hasChanged = false;

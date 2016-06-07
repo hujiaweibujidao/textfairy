@@ -126,7 +126,7 @@ public class DocumentGridAdapter extends CursorAdapter implements OnCheckedChang
 
         long created = cursor.getLong(mIndexCreated);//上面显示时间
         //hujiawei 修改时间显示格式 MMM dd, yyyy h:mmaa
-        CharSequence formattedDate = DateFormat.format("yyyyMMdd hh:mm", new Date(created));
+        CharSequence formattedDate = DateFormat.format("yyyyMMdd HH:mm:ss", new Date(created));
         holder.date.setText(formattedDate);
 
         //if (holder.mPageNumber != null) {//文档的页数
@@ -175,6 +175,7 @@ public class DocumentGridAdapter extends CursorAdapter implements OnCheckedChang
         holder.gridElement.setOnCheckedChangeListener(this);
         v.setTag(holder);
 
+        //hujiawei 删除下面这段代码没有效果
         FastBitmapDrawable start = Util.sDefaultDocumentThumbnail;
         Bitmap startBitmap = null;
         if (start != null) {
@@ -184,6 +185,7 @@ public class DocumentGridAdapter extends CursorAdapter implements OnCheckedChang
         transition.setCallback(v);
         transition.setCrossFadeEnabled(true);
         holder.transition = transition;
+
         return v;
     }
 

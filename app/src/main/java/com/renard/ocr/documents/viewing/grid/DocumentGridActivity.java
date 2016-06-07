@@ -373,44 +373,6 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         }
     }
 
-    public boolean isPendingThumbnailUpdate() {
-        return mPendingThumbnailUpdate;
-    }
-
-    //更新文档的缩略图
-    private void updateDocumentThumbnails() {
-        mPendingThumbnailUpdate = false;
-
-        final GridView grid = mGridView;
-        final int count = grid.getChildCount();
-
-        for (int i = 0; i < count; i++) {
-            final View view = grid.getChildAt(i);
-            final DocumentGridAdapter.DocumentViewHolder holder = (DocumentGridAdapter.DocumentViewHolder) view.getTag();
-            if (holder.updateThumbnail) {
-                final int documentId = holder.documentId;
-                CrossFadeDrawable d = holder.transition;
-                FastBitmapDrawable thumb = Util.getDocumentThumbnail(documentId);
-                if (thumb.getBitmap() != null) {
-                    d.setEnd(thumb.getBitmap());
-                    holder.gridElement.setImage(d);
-                    d.startTransition(375);
-                }
-                holder.updateThumbnail = false;
-            }
-        }
-
-        grid.invalidate();
-    }
-
-    private void postDocumentThumbnails() {
-        Handler handler = mScrollHandler;
-        Message message = handler.obtainMessage(MESSAGE_UPDATE_THUMNAILS, DocumentGridActivity.this);
-        handler.removeMessages(MESSAGE_UPDATE_THUMNAILS);
-        mPendingThumbnailUpdate = true;
-        handler.sendMessage(message);
-    }
-
     @Override
     protected void onPause() {
         super.onPause();
@@ -423,28 +385,6 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         return "Document Grid";
     }
 
-    //初始化gridview
-    private void initGridView() {
-        mGridView = (GridView) findViewById(R.id.gridview);
-        mDocumentAdapter = new DocumentGridAdapter(this, R.layout.document_element, this);
-
-        registerForContextMenu(mGridView);//toread
-
-        mGridView.setAdapter(mDocumentAdapter);
-        mGridView.setLongClickable(true);
-        mGridView.setOnItemClickListener(new DocumentClickListener());
-        mGridView.setOnItemLongClickListener(new DocumentLongClickListener());
-        mGridView.setOnScrollListener(new DocumentScrollListener());
-        mGridView.setOnTouchListener(new FingerTracker());//
-
-        final int[] outNum = new int[1];
-        final int columnWidth = Util.determineThumbnailSize(this, outNum);
-        mGridView.setColumnWidth(columnWidth);//列宽
-        mGridView.setNumColumns(outNum[0]);//列数
-
-        final View emptyView = findViewById(R.id.empty_view);
-        mGridView.setEmptyView(emptyView);//将emptyview设置给gridview
-    }
 
     /**
      * ActionMode指的是当前用户交互的操作模式，这里是ActionMode的回调函数
@@ -504,6 +444,29 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         }
     }
 
+    //初始化gridview
+    private void initGridView() {
+        mGridView = (GridView) findViewById(R.id.gridview);
+        mDocumentAdapter = new DocumentGridAdapter(this, R.layout.document_element, this);
+
+        registerForContextMenu(mGridView);//toread
+
+        mGridView.setAdapter(mDocumentAdapter);
+        mGridView.setLongClickable(true);
+        mGridView.setOnItemClickListener(new DocumentClickListener());
+        mGridView.setOnItemLongClickListener(new DocumentLongClickListener());
+        mGridView.setOnScrollListener(new DocumentScrollListener());
+        mGridView.setOnTouchListener(new FingerTracker());//
+
+        final int[] outNum = new int[1];
+        final int columnWidth = Util.determineThumbnailSize(this, outNum);
+        mGridView.setColumnWidth(columnWidth);//列宽
+        mGridView.setNumColumns(outNum[0]);//列数
+
+        final View emptyView = findViewById(R.id.empty_view);
+        mGridView.setEmptyView(emptyView);//将emptyview设置给gridview
+    }
+
     /////////////////  gridview  //////////////////
 
     //点击
@@ -557,7 +520,7 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         public void onScrollStateChanged(AbsListView view, int scrollState) {
             if (mScrollState == SCROLL_STATE_FLING && scrollState != SCROLL_STATE_FLING) {
                 final Handler handler = mScrollHandler;
-                final Message message = handler.obtainMessage(MESSAGE_UPDATE_THUMNAILS, DocumentGridActivity.this);
+                final Message message = handler.obtainMessage(MESSAGE_UPDATE_THUMNAILS, DocumentGridActivity.this);//obj DocumentGridActivity
                 handler.removeMessages(MESSAGE_UPDATE_THUMNAILS);
                 handler.sendMessageDelayed(message, mFingerUp ? 0 : DELAY_SHOW_THUMBNAILS);
                 mPendingThumbnailUpdate = true;
@@ -596,6 +559,45 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
             }
             return false;
         }
+    }
+
+
+    public boolean isPendingThumbnailUpdate() {
+        return mPendingThumbnailUpdate;
+    }
+
+    //更新文档的缩略图
+    private void updateDocumentThumbnails() {
+        mPendingThumbnailUpdate = false;
+
+        final GridView grid = mGridView;
+        final int count = grid.getChildCount();
+
+        for (int i = 0; i < count; i++) {
+            final View view = grid.getChildAt(i);
+            final DocumentGridAdapter.DocumentViewHolder holder = (DocumentGridAdapter.DocumentViewHolder) view.getTag();
+            if (holder.updateThumbnail) {
+                final int documentId = holder.documentId;
+                CrossFadeDrawable d = holder.transition;
+                FastBitmapDrawable thumb = Util.getDocumentThumbnail(documentId);
+                if (thumb.getBitmap() != null) {
+                    d.setEnd(thumb.getBitmap());
+                    holder.gridElement.setImage(d);
+                    d.startTransition(375);
+                }
+                holder.updateThumbnail = false;
+            }
+        }
+
+        grid.invalidate();
+    }
+
+    private void postDocumentThumbnails() {
+        Handler handler = mScrollHandler;
+        Message message = handler.obtainMessage(MESSAGE_UPDATE_THUMNAILS, DocumentGridActivity.this);
+        handler.removeMessages(MESSAGE_UPDATE_THUMNAILS);
+        mPendingThumbnailUpdate = true;
+        handler.sendMessage(message);
     }
 
 
