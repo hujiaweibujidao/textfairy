@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<EditText xmlns:android="http://schemas.android.com/apk/res/android"
+<EditText
     android:id="@+id/edit_title"
-    android:inputType="text"
-    android:singleLine="true"
-    android:hint="@string/edit_title_hint"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:hint="@string/edit_title_hint"
+    android:inputType="text"
+    android:singleLine="true">
 </EditText>

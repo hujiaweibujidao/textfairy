@@ -54,19 +54,19 @@ import java.io.OutputStream;
 
 public class Util {
 
-    public final static String EXTERNAL_APP_DIRECTORY = "textfee";
+    public final static String EXTERNAL_APP_DIRECTORY = "textfee";//一些存放在sd卡上的文件夹目录
     private final static String CACHE_DIRECTORY = EXTERNAL_APP_DIRECTORY + "/thumbnails";
     private final static String IMAGE_DIRECTORY = EXTERNAL_APP_DIRECTORY + "/pictures";
     private final static String PDF_DIRECTORY = EXTERNAL_APP_DIRECTORY + "/pdfs";
     private final static String OCR_DATA_DIRECTORY = "tessdata";
 
-    private final static String THUMBNAIL_SUFFIX = "png";
+    private final static String THUMBNAIL_SUFFIX = "png";//缩略图的格式和大小
     public final static int MAX_THUMB_WIDTH = 512;
     public final static int MAX_THUMB_HEIGHT = 512;
     private static final FastBitmapDrawable NULL_DRAWABLE = new FastBitmapDrawable(null);
-    public static FastBitmapDrawable sDefaultDocumentThumbnail;
+    public static FastBitmapDrawable sDefaultDocumentThumbnail;//默认的缩略图对应的drawable
 
-    //确定缩略图的大小
+    //确定缩略图的大小,返回值是缩略图的宽度,并且传入的int数组的第一个元素保存grid view一行能放几列
     public static int determineThumbnailSize(final Activity context, final int[] outNum) {
         DisplayMetrics metrics = new DisplayMetrics();
         context.getWindowManager().getDefaultDisplay().getMetrics(metrics);
@@ -91,6 +91,7 @@ public class Util {
         return columnWidth;
     }
 
+    //设置缩略图的大小
     public static void setThumbnailSize(final int w, final int h, final Context c) {
         Drawable drawable = c.getResources().getDrawable(R.drawable.default_thumbnail);
         drawable.setBounds(0, 0, w, h);

@@ -546,7 +546,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
     @Override
     protected Dialog onCreateDialog(int id, Bundle args) {
         switch (id) {
-            case PDF_PROGRESS_DIALOG_ID:
+            case PDF_PROGRESS_DIALOG_ID: //导出pdf的进度条对话框
                 int max = args.getInt(DIALOG_ARG_MAX);
                 String message = args.getString(DIALOG_ARG_MESSAGE);
                 String title = args.getString(DIALOG_ARG_TITLE);
@@ -558,7 +558,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
                 pdfProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
                 pdfProgressDialog.setCancelable(false);
                 return pdfProgressDialog;
-            case DELETE_PROGRESS_DIALOG_ID:
+            case DELETE_PROGRESS_DIALOG_ID: //删除文档的进进度条对话框
                 max = args.getInt(DIALOG_ARG_MAX);
                 message = args.getString(DIALOG_ARG_MESSAGE);
                 deleteProgressDialog = new ProgressDialog(this);
@@ -568,7 +568,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
                 deleteProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
                 deleteProgressDialog.setCancelable(false);
                 return deleteProgressDialog;
-            case EDIT_TITLE_DIALOG_ID:
+            case EDIT_TITLE_DIALOG_ID: //修改文档名
                 View layout = getLayoutInflater().inflate(R.layout.edit_title_dialog, null);
                 final Uri documentUri = Uri.parse(args.getString(DIALOG_ARG_DOCUMENT_URI));
                 final String oldTitle = args.getString(DIALOG_ARG_TITLE);
@@ -578,20 +578,18 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
                 AlertDialog.Builder builder = new Builder(this);
                 builder.setView(layout);
                 builder.setTitle(R.string.edit_dialog_title);
-                builder.setIcon(R.drawable.fairy_showing);
+                //builder.setIcon(R.drawable.fairy_showing);
                 builder.setPositiveButton(android.R.string.ok, new OnClickListener() {
 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         final String title = edit.getText().toString();
                         saveTitle(title, documentUri);
-
                     }
                 });
                 builder.setNegativeButton(R.string.cancel, new OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
                     }
                 });
                 builder.show();
@@ -704,8 +702,9 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
         public void onNewPage(int pageNumber) {
             Bundle args = new Bundle(5);
 
-            String progressMsg = getResources().getString(R.string.progress_pfd_creation);
-            progressMsg = String.format(progressMsg, pageNumber, mCurrentPageCount, mCurrentDocumentName);
+            String progressMsg = getResources().getString(R.string.progress_pdf_creation);
+            //progressMsg = String.format(progressMsg, pageNumber, mCurrentPageCount, mCurrentDocumentName);
+            progressMsg = String.format(progressMsg, pageNumber, mCurrentPageCount);//hujiawei 不显示文档名称
 
             String title = getResources().getString(R.string.pdf_creation_message);
 

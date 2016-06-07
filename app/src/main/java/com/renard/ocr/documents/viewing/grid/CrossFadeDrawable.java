@@ -25,7 +25,9 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.SystemClock;
 
-
+/**
+ *
+ */
 public class CrossFadeDrawable extends Drawable {
 
 	private static final int TRANSITION_STARTING = 0;

@@ -21,61 +21,62 @@ import android.view.MotionEvent;
 import android.widget.GridView;
 
 /**
- * 对子元素实现了3d效果的GridView
- *
  * a gridview that applies 3d effects to its children
- * 
+ *
+ * 对子元素实现了3d效果的GridView
+ * <p>
+ * update
+ * 1.关闭动画
+ *
  * @author renard
- * 
  */
 public class FancyGridView extends GridView {
 
-	public FancyGridView(Context context, AttributeSet attrs) {
-		super(context, attrs);
-	}
+    public FancyGridView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
 
-	private CheckableGridElement mLastTouchedChild;
+    private CheckableGridElement mLastTouchedChild;
 
-	@Override
-	public boolean onTouchEvent(MotionEvent ev) {
-		final int action = ev.getAction();
-		final int x = (int) ev.getX();
-		final int y = (int) ev.getY();
-		final int motionPosition = pointToPosition(x, y);
-		CheckableGridElement touchedChild = null;
-		if (motionPosition >= 0) {
-			touchedChild = (CheckableGridElement) getChildAt(motionPosition - getFirstVisiblePosition());
-		}
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        final int action = ev.getAction();
+        final int x = (int) ev.getX();
+        final int y = (int) ev.getY();
 
-		switch (action & MotionEvent.ACTION_MASK) {
-		case MotionEvent.ACTION_DOWN: {
-			if (touchedChild != null) {
-				touchedChild.startTouchDownAnimation();
-				mLastTouchedChild = touchedChild;
-			} else {
-				mLastTouchedChild = null;
-			}
-			break;
-		}
-		case MotionEvent.ACTION_UP: {
-			if (mLastTouchedChild != null) {
-				mLastTouchedChild.startTouchUpAnimation();
-				mLastTouchedChild = null;
-			}
-			break;
-		}
-		case MotionEvent.ACTION_MOVE: {
+        final int motionPosition = pointToPosition(x, y);//根据触摸事件的point定位到具体的position,然后取出其中的子view
+        CheckableGridElement touchedChild = null;
+        if (motionPosition >= 0) {
+            touchedChild = (CheckableGridElement) getChildAt(motionPosition - getFirstVisiblePosition());
+        }
 
-			if (mLastTouchedChild != null && !mLastTouchedChild.equals(touchedChild)) {
-				mLastTouchedChild.startTouchUpAnimation();
+        switch (action & MotionEvent.ACTION_MASK) {
+            case MotionEvent.ACTION_DOWN: {
+                if (touchedChild != null) {
+                    //touchedChild.startTouchDownAnimation();
+                    mLastTouchedChild = touchedChild;
+                } else {
+                    mLastTouchedChild = null;
+                }
+                break;
+            }
+            case MotionEvent.ACTION_UP: {
+                if (mLastTouchedChild != null) {
+                    //mLastTouchedChild.startTouchUpAnimation();
+                    mLastTouchedChild = null;
+                }
+                break;
+            }
+            case MotionEvent.ACTION_MOVE: {
+                if (mLastTouchedChild != null && !mLastTouchedChild.equals(touchedChild)) {
+                    //mLastTouchedChild.startTouchUpAnimation();
+                }
+                mLastTouchedChild = touchedChild;
+                break;
+            }
+        }
 
-			}
-			mLastTouchedChild = touchedChild;
-			break;
-		}
-		}
-
-		return super.onTouchEvent(ev);
-	}
+        return super.onTouchEvent(ev);
+    }
 
 }

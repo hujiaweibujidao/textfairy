@@ -2,6 +2,7 @@
 <RelativeLayout
     android:id="@+id/fairy_overlay"
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#ff000000"
@@ -28,13 +29,16 @@
 
         <Button
             android:id="@+id/column_pick_completed"
-            style="@style/StartActivityButton"
+            android:theme="@style/ColoredButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="@string/button_column_pick_completed"
             android:textSize="18sp"
-            android:visibility="gone"/>
+            android:textColor="@android:color/white"
+            android:padding="4dp"
+            android:visibility="gone"
+            tools:visibility="visible"/>
     </LinearLayout>
 
 </RelativeLayout>

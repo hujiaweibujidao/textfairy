@@ -87,6 +87,8 @@ import de.greenrobot.event.EventBus;
  * update:
  * 1.去掉左侧的菜单栏
  * 2.修改界面布局,添加thu声明
+ * 3.删除了修改标题菜单项功能 -> 1.显示title有问题 2.修改title界面有异常
+ * 4.去掉grid选择状态下的动画
  *
  * @author renard
  */
@@ -197,24 +199,23 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
                     }
                 });
             }
-
         }
     }
 
     /**
      * 如果应用启动之后发现没有安装任何语言，这个时候就会去将assets目录下的tessdata.zip复制到sd卡中，并安装这些默认的语言包
-     *
+     * <p>
      * Start the InstallActivity if possible and needed.
      */
     private void startInstallActivityIfNeeded() {
         final List<OcrLanguage> installedOCRLanguages = OcrLanguageDataStore.getInstalledOCRLanguages(this);
         final String state = Environment.getExternalStorageState();
 
-        if (state.equals(Environment.MEDIA_MOUNTED)) {
+        if (state.equals(Environment.MEDIA_MOUNTED)) {//sd卡存在
             if (installedOCRLanguages.isEmpty()) {//只有在安装语言为空的时候才会去安装,以前不论安装了哪些语言都不再重新安装
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setClassName(this, com.renard.ocr.install.InstallActivity.class.getName());
-                startActivityForResult(intent, REQUEST_CODE_INSTALL);//进入安装语言包
+                startActivityForResult(intent, REQUEST_CODE_INSTALL);//进入安装语言包 for result
             }
         } else {
             AlertDialog.Builder alert = new AlertDialog.Builder(this);
@@ -323,61 +324,6 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        final DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                drawerLayout.openDrawer(GravityCompat.START);
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-
-    public static boolean isInSelectionMode() {
-        return sIsInSelectionMode;
-    }
-
-
-    @Override
-    protected Dialog onCreateDialog(int id, Bundle args) {
-        switch (id) {
-            case HINT_DIALOG_ID:
-                return HintDialog.createDialog(this, R.string.document_list_help_title, "file:///android_res/raw/document_list_help.html");
-        }
-        return super.onCreateDialog(id, args);
-    }
-
-    @Override
-    public void onCheckedChanged(Set<Integer> checkedIds) {
-        if (mActionMode == null && checkedIds.size() > 0) {
-            mActionMode = startSupportActionMode(new DocumentActionCallback());
-        } else if (mActionMode != null && checkedIds.size() == 0) {
-            mActionMode.finish();
-            mActionMode = null;
-        }
-
-        if (mActionMode != null) {
-            // change state of action mode depending on the selection
-            final MenuItem editItem = mActionMode.getMenu().findItem(R.id.item_edit_title);
-            final MenuItem joinItem = mActionMode.getMenu().findItem(R.id.item_join);
-            if (checkedIds.size() == 1) {
-                editItem.setVisible(true);
-                editItem.setEnabled(true);
-                joinItem.setVisible(false);
-                joinItem.setEnabled(false);
-            } else {
-                editItem.setVisible(false);
-                editItem.setEnabled(false);
-                joinItem.setVisible(true);
-                joinItem.setEnabled(true);
-            }
-        }
-    }
-
-
-    @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         Set<Integer> selection = mDocumentAdapter.getSelectedDocumentIds();
@@ -393,39 +339,206 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         mDocumentAdapter.setSelectedDocumentIds(selection);
     }
 
-    ///////////////// toread  //////////////////
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        final DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
+        switch (item.getItemId()) {
+            case android.R.id.home://hujiawei 不会发生了
+                drawerLayout.openDrawer(GravityCompat.START);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    public static boolean isInSelectionMode() {
+        return sIsInSelectionMode;
+    }
+
+    @Override
+    protected Dialog onCreateDialog(int id, Bundle args) {
+        switch (id) {
+            case HINT_DIALOG_ID:
+                return HintDialog.createDialog(this, R.string.document_list_help_title, "file:///android_res/raw/document_list_help.html");
+        }
+        return super.onCreateDialog(id, args);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mDocumentAdapter.getSelectedDocumentIds().size() > 0) {
+            cancelMultiSelectionMode();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    public boolean isPendingThumbnailUpdate() {
+        return mPendingThumbnailUpdate;
+    }
+
+    //更新文档的缩略图
+    private void updateDocumentThumbnails() {
+        mPendingThumbnailUpdate = false;
+
+        final GridView grid = mGridView;
+        final int count = grid.getChildCount();
+
+        for (int i = 0; i < count; i++) {
+            final View view = grid.getChildAt(i);
+            final DocumentGridAdapter.DocumentViewHolder holder = (DocumentGridAdapter.DocumentViewHolder) view.getTag();
+            if (holder.updateThumbnail) {
+                final int documentId = holder.documentId;
+                CrossFadeDrawable d = holder.transition;
+                FastBitmapDrawable thumb = Util.getDocumentThumbnail(documentId);
+                if (thumb.getBitmap() != null) {
+                    d.setEnd(thumb.getBitmap());
+                    holder.gridElement.setImage(d);
+                    d.startTransition(375);
+                }
+                holder.updateThumbnail = false;
+            }
+        }
+
+        grid.invalidate();
+    }
+
+    private void postDocumentThumbnails() {
+        Handler handler = mScrollHandler;
+        Message message = handler.obtainMessage(MESSAGE_UPDATE_THUMNAILS, DocumentGridActivity.this);
+        handler.removeMessages(MESSAGE_UPDATE_THUMNAILS);
+        mPendingThumbnailUpdate = true;
+        handler.sendMessage(message);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        EventBus.getDefault().unregister(this);
+        mBusIsRegistered = false;
+    }
+
+    @Override
+    public String getScreenName() {
+        return "Document Grid";
+    }
+
+    //初始化gridview
+    private void initGridView() {
+        mGridView = (GridView) findViewById(R.id.gridview);
+        mDocumentAdapter = new DocumentGridAdapter(this, R.layout.document_element, this);
+
+        registerForContextMenu(mGridView);//toread
+
+        mGridView.setAdapter(mDocumentAdapter);
+        mGridView.setLongClickable(true);
+        mGridView.setOnItemClickListener(new DocumentClickListener());
+        mGridView.setOnItemLongClickListener(new DocumentLongClickListener());
+        mGridView.setOnScrollListener(new DocumentScrollListener());
+        mGridView.setOnTouchListener(new FingerTracker());//
+
+        final int[] outNum = new int[1];
+        final int columnWidth = Util.determineThumbnailSize(this, outNum);
+        mGridView.setColumnWidth(columnWidth);//列宽
+        mGridView.setNumColumns(outNum[0]);//列数
+
+        final View emptyView = findViewById(R.id.empty_view);
+        mGridView.setEmptyView(emptyView);//将emptyview设置给gridview
+    }
+
+    /**
+     * ActionMode指的是当前用户交互的操作模式，这里是ActionMode的回调函数
+     * 当check状态发生变化的时候,这个actionCallback会被触发 <- onCheckedChanged
+     * 在onCreateActionMode中向menu添加操作菜单
+     * 在onActionItemClicked中处理菜单点击事件
+     */
+    private class DocumentActionCallback implements ActionMode.Callback {
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            int itemId = item.getItemId();
+            if (itemId == R.id.item_delete) {
+                new DeleteDocumentTask(mDocumentAdapter.getSelectedDocumentIds(), false).execute();
+                cancelMultiSelectionMode();
+                mode.finish();
+                return true;
+            } else if (itemId == R.id.item_export_as_pdf) {
+                new CreatePDFTask(mDocumentAdapter.getSelectedDocumentIds()).execute();
+                cancelMultiSelectionMode();
+                mode.finish();
+                return true;
+            } else if (itemId == R.id.item_join) {
+                joinDocuments(mDocumentAdapter.getSelectedDocumentIds());
+                cancelMultiSelectionMode();
+                mode.finish();
+                return true;
+            }
+//            else if (itemId == R.id.item_edit_title) {
+//                final Set<Integer> selectedDocs = mDocumentAdapter.getSelectedDocumentIds();
+//                final int documentId = selectedDocs.iterator().next();
+//                getSupportLoaderManager().initLoader(documentId, null, DocumentGridActivity.this);//
+//                return true;
+//            }
+            return true;
+        }
+
+
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            getMenuInflater().inflate(R.menu.grid_action_mode, menu);
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            if (mActionMode != null) {
+                mActionMode = null;
+                cancelMultiSelectionMode();
+            }
+            mActionMode = null;
+        }
+    }
+
+    /////////////////  gridview  //////////////////
+
+    //点击
     public class DocumentClickListener implements OnItemClickListener {
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             DocumentGridAdapter.DocumentViewHolder holder = (DocumentGridAdapter.DocumentViewHolder) view.getTag();
-            if (sIsInSelectionMode) {
+            if (sIsInSelectionMode) {//如果是在选择模式下,那么就是选中或者不选中操作;如果不是在选择模式下,那么点击就进入文档界面
                 holder.gridElement.toggle();
             } else {
-                Intent i = new Intent(DocumentGridActivity.this, DocumentActivity.class);
+                Intent intent = new Intent(DocumentGridActivity.this, DocumentActivity.class);
                 long documentId = mDocumentAdapter.getItemId(position);
                 Uri uri = Uri.withAppendedPath(DocumentContentProvider.CONTENT_URI, String.valueOf(documentId));
-                i.setData(uri);
-                startActivity(i);
+                intent.setData(uri);
+                startActivity(intent);
             }
         }
     }
 
+    //长按
     private class DocumentLongClickListener implements OnItemLongClickListener {
 
         @Override
         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
             CheckableGridElement clicked = (CheckableGridElement) view;
 
-            if (!sIsInSelectionMode) {
+            if (!sIsInSelectionMode) {//如果之前不是在选择模式,那么长按任何一个item都将进入选择模式
                 sIsInSelectionMode = true;
                 clicked.toggle();
                 final int childCount = parent.getChildCount();
                 for (int i = 0; i < childCount; i++) {
                     CheckableGridElement element = (CheckableGridElement) parent.getChildAt(i);
                     if (element != view) {
-                        element.setChecked(false);
+                        element.setChecked(false);//这种情况下,初次进入选择模式的时候要将所有其他的子view的选中状态设置为未选中
                     }
                 }
             } else {
@@ -439,6 +552,7 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         return mScrollState;
     }
 
+    //滑动gridview,处理缩略图更新
     private class DocumentScrollListener implements AbsListView.OnScrollListener {
         public void onScrollStateChanged(AbsListView view, int scrollState) {
             if (mScrollState == SCROLL_STATE_FLING && scrollState != SCROLL_STATE_FLING) {
@@ -484,141 +598,34 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         }
     }
 
+
+    //gridview中元素的选择状态发生变化的时候这个方法会被调用,选中的文档个数不同,对应的菜单选项不同
     @Override
-    public void onBackPressed() {
-        if (mDocumentAdapter.getSelectedDocumentIds().size() > 0) {
-            cancelMultiSelectionMode();
-        } else {
-            super.onBackPressed();
-
-        }
-    }
-
-    public boolean isPendingThumbnailUpdate() {
-        return mPendingThumbnailUpdate;
-    }
-
-    //更新文档的缩略图
-    private void updateDocumentThumbnails() {
-        mPendingThumbnailUpdate = false;
-
-        final GridView grid = mGridView;
-        final int count = grid.getChildCount();
-
-        for (int i = 0; i < count; i++) {
-            final View view = grid.getChildAt(i);
-            final DocumentGridAdapter.DocumentViewHolder holder = (DocumentGridAdapter.DocumentViewHolder) view.getTag();
-            if (holder.updateThumbnail) {
-                final int documentId = holder.documentId;
-                CrossFadeDrawable d = holder.transition;
-                FastBitmapDrawable thumb = Util.getDocumentThumbnail(documentId);
-                if (thumb.getBitmap() != null) {
-                    d.setEnd(thumb.getBitmap());
-                    holder.gridElement.setImage(d);
-                    d.startTransition(375);
-                }
-                holder.updateThumbnail = false;
-            }
-        }
-
-        grid.invalidate();
-    }
-
-    private void postDocumentThumbnails() {
-        Handler handler = mScrollHandler;
-        Message message = handler.obtainMessage(MESSAGE_UPDATE_THUMNAILS, DocumentGridActivity.this);
-        handler.removeMessages(MESSAGE_UPDATE_THUMNAILS);
-        mPendingThumbnailUpdate = true;
-        handler.sendMessage(message);
-    }
-
-
-    /**
-     * ActionMode指的是当前用户交互的操作模式，这里是ActionMode的回调函数
-     * 在onCreateActionMode中向menu添加操作菜单
-     * 在onActionItemClicked中处理菜单点击事件
-     */
-    private class DocumentActionCallback implements ActionMode.Callback {
-
-        @Override
-        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            int itemId = item.getItemId();
-            if (itemId == R.id.item_join) {
-                joinDocuments(mDocumentAdapter.getSelectedDocumentIds());
-                cancelMultiSelectionMode();
-                mode.finish();
-                return true;
-            } else if (itemId == R.id.item_edit_title) {
-                final Set<Integer> selectedDocs = mDocumentAdapter.getSelectedDocumentIds();
-                final int documentId = selectedDocs.iterator().next();
-                getSupportLoaderManager().initLoader(documentId, null, DocumentGridActivity.this);//toread
-                return true;
-            } else if (itemId == R.id.item_export_as_pdf) {
-                new CreatePDFTask(mDocumentAdapter.getSelectedDocumentIds()).execute();
-                cancelMultiSelectionMode();
-                mode.finish();
-                return true;
-            } else if (itemId == R.id.item_delete) {
-                new DeleteDocumentTask(mDocumentAdapter.getSelectedDocumentIds(), false).execute();
-                cancelMultiSelectionMode();
-                mode.finish();
-                return true;
-            }
-            return true;
-        }
-
-
-        @Override
-        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            getMenuInflater().inflate(R.menu.grid_action_mode, menu);
-            return true;
-        }
-
-        @Override
-        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-            return false;
-        }
-
-
-        @Override
-        public void onDestroyActionMode(ActionMode mode) {
-            if (mActionMode != null) {
-                mActionMode = null;
-                cancelMultiSelectionMode();
-            }
+    public void onCheckedChanged(Set<Integer> checkedIds) {
+        if (mActionMode == null && checkedIds.size() > 0) {
+            mActionMode = startSupportActionMode(new DocumentActionCallback());// AppCompatActivity.startSupportActionMode (ActionMode.Callback)
+        } else if (mActionMode != null && checkedIds.size() == 0) {//没有选中的了就退出actionMode
+            mActionMode.finish();
             mActionMode = null;
         }
-    }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        EventBus.getDefault().unregister(this);
-        mBusIsRegistered = false;
-    }
-
-    @Override
-    public String getScreenName() {
-        return "Document Grid";
-    }
-
-
-    private void initGridView() {
-        mGridView = (GridView) findViewById(R.id.gridview);
-        mDocumentAdapter = new DocumentGridAdapter(this, R.layout.document_element, this);
-        registerForContextMenu(mGridView);
-        mGridView.setAdapter(mDocumentAdapter);
-        mGridView.setLongClickable(true);
-        mGridView.setOnItemClickListener(new DocumentClickListener());
-        mGridView.setOnItemLongClickListener(new DocumentLongClickListener());
-        mGridView.setOnScrollListener(new DocumentScrollListener());
-        mGridView.setOnTouchListener(new FingerTracker());
-        final int[] outNum = new int[1];
-        final int columnWidth = Util.determineThumbnailSize(this, outNum);
-        mGridView.setColumnWidth(columnWidth);
-        mGridView.setNumColumns(outNum[0]);
-        final View emptyView = findViewById(R.id.empty_view);
-        mGridView.setEmptyView(emptyView);
+        //hujiawei 编辑title、合并文档等功能的显示或者不显示
+        if (mActionMode != null) {
+            // change state of action mode depending on the selection
+            //final MenuItem editItem = mActionMode.getMenu().findItem(R.id.item_edit_title);
+            final MenuItem joinItem = mActionMode.getMenu().findItem(R.id.item_join);
+            if (checkedIds.size() == 1) {
+                //editItem.setVisible(true);
+                //editItem.setEnabled(true);
+                joinItem.setVisible(false);
+                joinItem.setEnabled(false);
+            } else {
+                //editItem.setVisible(false);
+                //editItem.setEnabled(false);
+                joinItem.setVisible(true);
+                joinItem.setEnabled(true);
+            }
+        }
     }
 
     @Override
@@ -626,14 +633,15 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         return -1;
     }
 
+    //取消所有的选中项
     public void cancelMultiSelectionMode() {
-        mDocumentAdapter.getSelectedDocumentIds().clear();
+        mDocumentAdapter.clearAllSelection(); //.getSelectedDocumentIds().clear();
         sIsInSelectionMode = false;
         final int childCount = mGridView.getChildCount();
         for (int i = 0; i < childCount; i++) {
             final View v = mGridView.getChildAt(i);
             final DocumentGridAdapter.DocumentViewHolder holder = (DocumentGridAdapter.DocumentViewHolder) v.getTag();
-            holder.gridElement.setChecked(false);
+            holder.gridElement.setChecked(false);//
         }
     }
 
@@ -672,10 +680,12 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
     public void onLoaderReset(Loader<Cursor> arg0) {
     }
 
+    //合并文档
     private void joinDocuments(final Set<Integer> selectedDocs) {
         new JoinDocumentsTask(selectedDocs, getApplicationContext()).execute();
     }
 
+    //合并文档的任务
     protected class JoinDocumentsTask extends AsyncTask<Void, Integer, Integer> {
 
         private Set<Integer> mIds = new HashSet<Integer>();
@@ -706,7 +716,7 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
             StringBuilder builder = new StringBuilder();
             builder.append(" in (");
             for (@SuppressWarnings("unused")
-            Integer id : ids) {
+                    Integer id : ids) {
                 builder.append("?");
                 if (count < length - 1) {
                     builder.append(",");

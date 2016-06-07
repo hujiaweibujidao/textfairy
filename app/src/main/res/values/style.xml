@@ -3,6 +3,8 @@
 
     <style name="DocumentCaptionText">
         <item name="android:textSize">18sp</item>
+        <item name="android:textColor">#FFEFEFEF</item>
+        <item name="android:background">#aa000000</item>
     </style>
 
     <style name="TOCPageNumber">
