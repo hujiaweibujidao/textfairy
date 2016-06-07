@@ -22,6 +22,8 @@ import android.view.ViewConfiguration;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.ndk.CrashlyticsNdk;
+import com.joanzapata.iconify.Iconify;
+import com.joanzapata.iconify.fonts.FontAwesomeModule;
 import com.renard.ocr.analytics.Analytics;
 import com.renard.ocr.analytics.AnalyticsFactory;
 import com.renard.ocr.util.PreferencesUtils;
@@ -46,6 +48,8 @@ public class TextFairyApplication extends Application {
 
         enableStrictMode();
         alwaysShowOverflowButton();
+
+        Iconify.with(new FontAwesomeModule());
     }
 
     private void initTextPreferences() {
