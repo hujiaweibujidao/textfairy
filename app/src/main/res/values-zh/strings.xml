@@ -57,8 +57,8 @@
     <string name="progress_pdf_creation">正在创建PDF文件 %1$d/%2$d</string>
     <string name="join">合并</string>
     <string name="delete">删除</string>
-    <string name="item_check">☑</string>
-    <string name="item_uncheck">□</string>
+    <string name="item_check">{fa-check-square-o}</string>
+    <string name="item_uncheck">{fa-square-o}</string>
     <string name="edit_dialog_title">修改文档名</string>
     <string name="edit_title_hint">输入文档名</string>
     <string name="edit_title">修改文档名</string>

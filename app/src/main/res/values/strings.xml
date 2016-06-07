@@ -346,7 +346,7 @@
     </string>
     <string name="got_it">got it</string>
     <string name="installing">Installing languages...</string>
-    <string name="item_check">☑</string>
-    <string name="item_uncheck">□</string>
+    <string name="item_check">{fa-check-square-o}</string>
+    <string name="item_uncheck">{fa-square-o}</string>
     <string name="install_ok">Installation Success</string>
 </resources>
