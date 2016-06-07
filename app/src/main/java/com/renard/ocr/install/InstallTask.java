@@ -143,6 +143,7 @@ class InstallTask extends AsyncTask<Void, Integer, InstallResult> {
             ZipEntry entry = null;
             while ((entry = zipStream.getNextEntry()) != null) {
                 String filename = entry.getName();
+                if (filename.contains("OSX")) continue;//hujiawei 乱入的mac osx空文件夹
                 File file = new File(externalStorageDir, entry.getName());
                 if (entry.isDirectory()) {
                     file.mkdirs();

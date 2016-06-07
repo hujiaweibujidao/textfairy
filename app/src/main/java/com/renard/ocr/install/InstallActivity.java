@@ -172,7 +172,7 @@ public class InstallActivity extends MonitoredActivity implements TaskFragment.T
                 mButtonStartApp.setOnClickListener(onClickListener);
                 //mFairyContainer.setOnClickListener(onClickListener);
                 //mFairySpeechBubble.setVisibility(View.VISIBLE);
-                mFairyText.setText(R.string.start_app);
+                mFairyText.setText(R.string.install_ok);
                 break;
             case NOT_ENOUGH_DISK_SPACE:
                 String errorMsg = getString(R.string.install_error_disk_space);
