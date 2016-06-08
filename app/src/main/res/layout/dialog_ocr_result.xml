@@ -47,44 +47,6 @@
         android:background="@color/grey6"/>
 
     <Button
-        android:id="@+id/button_show_tips"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/default_padding"
-        android:background="@drawable/btn_start_activity2"
-        android:drawableLeft="@drawable/ic_action_tips_light"
-        android:drawablePadding="@dimen/default_padding"
-        android:gravity="left|center"
-        android:paddingLeft="@dimen/default_padding"
-        android:paddingRight="@dimen/default_padding"
-        android:text="@string/show_tips"/>
-
-    <View
-        android:id="@+id/divider2"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/grey6"/>
-
-    <Button
-        android:id="@+id/button_send_feedback"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/default_padding"
-        android:background="@drawable/btn_start_activity2"
-        android:drawableLeft="@drawable/ic_action_feedback"
-        android:drawablePadding="@dimen/default_padding"
-        android:gravity="left|center"
-        android:paddingLeft="@dimen/default_padding"
-        android:paddingRight="@dimen/default_padding"
-        android:text="@string/feedback_title"/>
-
-    <View
-        android:id="@+id/divider3"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/grey6"/>
-
-    <Button
         android:id="@+id/button_share_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

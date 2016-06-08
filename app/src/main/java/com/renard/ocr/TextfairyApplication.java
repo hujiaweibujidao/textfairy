@@ -33,6 +33,9 @@ import java.lang.reflect.Field;
 
 import io.fabric.sdk.android.Fabric;
 
+/**
+ * application
+ */
 public class TextFairyApplication extends Application {
 
     private static final String LOG_TAG = TextFairyApplication.class.getSimpleName();

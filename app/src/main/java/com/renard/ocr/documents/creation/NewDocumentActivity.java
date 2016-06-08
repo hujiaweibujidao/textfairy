@@ -47,7 +47,6 @@ import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
 import android.util.Pair;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
@@ -143,15 +142,110 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
         private final ImageSource mSource;
     }
 
-    protected abstract int getParentId();
-
     private ProgressDialog pdfProgressDialog;
     private ProgressDialog deleteProgressDialog;
     private CameraResult mCameraResult;
     private AsyncTask<Void, Void, ImageLoadAsyncTask.LoadResult> mBitmapLoadTask;
 
+    @TargetApi(11)
+    @Override
+    protected synchronized void onDestroy() {
+        super.onDestroy();
+        unRegisterImageLoadedReceiver();
+        //cancel loading of image if the activity is destroyed for good
+        if (android.os.Build.VERSION.SDK_INT >= 11 && !isChangingConfigurations() && mBitmapLoadTask != null) {
+            mBitmapLoadTask.cancel(false);
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle savedInstanceState) {
+        Log.i(LOG_TAG, "onSaveInstanceState" + this);
+        //remember to register the receiver again in #onRestoreInstanceState
+        savedInstanceState.putBoolean(STATE_RECEIVER_REGISTERED, mReceiverRegistered);
+        unRegisterImageLoadedReceiver();
+        //unregister receiver before onSaveInstanceState is called!
+        super.onSaveInstanceState(savedInstanceState);
+        if (dateCameraIntentStarted != null) {
+            savedInstanceState.putLong(DATE_CAMERA_INTENT_STARTED_STATE, dateCameraIntentStarted.getTime());
+        }
+        if (cameraPicUri != null) {
+            savedInstanceState.putString(CAMERA_PIC_URI_STATE, cameraPicUri.toString());
+        }
+        savedInstanceState.putInt(IMAGE_SOURCE, mImageSource.ordinal());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        Log.i(LOG_TAG, "onRestoreInstanceState " + this);
+        super.onRestoreInstanceState(savedInstanceState);
+
+        //如果出现了异常，需要把请求camera拍照的时间和对应图片的保存uri给保存起来
+        if (savedInstanceState.containsKey(DATE_CAMERA_INTENT_STARTED_STATE)) {
+            dateCameraIntentStarted = new Date(savedInstanceState.getLong(DATE_CAMERA_INTENT_STARTED_STATE));
+        }
+        if (savedInstanceState.containsKey(CAMERA_PIC_URI_STATE)) {
+            cameraPicUri = Uri.parse(savedInstanceState.getString(CAMERA_PIC_URI_STATE));
+        }
+        if (savedInstanceState.getBoolean(STATE_RECEIVER_REGISTERED)) {
+            registerImageLoaderReceiver();
+        }
+        final int index = savedInstanceState.getInt(IMAGE_SOURCE);
+        mImageSource = ImageSource.values()[index];
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int itemId = item.getItemId();
+        if (itemId == R.id.item_camera) {
+            checkRam(MemoryWarningDialog.DoAfter.START_CAMERA);
+            return true;
+        } else if (itemId == R.id.item_gallery) {
+            checkRam(MemoryWarningDialog.DoAfter.START_GALLERY);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        getMenuInflater().inflate(R.menu.base_document_activity_options, menu);//添加两个操作按钮 拍照 图库
+//        return true;
+//    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (RESULT_OK == resultCode) {//返回了成功
+            switch (requestCode) {
+                case REQUEST_CODE_CROP_PHOTO: {//图片裁剪成功，可以进入到ocr了
+                    long nativePix = data.getLongExtra(EXTRA_NATIVE_PIX, 0);
+                    startOcrActivity(nativePix, false);
+                    break;
+                }
+                case REQUEST_CODE_MAKE_PHOTO:
+                    mCameraResult = new CameraResult(requestCode, resultCode, data, ImageSource.CAMERA);
+                    break;
+                case REQUEST_CODE_PICK_PHOTO:
+                    mCameraResult = new CameraResult(requestCode, resultCode, data, ImageSource.PICK);
+                    break;
+            }
+        } else if (CropImageActivity.RESULT_NEW_IMAGE == resultCode) {//在裁剪图片的时候出现任何错误都会返回到这里重新获取图片
+            switch (mImageSource) {
+                case PICK:
+                    startGallery();
+                    break;
+                case INTENT:
+                    break;
+                case CAMERA:
+                    startCamera();
+                    break;
+            }
+        }
+    }
+
     //检查目前可用的ram，如果ram足够的话就进行相应的操作
-    private void checkRam(MemoryWarningDialog.DoAfter doAfter) {
+    protected void checkRam(MemoryWarningDialog.DoAfter doAfter) {
         long availableMegs = MemoryInfo.getFreeMemory(this);
         Log.i(LOG_TAG, "available ram = " + availableMegs);
         if (availableMegs < MemoryInfo.MINIMUM_RECOMMENDED_RAM) {//可用内存小于推荐最小值，弹出提示信息
@@ -167,19 +261,19 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
     protected void startGallery() {
         mAnalytics.startGallery();
         cameraPicUri = null;
-        Intent i;
+        Intent intent;
         if (Build.VERSION.SDK_INT >= 19) {//请求图库中的图片，设置一些参数
-            i = new Intent(Intent.ACTION_GET_CONTENT, null);
-            i.addCategory(Intent.CATEGORY_OPENABLE);
-            i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            i.setType("image/*");
-            i.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"image/png", "image/jpg", "image/jpeg"});
+            intent = new Intent(Intent.ACTION_GET_CONTENT, null);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.setType("image/*");
+            intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"image/png", "image/jpg", "image/jpeg"});
         } else {
-            i = new Intent(Intent.ACTION_GET_CONTENT, null);
-            i.setType("image/png,image/jpg, image/jpeg");
+            intent = new Intent(Intent.ACTION_GET_CONTENT, null);
+            intent.setType("image/png,image/jpg, image/jpeg");
         }
 
-        Intent chooser = Intent.createChooser(i, getString(R.string.image_source));//选择一种图片来源
+        Intent chooser = Intent.createChooser(intent, getString(R.string.image_source));//选择一种图片来源
         try {
             startActivityForResult(chooser, REQUEST_CODE_PICK_PHOTO);
         } catch (ActivityNotFoundException e) {
@@ -218,73 +312,6 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
         } catch (ActivityNotFoundException e) {
             showFileError(PixLoadStatus.CAMERA_APP_NOT_FOUND);
         }
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle savedInstanceState) {
-        Log.i(LOG_TAG, "onSaveInstanceState" + this);
-        //remember to register the receiver again in #onRestoreInstanceState
-        savedInstanceState.putBoolean(STATE_RECEIVER_REGISTERED, mReceiverRegistered);
-        unRegisterImageLoadedReceiver();
-        //unregister receiver before onSaveInstanceState is called!
-        super.onSaveInstanceState(savedInstanceState);
-        if (dateCameraIntentStarted != null) {
-            savedInstanceState.putLong(DATE_CAMERA_INTENT_STARTED_STATE, dateCameraIntentStarted.getTime());
-        }
-        if (cameraPicUri != null) {
-            savedInstanceState.putString(CAMERA_PIC_URI_STATE, cameraPicUri.toString());
-        }
-        savedInstanceState.putInt(IMAGE_SOURCE, mImageSource.ordinal());
-    }
-
-    @TargetApi(11)
-    @Override
-    protected synchronized void onDestroy() {
-        super.onDestroy();
-        unRegisterImageLoadedReceiver();
-        //cancel loading of image if the activity is destroyed for good
-        if (android.os.Build.VERSION.SDK_INT >= 11 && !isChangingConfigurations() && mBitmapLoadTask != null) {
-            mBitmapLoadTask.cancel(false);
-        }
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        Log.i(LOG_TAG, "onRestoreInstanceState " + this);
-        super.onRestoreInstanceState(savedInstanceState);
-
-        //如果出现了异常，需要把请求camera拍照的时间和对应图片的保存uri给保存起来
-        if (savedInstanceState.containsKey(DATE_CAMERA_INTENT_STARTED_STATE)) {
-            dateCameraIntentStarted = new Date(savedInstanceState.getLong(DATE_CAMERA_INTENT_STARTED_STATE));
-        }
-        if (savedInstanceState.containsKey(CAMERA_PIC_URI_STATE)) {
-            cameraPicUri = Uri.parse(savedInstanceState.getString(CAMERA_PIC_URI_STATE));
-        }
-        if (savedInstanceState.getBoolean(STATE_RECEIVER_REGISTERED)) {
-            registerImageLoaderReceiver();
-        }
-        final int index = savedInstanceState.getInt(IMAGE_SOURCE);
-        mImageSource = ImageSource.values()[index];
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int itemId = item.getItemId();
-        if (itemId == R.id.item_camera) {
-            checkRam(MemoryWarningDialog.DoAfter.START_CAMERA);
-            return true;
-        } else if (itemId == R.id.item_gallery) {
-            checkRam(MemoryWarningDialog.DoAfter.START_GALLERY);
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.base_document_activity_options, menu);//添加两个操作按钮 拍照 图库
-        return true;
     }
 
     //拍照结果返回，接下来就是根据cameraPicUri去加载图片数据了
@@ -383,36 +410,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
         }
     }
 
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (RESULT_OK == resultCode) {//返回了成功
-            switch (requestCode) {
-                case REQUEST_CODE_CROP_PHOTO: {//图片裁剪成功，可以进入到ocr了
-                    long nativePix = data.getLongExtra(EXTRA_NATIVE_PIX, 0);
-                    startOcrActivity(nativePix, false);
-                    break;
-                }
-                case REQUEST_CODE_MAKE_PHOTO:
-                    mCameraResult = new CameraResult(requestCode, resultCode, data, ImageSource.CAMERA);
-                    break;
-                case REQUEST_CODE_PICK_PHOTO:
-                    mCameraResult = new CameraResult(requestCode, resultCode, data, ImageSource.PICK);
-                    break;
-            }
-        } else if (CropImageActivity.RESULT_NEW_IMAGE == resultCode) {//在裁剪图片的时候出现任何错误都会返回到这里重新获取图片
-            switch (mImageSource) {
-                case PICK:
-                    startGallery();
-                    break;
-                case INTENT:
-                    break;
-                case CAMERA:
-                    startCamera();
-                    break;
-            }
-        }
-    }
+    protected abstract int getParentId();
 
     //启动ocr Activity去进行ocr操作
     void startOcrActivity(long nativePix, boolean accessibilityMode) {

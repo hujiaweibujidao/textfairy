@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/document_grid_background"
+    tools:context="com.renard.ocr.thu.MainActivity">
+
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/toolbar"/>
+
+    <ScrollView
+        android:id="@+id/main_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/toolbar"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:padding="@dimen/activity_horizontal_margin"
+            android:orientation="vertical">
+
+            <include
+                android:id="@+id/ocr_settings"
+                layout="@layout/thu_main_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <Button
+                android:id="@+id/start_camera"
+                style="@style/Base.TextAppearance.AppCompat.Medium"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="4dp"
+                android:layout_marginBottom="@dimen/default_padding"
+                android:layout_marginTop="@dimen/default_padding"
+                android:text="@string/option_camera_title"
+                android:textColor="@android:color/white"
+                android:theme="@style/ColoredButton"
+                android:visibility="visible"/>
+
+            <Button
+                android:id="@+id/start_gallary"
+                style="@style/Base.TextAppearance.AppCompat.Medium"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="4dp"
+                android:layout_marginBottom="@dimen/default_padding"
+                android:layout_marginTop="@dimen/default_padding"
+                android:text="@string/option_gallery_title"
+                android:textColor="@android:color/white"
+                android:theme="@style/ColoredButton"
+                android:visibility="visible"/>
+
+            <Button
+                android:id="@+id/start_batch"
+                style="@style/Base.TextAppearance.AppCompat.Medium"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="4dp"
+                android:layout_marginBottom="@dimen/default_padding"
+                android:layout_marginTop="@dimen/default_padding"
+                android:text="@string/option_batch"
+                android:textColor="@android:color/white"
+                android:theme="@style/ColoredButton"
+                android:visibility="visible"/>
+
+            <Button
+                android:id="@+id/document_grid"
+                style="@style/Base.TextAppearance.AppCompat.Medium"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="4dp"
+                android:layout_marginBottom="@dimen/default_padding"
+                android:layout_marginTop="@dimen/default_padding"
+                android:text="@string/history_ocr"
+                android:textColor="@android:color/white"
+                android:theme="@style/ColoredButton"
+                android:visibility="visible"/>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <TextView
+        android:id="@+id/thu_ocr"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="10dp"
+        android:layout_gravity="bottom"
+        android:gravity="center"
+        android:text="@string/thu_ocr"
+        android:textColor="@color/grey3"
+        android:textSize="14sp"/>
+
+</RelativeLayout>
+

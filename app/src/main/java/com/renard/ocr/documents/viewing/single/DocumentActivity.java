@@ -60,7 +60,7 @@ import java.util.Set;
  * 1.简化菜单选项,目前只保留了切换视图和创建PDF的功能选项
  *
  */
-public class DocumentActivity extends NewDocumentActivity implements LoaderManager.LoaderCallbacks<Cursor>, GetOpinionDialog.FeedbackDialogClickListener {
+public class DocumentActivity extends NewDocumentActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private final static String LOG_TAG = DocumentActivity.class.getSimpleName();
     public static final String OCR_RESULT_DIALOG = "Ocr Result Dialog";
@@ -75,13 +75,9 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
         String getTextOfCurrentlyShownDocument();
 
         int getDocumentCount();
-
         void setCursor(final Cursor cursor);
-
         String getTextOfAllDocuments();
-
         void setShowText(boolean text);
-
         boolean getShowText();
     }
 
@@ -106,7 +102,9 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
 
         setVolumeControlStream(AudioManager.STREAM_ALARM);//
         supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);//不确定的进度
+
         setContentView(R.layout.activity_document);
+
         if (!init(savedInstanceState)) {//初始化失败了
             finish();
             return;
@@ -120,16 +118,21 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
 
         setDocumentFragmentType();
         initToolbar();
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mActionCallback = new TtsActionCallback(this);
+    }
+
+    @Override
+    protected void initToolbar() {
+        super.initToolbar();
+        setToolbarMessage(R.string.label_document);//修改标题
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
     protected int getHintDialogId() {
         return HINT_DIALOG_ID;
     }
-
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -141,7 +144,6 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
         } else {
             mAnalytics.sendScreenView("Document");
         }
-
     }
 
     private boolean isStartedAfterAScan(Intent intent) {
@@ -180,24 +182,10 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
         new CreatePDFTask(idForPdf).execute();
     }
 
-
-    @Override
-    public void onContinueClicked() {
-        int accuracy = getIntent().getIntExtra(EXTRA_ACCURACY, 0);
-        final String languageOfDocument = getIntent().getStringExtra(EXTRA_LANGUAGE);
-        OCRResultDialog.newInstance(accuracy, languageOfDocument).show(getSupportFragmentManager(), OCRResultDialog.TAG);
-        mAnalytics.sendScreenView(OCR_RESULT_DIALOG);
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.document_activity_options, menu);
-
-        //去掉这两个菜单项
-        menu.removeItem(R.id.item_camera);
-        menu.removeItem(R.id.item_gallery);
-
         return true;
     }
 

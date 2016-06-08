@@ -16,7 +16,6 @@
 package com.renard.ocr.documents.viewing.grid;
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
@@ -27,19 +26,12 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.support.design.widget.NavigationView;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.view.ActionMode;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -52,7 +44,6 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.GridView;
 import android.widget.Toast;
 
-import com.renard.ocr.HintDialog;
 import com.renard.ocr.PermissionGrantedEvent;
 import com.renard.ocr.R;
 import com.renard.ocr.documents.creation.ImageSource;
@@ -60,21 +51,12 @@ import com.renard.ocr.documents.creation.NewDocumentActivity;
 import com.renard.ocr.documents.creation.PixLoadStatus;
 import com.renard.ocr.documents.viewing.DocumentContentProvider;
 import com.renard.ocr.documents.viewing.single.DocumentActivity;
-import com.renard.ocr.main_menu.AboutActivity;
-import com.renard.ocr.main_menu.FeedbackActivity;
-import com.renard.ocr.main_menu.ReleaseNoteDialog;
-import com.renard.ocr.main_menu.TipsActivity;
-import com.renard.ocr.main_menu.language.OCRLanguageActivity;
-import com.renard.ocr.main_menu.language.OcrLanguage;
-import com.renard.ocr.main_menu.language.OcrLanguageDataStore;
-import com.renard.ocr.util.PreferencesUtils;
 import com.renard.ocr.util.Util;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import de.greenrobot.event.EventBus;
@@ -103,7 +85,6 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
     private static final int MESSAGE_UPDATE_THUMNAILS = 1;
     private static final int DELAY_SHOW_THUMBNAILS = 550;
     private static final int JOIN_PROGRESS_DIALOG = 4;
-    private static final int REQUEST_CODE_INSTALL = 234;
     private static boolean sIsInSelectionMode = false;
     private static final String SAVE_STATE_KEY = "selection";
 
@@ -119,13 +100,18 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         setContentView(R.layout.activity_document_grid);
 
         initToolbar();
-        //initNavigationDrawer();//去掉左侧滑动菜单
         initGridView();
-        setupAddLanguageButton();
 
         if (savedInstanceState == null) {
             checkForImageIntent(getIntent());
         }
+    }
+
+    @Override
+    protected void initToolbar() {
+        super.initToolbar();
+        setToolbarMessage(R.string.label_document_grid);//修改标题
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
@@ -136,40 +122,20 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
             EventBus.getDefault().register(this);
             mBusIsRegistered = true;
         }
-        //声明需要访问texfee文件夹
+        //声明需要访问thuocr文件夹
         ensurePermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, R.string.permission_explanation);
     }
-
 
     @SuppressWarnings("unused")
     public void onEventMainThread(final PermissionGrantedEvent event) {
         Log.i(LOG_TAG, "Permission Granted");
-        startInstallActivityIfNeeded();
         initThumbnailSize();
-    }
-
-    @Override
-    protected int getHintDialogId() {
-        return HINT_DIALOG_ID;
     }
 
     //初始化缩略图的大小
     private void initThumbnailSize() {
         final int columnWidth = Util.determineThumbnailSize(this, null);
         Util.setThumbnailSize(columnWidth, columnWidth, this);
-    }
-
-    //处理下载语言包的按钮
-    private void setupAddLanguageButton() {
-        final View viewById = findViewById(R.id.install_language_button);
-        if (viewById != null) {
-            viewById.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    startActivity(new Intent(DocumentGridActivity.this, OCRLanguageActivity.class));
-                }
-            });
-        }
     }
 
     @Override
@@ -202,127 +168,6 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         }
     }
 
-    /**
-     * 如果应用启动之后发现没有安装任何语言，这个时候就会去将assets目录下的tessdata.zip复制到sd卡中，并安装这些默认的语言包
-     * <p>
-     * Start the InstallActivity if possible and needed.
-     */
-    private void startInstallActivityIfNeeded() {
-        final List<OcrLanguage> installedOCRLanguages = OcrLanguageDataStore.getInstalledOCRLanguages(this);
-        final String state = Environment.getExternalStorageState();
-
-        if (state.equals(Environment.MEDIA_MOUNTED)) {//sd卡存在
-            if (installedOCRLanguages.isEmpty()) {//只有在安装语言为空的时候才会去安装,以前不论安装了哪些语言都不再重新安装
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setClassName(this, com.renard.ocr.install.InstallActivity.class.getName());
-                startActivityForResult(intent, REQUEST_CODE_INSTALL);//进入安装语言包 for result
-            }
-        } else {
-            AlertDialog.Builder alert = new AlertDialog.Builder(this);
-            alert.setMessage(getString(R.string.no_sd_card));
-            alert.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    finish();
-                }
-            });
-            alert.show();
-        }
-    }
-
-    /**
-     * 初始化导航菜单栏
-     */
-    private void initNavigationDrawer() {
-        final DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        NavigationView view = (NavigationView) findViewById(R.id.left_drawer);
-        handleNavigationMenuSelection(drawerLayout, view);
-
-        ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, (Toolbar) findViewById(R.id.toolbar), R.string.drawer_open, R.string.drawer_close) {
-            public void onDrawerClosed(View view) {
-                super.onDrawerClosed(view);
-                invalidateOptionsMenu();
-                syncState();
-            }
-
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-                invalidateOptionsMenu();
-                syncState();
-            }
-        };
-        drawerLayout.setDrawerListener(actionBarDrawerToggle);
-
-        // Enable ActionBar app icon to behave as action to toggle nav drawer
-        getSupportActionBar().setHomeButtonEnabled(true);
-        actionBarDrawerToggle.syncState();
-        if (checkForFirstStart()) {
-            drawerLayout.openDrawer(GravityCompat.START);
-        }
-    }
-
-    /**
-     * 检查是否是第一次启动
-     */
-    private boolean checkForFirstStart() {
-        final boolean firstStart = PreferencesUtils.isFirstStart(getApplicationContext());
-        if (firstStart) {
-            PreferencesUtils.setFirstStart(getApplicationContext(), false);
-        }
-        return firstStart;
-    }
-
-    /**
-     * 处理导航菜单栏选择的操作
-     */
-    private void handleNavigationMenuSelection(final DrawerLayout drawerLayout, NavigationView view) {
-        view.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(MenuItem menuItem) {
-                drawerLayout.closeDrawers();
-                switch (menuItem.getItemId()) {
-                    case R.id.whats_new:
-                        FragmentManager supportFragmentManager = getSupportFragmentManager();
-                        new ReleaseNoteDialog().show(supportFragmentManager, ReleaseNoteDialog.TAG);
-                        break;
-                    case R.id.add_language:
-                        startActivity(new Intent(DocumentGridActivity.this, OCRLanguageActivity.class));
-                        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-                        break;
-                    case R.id.show_tips:
-                        startActivity(new Intent(DocumentGridActivity.this, TipsActivity.class));
-                        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-                        break;
-                    case R.id.feedback:
-                        startActivity(new Intent(DocumentGridActivity.this, FeedbackActivity.class));
-                        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-                        break;
-                    case R.id.about:
-                        startActivity(new Intent(DocumentGridActivity.this, AboutActivity.class));
-                        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-                        break;
-
-                }
-                return true;
-            }
-        });
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CODE_INSTALL) {
-            if (RESULT_OK == resultCode) {
-                // install successfull, show happy fairy or introduction text
-            } else {
-                finish();// install failed, quit immediately
-            }
-
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
-    }
-
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -339,28 +184,12 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         mDocumentAdapter.setSelectedDocumentIds(selection);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        final DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-
-        switch (item.getItemId()) {
-            case android.R.id.home://hujiawei 不会发生了
-                drawerLayout.openDrawer(GravityCompat.START);
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
     public static boolean isInSelectionMode() {
         return sIsInSelectionMode;
     }
 
     @Override
     protected Dialog onCreateDialog(int id, Bundle args) {
-        switch (id) {
-            case HINT_DIALOG_ID:
-                return HintDialog.createDialog(this, R.string.document_list_help_title, "file:///android_res/raw/document_list_help.html");
-        }
         return super.onCreateDialog(id, args);
     }
 
@@ -385,6 +214,27 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         return "Document Grid";
     }
 
+    @Override
+    protected int getParentId() {
+        return -1;
+    }
+
+    @Override
+    protected int getHintDialogId() {
+        return 0;
+    }
+
+    @Override
+    protected Dialog onCreateDialog(int id) {//配合着showDialog和dismissDialog方法一起使用
+        switch (id) {
+            case JOIN_PROGRESS_DIALOG:
+                ProgressDialog d = new ProgressDialog(this);
+                d.setTitle(R.string.join_documents_title);
+                d.setIndeterminate(true);
+                return d;
+        }
+        return super.onCreateDialog(id);
+    }
 
     /**
      * ActionMode指的是当前用户交互的操作模式，这里是ActionMode的回调函数
@@ -635,11 +485,6 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         }
     }
 
-    @Override
-    protected int getParentId() {
-        return -1;
-    }
-
     //取消所有的选中项
     public void cancelMultiSelectionMode() {
         mDocumentAdapter.clearAllSelection(); //.getSelectedDocumentIds().clear();
@@ -650,18 +495,6 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
             final DocumentGridAdapter.DocumentViewHolder holder = (DocumentGridAdapter.DocumentViewHolder) v.getTag();
             holder.gridElement.setChecked(false);//
         }
-    }
-
-    @Override
-    protected Dialog onCreateDialog(int id) {
-        switch (id) {
-            case JOIN_PROGRESS_DIALOG:
-                ProgressDialog d = new ProgressDialog(this);
-                d.setTitle(R.string.join_documents_title);
-                d.setIndeterminate(true);
-                return d;
-        }
-        return super.onCreateDialog(id);
     }
 
     @Override
@@ -687,7 +520,10 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
     public void onLoaderReset(Loader<Cursor> arg0) {
     }
 
-    //合并文档
+    ///////////////////////////////////////////////////////////////////////////
+    /////////////////////////  合并文档  /////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
+
     private void joinDocuments(final Set<Integer> selectedDocs) {
         new JoinDocumentsTask(selectedDocs, getApplicationContext()).execute();
     }
@@ -717,13 +553,13 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
             dismissDialog(JOIN_PROGRESS_DIALOG);
         }
 
+        //构建in表达式
         private String buidlInExpr(final Collection<Integer> ids) {
             final int length = ids.size();
             int count = 0;
             StringBuilder builder = new StringBuilder();
             builder.append(" in (");
-            for (@SuppressWarnings("unused")
-                    Integer id : ids) {
+            for (@SuppressWarnings("unused") Integer id : ids) {
                 builder.append("?");
                 if (count < length - 1) {
                     builder.append(",");
@@ -732,17 +568,16 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
             }
             builder.append(")");
             return builder.toString();
-
         }
 
         @Override
         protected Integer doInBackground(Void... params) {
             int count = 0;
-            final Integer parentId = Collections.min(mIds);
+            final Integer parentId = Collections.min(mIds);//找到id最小的那个
             final int documentCount = mIds.size();
             mIds.remove(parentId);
 
-            String[] selectionArgs = new String[mIds.size() * 2];
+            String[] selectionArgs = new String[mIds.size() * 2];//这些id重复两遍添加到selectionArgs中
             for (Integer id : mIds) {
                 selectionArgs[count++] = String.valueOf(id);
             }

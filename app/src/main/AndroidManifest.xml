@@ -32,22 +32,30 @@
             android:authorities="com.renard.ocr"
             android:exported="false"/>
 
-        <activity
-            android:name=".documents.viewing.grid.DocumentGridActivity"
-            android:hardwareAccelerated="false"
-            android:launchMode="singleTop">
+        <activity android:name=".thu.MainActivity"
+                  android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
+
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND"/>
+
                 <category android:name="android.intent.category.DEFAULT"/>
 
                 <data android:mimeType="image/jpeg"/>
                 <data android:mimeType="image/jpg"/>
                 <data android:mimeType="image/png"/>
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".documents.viewing.grid.DocumentGridActivity"
+            android:hardwareAccelerated="false"
+            android:launchMode="singleTop">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".thu.MainActivity"/>
         </activity>
         <activity
             android:name=".documents.creation.visualisation.OCRActivity"
@@ -62,22 +70,9 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".documents.viewing.grid.DocumentGridActivity"/>
         </activity>
-        <activity
-            android:name=".documents.viewing.single.TextSettingsActivity"/>
-        <activity
-            android:name=".main_menu.TipsActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".documents.viewing.grid.DocumentGridActivity"/>
-        </activity>
-        <activity
-            android:name=".main_menu.language.OCRLanguageActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".documents.viewing.grid.DocumentGridActivity"/>
-        </activity>
-        <activity
-            android:name=".documents.viewing.single.TableOfContentsActivity">
+        <activity android:name=".documents.viewing.single.TextSettingsActivity"/>
+
+        <activity android:name=".documents.viewing.single.TableOfContentsActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".documents.viewing.single.DocumentActivity"/>
@@ -89,50 +84,17 @@
             android:name=".documents.creation.crop.CropImageActivity"
             android:configChanges="orientation|keyboardHidden"/>
 
+        <activity android:name=".main_menu.language.OCRLanguageActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".documents.viewing.grid.DocumentGridActivity"/>
+        </activity>
         <service android:name=".main_menu.language.OCRLanguageInstallService"/>
-
         <receiver android:name=".main_menu.language.DownloadBroadCastReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.DOWNLOAD_COMPLETE"/>
             </intent-filter>
         </receiver>
-
-        <activity
-            android:name="com.renard.ocr.main_menu.ContactActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.renard.ocr.main_menu.AboutActivity"/>
-        </activity>
-        <activity
-            android:name="com.renard.ocr.main_menu.LicenseActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.renard.ocr.main_menu.AboutActivity"/>
-        </activity>
-        <activity
-            android:name=".main_menu.FeedbackActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".documents.viewing.grid.DocumentGridActivity"/>
-        </activity>
-        <activity
-            android:name="com.renard.ocr.main_menu.BetaTestActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".main_menu.FeedbackActivity"/>
-        </activity>
-        <activity
-            android:name="com.renard.ocr.main_menu.AboutActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".documents.viewing.grid.DocumentGridActivity"/>
-        </activity>
-        <activity
-            android:name="com.renard.ocr.main_menu.PrivacyPolicyActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".main_menu.AboutActivity"/>
-        </activity>
 
         <meta-data
             android:name="io.fabric.ApiKey"

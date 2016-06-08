@@ -2,19 +2,11 @@ package com.renard.ocr.documents.viewing.single;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.ActivityNotFoundException;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.googlecode.tesseract.android.OCR;
 import com.renard.ocr.R;
-import com.renard.ocr.main_menu.ContactActivity;
-import com.renard.ocr.main_menu.TipsActivity;
-
-import java.io.File;
 
 /**
  * 显示OCR处理结果的对话框
@@ -102,22 +94,6 @@ public class OCRResultDialog extends TopDialogFragment implements View.OnClickLi
             return;
         }
         switch (v.getId()) {
-            case R.id.button_send_feedback:
-                getAnalytics().ocrResultSendFeedback();
-                File lastOriginalImage = OCR.getLastOriginalImageFromCache(getActivity());
-                final String language = getArguments().getString(EXTRA_LANGUAGE);
-                String body = activity.getString(R.string.document_scanned_as, language);
-                Intent intent = ContactActivity.getFeedbackIntent(getActivity(), getString(R.string.feedback_subject), lastOriginalImage, body);
-                try {
-                    startActivity(intent);
-                } catch (ActivityNotFoundException notFound) {
-                    Toast.makeText(getContext(), R.string.no_mail_app, Toast.LENGTH_LONG).show();
-                }
-                break;
-            case R.id.button_show_tips:
-                getAnalytics().ocrResultShowTips();
-                startActivity(new Intent(activity, TipsActivity.class));
-                break;
             case R.id.button_copy_to_clipboard:
                 getAnalytics().ocrResultCopyToClipboard();
                 activity.copyTextToClipboard();

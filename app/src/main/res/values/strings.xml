@@ -349,4 +349,10 @@
     <string name="item_check">{fa-check-square-o}</string>
     <string name="item_uncheck">{fa-square-o}</string>
     <string name="install_ok">Installation Success</string>
+    <string name="empty_document_grid">No documents</string>
+    <string name="label_document_grid">Document Managment</string>
+    <string name="label_document">Document Content</string>
+    <string name="thu_ocr">Tsinghua University</string>
+    <string name="option_batch">Batch OCR</string>
+    <string name="history_ocr">History Managment</string>
 </resources>
