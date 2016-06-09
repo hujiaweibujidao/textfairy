@@ -1,0 +1,39 @@
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/document_grid_background"
+    tools:context="imagepicker.ui.PickerActivity"
+    tools:ignore="MergeRootFrame">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/toolbar"/>
+
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_below="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    </RelativeLayout>
+
+    <!--app:layout_behavior="@string/appbar_scrolling_view_behavior"-->
+
+    <com.melnykov.fab.FloatingActionButton
+        android:id="@+id/fab_done"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|bottom"
+        android:layout_margin="@dimen/fab_margin"
+        android:clickable="true"
+        android:onClick="onClickDone"
+        android:src="@drawable/ic_action_done_white"/>
+
+</android.support.design.widget.CoordinatorLayout>

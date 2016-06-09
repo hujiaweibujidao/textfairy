@@ -30,7 +30,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
-import com.renard.ocr.MonitoredActivity;
+import com.renard.ocr.base.MonitoredActivity;
 import com.renard.ocr.R;
 import com.renard.ocr.documents.viewing.single.DocumentActivity.DocumentContainerFragment;
 import com.renard.ocr.util.PreferencesUtils;

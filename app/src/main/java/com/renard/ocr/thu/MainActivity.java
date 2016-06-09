@@ -9,26 +9,28 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
-import com.renard.ocr.PermissionGrantedEvent;
 import com.renard.ocr.R;
+import com.renard.ocr.base.PermissionGrantedEvent;
 import com.renard.ocr.documents.creation.ImageSource;
 import com.renard.ocr.documents.creation.MemoryWarningDialog;
 import com.renard.ocr.documents.creation.NewDocumentActivity;
 import com.renard.ocr.documents.creation.PixLoadStatus;
 import com.renard.ocr.documents.viewing.grid.DocumentGridActivity;
-import com.renard.ocr.main_menu.language.OcrLanguage;
-import com.renard.ocr.main_menu.language.OcrLanguageDataStore;
+import com.renard.ocr.language.OcrLanguage;
+import com.renard.ocr.language.OcrLanguageDataStore;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
+import imagepicker.model.ImageEntry;
+import imagepicker.util.Picker;
 
 /**
  * 应用首页,控制中心,核心功能入口
  */
-public class MainActivity extends NewDocumentActivity {
+public class MainActivity extends NewDocumentActivity implements Picker.PickListener{
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
@@ -39,7 +41,7 @@ public class MainActivity extends NewDocumentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.thu_activity_main);
 
         initToolbar();
         if (savedInstanceState == null) {
@@ -61,10 +63,17 @@ public class MainActivity extends NewDocumentActivity {
         findViewById(R.id.start_batch).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "暂无", Toast.LENGTH_SHORT).show();
+//                startActivity(new Intent(MainActivity.this, MIPActivity.class));
+
+                new Picker.Builder(MainActivity.this, MainActivity.this, R.style.AppBaseTheme)
+                        .setPickMode(Picker.PickMode.MULTIPLE_IMAGES)
+                        .setBackBtnInMainActivity(true)
+                        .disableCaptureImageFromCamera()
+                        .build()
+                        .startActivity();
+
             }
         });
-
         findViewById(R.id.document_grid).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -187,4 +196,13 @@ public class MainActivity extends NewDocumentActivity {
         mBusIsRegistered = false;
     }
 
+    @Override
+    public void onPickedSuccessfully(ArrayList<ImageEntry> images) {
+
+    }
+
+    @Override
+    public void onCancel() {
+
+    }
 }

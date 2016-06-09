@@ -10,9 +10,10 @@ import android.support.v4.app.DialogFragment;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
+
 import com.renard.ocr.R;
-import com.renard.ocr.main_menu.language.OcrLanguage;
-import com.renard.ocr.main_menu.language.OCRLanguageAdapter;
+import com.renard.ocr.language.OCRLanguageAdapter;
+import com.renard.ocr.language.OcrLanguage;
 
 import java.util.ArrayList;
 

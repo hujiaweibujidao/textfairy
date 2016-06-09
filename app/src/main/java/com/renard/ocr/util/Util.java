@@ -40,7 +40,7 @@ import android.util.Log;
 
 import com.googlecode.leptonica.android.Pix;
 import com.googlecode.leptonica.android.WriteFile;
-import com.renard.ocr.MonitoredActivity;
+import com.renard.ocr.base.MonitoredActivity;
 import com.renard.ocr.R;
 import com.renard.ocr.documents.viewing.grid.FastBitmapDrawable;
 
@@ -52,6 +52,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+/**
+ * 工具类
+ */
 public class Util {
 
     public final static String EXTERNAL_APP_DIRECTORY = "thuocr";//一些存放在sd卡上的文件夹目录 textfee

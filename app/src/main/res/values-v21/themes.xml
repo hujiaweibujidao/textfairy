@@ -7,9 +7,9 @@
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowBackground">@null</item>
         <item name="android:windowNoTitle">true</item>
-        <item name="android:colorPrimary">@color/primary</item>
+        <item name="android:colorPrimary">@color/colorPrimary</item>
         <item name="android:colorPrimaryDark">@android:color/black</item>
-        <item name="android:colorAccent">@color/accent</item>
+        <item name="android:colorAccent">@color/colorAccent</item>
         <item name="android:colorControlHighlight">@color/colorControlHighlight</item>
         <item name="android:actionModeStyle">@style/ActionMode</item>
     </style>

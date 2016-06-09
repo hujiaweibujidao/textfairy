@@ -36,9 +36,9 @@ import android.widget.Toast;
 
 import com.googlecode.leptonica.android.Pix;
 import com.googlecode.leptonica.android.Pixa;
-import com.googlecode.tesseract.android.OCR;
-import com.renard.ocr.MonitoredActivity;
-import com.renard.ocr.PermissionGrantedEvent;
+import com.renard.ocr.util.OCR;
+import com.renard.ocr.base.MonitoredActivity;
+import com.renard.ocr.base.PermissionGrantedEvent;
 import com.renard.ocr.R;
 import com.renard.ocr.documents.creation.visualisation.LayoutQuestionDialog.LayoutChoseListener;
 import com.renard.ocr.documents.creation.visualisation.LayoutQuestionDialog.LayoutKind;

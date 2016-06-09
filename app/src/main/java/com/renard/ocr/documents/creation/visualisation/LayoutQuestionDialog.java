@@ -36,11 +36,11 @@ import android.widget.Spinner;
 import android.widget.ViewFlipper;
 import android.widget.ViewSwitcher;
 
-import com.renard.ocr.MonitoredActivity;
 import com.renard.ocr.R;
 import com.renard.ocr.analytics.Analytics;
-import com.renard.ocr.main_menu.language.OcrLanguage;
-import com.renard.ocr.main_menu.language.OcrLanguageDataStore;
+import com.renard.ocr.base.MonitoredActivity;
+import com.renard.ocr.language.OcrLanguage;
+import com.renard.ocr.language.OcrLanguageDataStore;
 import com.renard.ocr.util.PreferencesUtils;
 
 import java.util.List;

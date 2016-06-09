@@ -2,9 +2,9 @@ package com.renard.ocr.analytics;
 
 import android.util.Log;
 
-import com.renard.ocr.cropimage.image_processing.BlurDetectionResult;
+import com.renard.ocr.documents.creation.crop.BlurDetectionResult;
 import com.renard.ocr.documents.creation.visualisation.LayoutQuestionDialog;
-import com.renard.ocr.main_menu.language.OcrLanguage;
+import com.renard.ocr.language.OcrLanguage;
 
 /**
  * 记录使用者的操作日志分析

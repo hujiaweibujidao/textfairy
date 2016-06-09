@@ -33,7 +33,7 @@
             android:gravity="center"
             android:text="@string/install_ok"
             android:textSize="18sp"
-            android:textColor="@color/accent"/>
+            android:textColor="@color/colorAccent"/>
 
     </RelativeLayout>
 

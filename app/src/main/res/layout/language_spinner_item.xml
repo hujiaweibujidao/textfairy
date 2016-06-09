@@ -4,7 +4,7 @@
           android:singleLine="true"
           android:textSize="18sp"
           android:gravity="center_horizontal|start"
-          android:textColor="@color/accent"
+          android:textColor="@color/colorAccent"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:ellipsize="end"

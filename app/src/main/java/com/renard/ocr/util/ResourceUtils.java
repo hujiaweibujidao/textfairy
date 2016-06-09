@@ -19,6 +19,7 @@ import java.util.Map;
  */
 public class ResourceUtils {
 
+    //获取hashmap资源
     public static Map<String, String> getHashMapResource(Context c, int hashMapResId) {
         Map<String, String> map = null;
         XmlResourceParser parser = c.getResources().getXml(hashMapResId);

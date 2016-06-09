@@ -56,9 +56,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
-import com.renard.ocr.MonitoredActivity;
+import com.renard.ocr.base.MonitoredActivity;
 import com.renard.ocr.R;
-import com.renard.ocr.TextFairyApplication;
+import com.renard.ocr.base.TextFairyApplication;
 import com.renard.ocr.documents.creation.crop.CropImageActivity;
 import com.renard.ocr.documents.creation.visualisation.OCRActivity;
 import com.renard.ocr.documents.viewing.DocumentContentProvider;

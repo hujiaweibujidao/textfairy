@@ -1,22 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <style name="ToolbarTheme" parent="AppBaseTheme">
+        <item name="android:textColorSecondary">@android:color/white</item>
+        <item name="android:actionModeStyle">@style/ActionMode</item>
+        <item name="actionModeStyle">@style/ActionMode</item>
+    </style>
+
+    <style name="ActionMode" parent="Widget.AppCompat.ActionMode">
+        <item name="android:background">@color/colorAccent</item>
+        <item name="background">@color/colorAccent</item>
+    </style>
+
+    <style name="ColoredButton" parent="Base.Widget.AppCompat.Button">
+        <item name="colorButtonNormal">@color/colorAccent</item>
+    </style>
+
+    <!--用于图片多选的界面-->
+    <style name="MIP_theme" parent="AppBaseTheme">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
     <style name="DocumentCaptionText">
         <item name="android:textSize">18sp</item>
         <item name="android:textColor">#FFEFEFEF</item>
         <item name="android:background">#aa000000</item>
-    </style>
-
-    <style name="TOCPageNumber">
-        <item name="android:textSize">21sp</item>
-    </style>
-
-    <style name="TOCCaptionText">
-        <item name="android:textSize">18sp</item>
-    </style>
-
-    <style name="TOCDateText">
-        <item name="android:textSize">15sp</item>
     </style>
 
     <style name="DocumentDateText">
@@ -30,6 +39,18 @@
 
     <style name="PageNumberText">
         <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="TOCPageNumber">
+        <item name="android:textSize">21sp</item>
+    </style>
+
+    <style name="TOCCaptionText">
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="TOCDateText">
+        <item name="android:textSize">15sp</item>
     </style>
 
     <style name="OptionsText">
@@ -86,7 +107,6 @@
         <item name="android:layout_margin">4dp</item>
     </style>
 
-
     <style name="DialogSlideAnim" parent="@android:style/Theme.Holo.Light.Dialog">
         <item name="android:windowFrame">@null</item>
         <item name="android:windowBackground">@android:color/transparent</item>
@@ -133,21 +153,6 @@
     </style>
     <style name="ocr_tip_style_cross" parent="ocr_tip_style">
         <item name="android:drawableLeft">@drawable/cross</item>
-    </style>
-
-    <style name="ToolbarTheme" parent="AppBaseTheme">
-        <item name="android:textColorSecondary">@android:color/white</item>
-        <item name="android:actionModeStyle">@style/ActionMode</item>
-        <item name="actionModeStyle">@style/ActionMode</item>
-    </style>
-
-    <style name="ActionMode" parent="Widget.AppCompat.ActionMode">
-        <item name="android:background">@color/accent</item>
-        <item name="background">@color/accent</item>
-    </style>
-
-    <style name="ColoredButton" parent="Base.Widget.AppCompat.Button">
-        <item name="colorButtonNormal">@color/accent</item>
     </style>
 
 </resources>

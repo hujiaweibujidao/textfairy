@@ -45,14 +45,14 @@ class InstallTask extends AsyncTask<Void, Integer, InstallResult> {
     private final AssetManager mAssetManager;
     private long mBytesInstalled; // bytes Installed
     private long mBytesToInstallTotal; // total Install size in bytes
-    private TaskFragment.TaskCallbacks mCallbacks;
+    private InstallTaskFragment.TaskCallbacks mCallbacks;
 
-    InstallTask(TaskFragment.TaskCallbacks callbacks, AssetManager assetManager) {
+    InstallTask(InstallTaskFragment.TaskCallbacks callbacks, AssetManager assetManager) {
         mCallbacks = callbacks;
         mAssetManager = assetManager;
     }
 
-    public void setTaskCallbacks(TaskFragment.TaskCallbacks callbacks) {
+    public void setTaskCallbacks(InstallTaskFragment.TaskCallbacks callbacks) {
         mCallbacks = callbacks;
     }
 

@@ -43,7 +43,7 @@
         android:layout_marginTop="?android:attr/actionBarSize"
         android:background="@android:color/white"
         app:itemBackground="?android:attr/selectableItemBackground"
-        app:itemTextColor="@color/primary"
+        app:itemTextColor="@color/colorPrimary"
         app:menu="@menu/navigation_drawer"
         app:theme="@style/ThemeOverlay.AppCompat.Light"/>
 

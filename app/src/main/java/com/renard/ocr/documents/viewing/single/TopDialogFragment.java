@@ -8,7 +8,7 @@ import android.view.Gravity;
 import android.view.Window;
 import android.view.WindowManager;
 
-import com.renard.ocr.MonitoredActivity;
+import com.renard.ocr.base.MonitoredActivity;
 import com.renard.ocr.analytics.Analytics;
 
 /**

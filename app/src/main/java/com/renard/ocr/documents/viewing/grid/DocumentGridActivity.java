@@ -44,7 +44,7 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.GridView;
 import android.widget.Toast;
 
-import com.renard.ocr.PermissionGrantedEvent;
+import com.renard.ocr.base.PermissionGrantedEvent;
 import com.renard.ocr.R;
 import com.renard.ocr.documents.creation.ImageSource;
 import com.renard.ocr.documents.creation.NewDocumentActivity;

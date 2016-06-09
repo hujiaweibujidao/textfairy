@@ -1,11 +1,5 @@
 package com.renard.ocr.documents.viewing.single;
 
-import com.renard.ocr.analytics.Analytics;
-import com.renard.ocr.MonitoredActivity;
-import com.renard.ocr.R;
-import com.renard.ocr.main_menu.language.OcrLanguage;
-import com.renard.ocr.util.ResourceUtils;
-
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -19,6 +13,12 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
+
+import com.renard.ocr.R;
+import com.renard.ocr.analytics.Analytics;
+import com.renard.ocr.base.MonitoredActivity;
+import com.renard.ocr.language.OcrLanguage;
+import com.renard.ocr.util.ResourceUtils;
 
 import java.util.HashMap;
 import java.util.Locale;

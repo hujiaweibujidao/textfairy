@@ -81,11 +81,21 @@
     <string name="empty_document_grid">没有文档</string>
     <string name="close_app">退出应用</string>
     <string name="label_document_grid">文档管理</string>
-    <string name="language_downloaded"></string>
     <string name="label_document">文档内容</string>
     <string name="option_camera_title">拍照获取图片</string>
     <string name="option_gallery_title">从图库选择图片</string>
     <string name="thu_ocr">清华大学电子系图文信息处理实验室</string>
     <string name="option_batch">批量处理图片</string>
     <string name="history_ocr">处理记录管理</string>
+
+    <!--mip-->
+    <string name="action_deselect_all">全不选</string>
+    <string name="action_select_all">全选</string>
+    <string name="albums_title">相册</string>
+    <string name="album_thumbnail">相册缩略图</string>
+    <string name="all_photos">所有照片</string>
+    <string name="image_thumbnail">图片缩略图</string>
+    <string name="you_cant_check_more_images">不能再选了</string>
+    <string name="image_check">选中图片</string>
+
 </resources>

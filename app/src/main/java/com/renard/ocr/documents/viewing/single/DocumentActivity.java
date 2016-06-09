@@ -42,12 +42,12 @@ import android.view.MenuItem;
 import android.view.Window;
 import android.widget.Toast;
 
-import com.renard.ocr.HintDialog;
 import com.renard.ocr.R;
+import com.renard.ocr.base.HintDialog;
 import com.renard.ocr.documents.creation.NewDocumentActivity;
 import com.renard.ocr.documents.viewing.DocumentContentProvider;
 import com.renard.ocr.documents.viewing.DocumentContentProvider.Columns;
-import com.renard.ocr.main_menu.language.OcrLanguage;
+import com.renard.ocr.language.OcrLanguage;
 import com.renard.ocr.util.PreferencesUtils;
 
 import java.util.HashSet;
@@ -157,14 +157,14 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
         mAnalytics.sendOcrResult(language, accuracy);
 
         int numberOfSuccessfulScans = PreferencesUtils.getNumberOfSuccessfulScans(getApplicationContext());
-        if (accuracy >= OCRResultDialog.MEDIUM_ACCURACY) {//大于83%以上就算是成功的扫描结果
+        if (accuracy >= 0.83) {//大于83%以上就算是成功的扫描结果
             PreferencesUtils.setNumberOfSuccessfulScans(getApplicationContext(), ++numberOfSuccessfulScans);
         }
 
-        if (accuracy > -1) {//显示OCR处理结果的对话框
-            OCRResultDialog.newInstance(accuracy, language).show(getSupportFragmentManager(), OCRResultDialog.TAG);
-            mAnalytics.sendScreenView(OCR_RESULT_DIALOG);
-        }
+//        if (accuracy > -1) {//显示OCR处理结果的对话框
+//            OCRResultDialog.newInstance(accuracy, language).show(getSupportFragmentManager(), OCRResultDialog.TAG);
+//            mAnalytics.sendScreenView(OCR_RESULT_DIALOG);
+//        }
 
 //        if (numberOfSuccessfulScans == 2) {//成功了两次的话弹出用户使用意见对话框 -> 去掉不显示
 //            GetOpinionDialog.newInstance(language).show(getSupportFragmentManager(), GetOpinionDialog.TAG);

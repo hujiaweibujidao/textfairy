@@ -18,8 +18,8 @@ package com.renard.ocr.documents.viewing.single;
 
 import com.renard.ocr.documents.viewing.DocumentContentProvider;
 import com.renard.ocr.documents.viewing.DocumentContentProvider.Columns;
-import com.renard.ocr.HintDialog;
-import com.renard.ocr.MonitoredActivity;
+import com.renard.ocr.base.HintDialog;
+import com.renard.ocr.base.MonitoredActivity;
 import com.renard.ocr.R;
 import com.renard.ocr.documents.viewing.single.SimpleDocumentAdapter.DocumentViewHolder;
 import com.renard.ocr.documents.viewing.single.SimpleDocumentAdapter.ViewBinder;

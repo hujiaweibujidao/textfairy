@@ -9,7 +9,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <application
-        android:name=".TextFairyApplication"
+        android:name=".base.TextFairyApplication"
         android:allowBackup="true"
         android:hardwareAccelerated="true"
         android:hasCode="true"
@@ -32,8 +32,9 @@
             android:authorities="com.renard.ocr"
             android:exported="false"/>
 
-        <activity android:name=".thu.MainActivity"
-                  android:launchMode="singleTop">
+        <activity
+            android:name=".thu.MainActivity"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -71,7 +72,6 @@
                 android:value=".documents.viewing.grid.DocumentGridActivity"/>
         </activity>
         <activity android:name=".documents.viewing.single.TextSettingsActivity"/>
-
         <activity android:name=".documents.viewing.single.TableOfContentsActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -83,23 +83,38 @@
         <activity
             android:name=".documents.creation.crop.CropImageActivity"
             android:configChanges="orientation|keyboardHidden"/>
-
-        <activity android:name=".main_menu.language.OCRLanguageActivity">
+        <activity android:name=".language.OCRLanguageActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".documents.viewing.grid.DocumentGridActivity"/>
         </activity>
-        <service android:name=".main_menu.language.OCRLanguageInstallService"/>
-        <receiver android:name=".main_menu.language.DownloadBroadCastReceiver">
+
+        <service android:name=".language.OCRLanguageInstallService"/>
+
+        <receiver android:name=".language.DownloadBroadCastReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.DOWNLOAD_COMPLETE"/>
             </intent-filter>
         </receiver>
 
+        <activity
+            android:name=".thu.MIPActivity"
+            android:label="@string/title_activity_mip"
+            android:theme="@style/MIP_theme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.renard.ocr.thu.MainActivity"/>
+        </activity>
+
+        <!--mip-->
+        <activity android:name="imagepicker.ui.PickerActivity"/>
+        <service
+            android:name="imagepicker.util.OfflineSpiceService"
+            android:exported="false"/>
+
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="ef8b77a0fd2ef3e87c78497b9595a9234fe5b711"/>
-
     </application>
 
 </manifest>

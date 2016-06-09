@@ -25,8 +25,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.renard.ocr.MonitoredActivity;
-import com.renard.ocr.PermissionGrantedEvent;
+import com.renard.ocr.base.MonitoredActivity;
+import com.renard.ocr.base.PermissionGrantedEvent;
 import com.renard.ocr.R;
 
 import butterknife.Bind;
@@ -42,7 +42,7 @@ import de.greenrobot.event.EventBus;
  * 2.删除多余的功能
  * 3.简化安装过程的动画
  */
-public class InstallActivity extends MonitoredActivity implements TaskFragment.TaskCallbacks {
+public class InstallActivity extends MonitoredActivity implements InstallTaskFragment.TaskCallbacks {
 
     private static final String TAG_TASK_FRAGMENT = "task_fragment";
     @SuppressWarnings("unused")
@@ -70,7 +70,7 @@ public class InstallActivity extends MonitoredActivity implements TaskFragment.T
 //    @Bind(R.id.promo)
 //    protected View mYoutube;
 
-    private TaskFragment mTaskFragment;
+    private InstallTaskFragment mInstallTaskFragment;
     private AnimationDrawable mFairyAnimation;
 
     @Override
@@ -88,14 +88,14 @@ public class InstallActivity extends MonitoredActivity implements TaskFragment.T
 
         mFairyAnimation = (AnimationDrawable) mImageViewFairy.getDrawable();
         FragmentManager fm = getSupportFragmentManager();
-        mTaskFragment = (TaskFragment) fm.findFragmentByTag(TAG_TASK_FRAGMENT);
+        mInstallTaskFragment = (InstallTaskFragment) fm.findFragmentByTag(TAG_TASK_FRAGMENT);
 
         // If the Fragment is non-null, then it is currently being retained across a configuration change.
-        if (mTaskFragment == null) {
+        if (mInstallTaskFragment == null) {
             Log.i(LOG_TAG, "ensuring permission for: " + this);
             ensurePermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, R.string.permission_explanation_install);
         } else {
-            InstallResult result = mTaskFragment.getInstallResult();
+            InstallResult result = mInstallTaskFragment.getInstallResult();
             if (result != null) {
                 markAsDone(result);
             } else {
@@ -109,9 +109,9 @@ public class InstallActivity extends MonitoredActivity implements TaskFragment.T
     public void onEventMainThread(final PermissionGrantedEvent event) {
         Log.i(LOG_TAG, "PermissionGrantedEvent : " + this);
         EventBus.getDefault().unregister(this);//对应前面的ensurePermission
-        mTaskFragment = new TaskFragment();
+        mInstallTaskFragment = new InstallTaskFragment();
         final FragmentManager supportFragmentManager = getSupportFragmentManager();
-        supportFragmentManager.beginTransaction().add(mTaskFragment, TAG_TASK_FRAGMENT).commitAllowingStateLoss();
+        supportFragmentManager.beginTransaction().add(mInstallTaskFragment, TAG_TASK_FRAGMENT).commitAllowingStateLoss();
     }
 
 

@@ -17,7 +17,7 @@
 package com.renard.ocr.documents.viewing.single;
 
 import com.renard.ocr.R;
-import com.renard.ocr.MonitoredActivity;
+import com.renard.ocr.base.MonitoredActivity;
 import com.renard.ocr.util.PreferencesUtils;
 
 import android.content.SharedPreferences;

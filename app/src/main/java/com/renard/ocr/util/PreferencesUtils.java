@@ -23,7 +23,7 @@ import android.view.Gravity;
 import android.widget.TextView;
 
 import com.renard.ocr.R;
-import com.renard.ocr.main_menu.language.OcrLanguage;
+import com.renard.ocr.language.OcrLanguage;
 
 public class PreferencesUtils {
 

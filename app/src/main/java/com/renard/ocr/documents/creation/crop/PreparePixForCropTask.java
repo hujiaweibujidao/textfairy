@@ -6,8 +6,6 @@ import android.util.Log;
 
 import com.googlecode.leptonica.android.Pix;
 import com.googlecode.leptonica.android.WriteFile;
-import com.renard.ocr.cropimage.image_processing.Blur;
-import com.renard.ocr.cropimage.image_processing.BlurDetectionResult;
 
 import de.greenrobot.event.EventBus;
 

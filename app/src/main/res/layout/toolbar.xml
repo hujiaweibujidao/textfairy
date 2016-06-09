@@ -8,7 +8,7 @@
     android:layout_gravity="top"
     android:background="@drawable/toolbar_background"
     android:theme="@style/ToolbarTheme"
-    tools:showIn="@layout/activity_document_grid">
+    tools:showIn="@layout/thu_activity_main">
 
     <RelativeLayout
         android:layout_width="match_parent"
