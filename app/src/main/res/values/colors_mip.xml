@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <drawable name="transparent">@android:color/transparent</drawable>
-
-    <color name="alter_primary">#424242</color>
-    <color name="alter_primary_dark">#212121</color>
 
     <color name="alter_unchecked_image_background">@android:color/transparent</color>
-    <color name="alter_checked_image_background">#009e8c</color>
     <!--dd2fdfff-->
 
     <color name="alter_image_check_color">#b457585b</color>
@@ -18,7 +13,6 @@
     <color name="alter_album_name_text_color">#fcffff</color>
 
     <color name="alter_album_images_count_text_color">#a5a49f</color>
-    <color name="alter_checked_image_overlay">#a97f7f7f</color>
 
     <color name="alter_video_thumbnail_overlay">#9b9b9b</color>
 

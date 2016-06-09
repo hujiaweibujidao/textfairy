@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
-    android:id="@+id/fairy_overlay"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -24,7 +23,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="@dimen/default_padding_half"
+
         android:background="@color/start_activity_buttons_background">
 
         <Button
@@ -32,6 +31,7 @@
             android:theme="@style/ColoredButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/default_padding"
             android:gravity="center"
             android:text="@string/button_column_pick_completed"
             android:textSize="18sp"

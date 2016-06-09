@@ -30,7 +30,7 @@ import imagepicker.util.Picker;
 /**
  * 应用首页,控制中心,核心功能入口
  */
-public class MainActivity extends NewDocumentActivity implements Picker.PickListener{
+public class MainActivity extends NewDocumentActivity implements Picker.PickListener {
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
@@ -63,8 +63,6 @@ public class MainActivity extends NewDocumentActivity implements Picker.PickList
         findViewById(R.id.start_batch).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                startActivity(new Intent(MainActivity.this, MIPActivity.class));
-
                 new Picker.Builder(MainActivity.this, MainActivity.this, R.style.AppBaseTheme)
                         .setPickMode(Picker.PickMode.MULTIPLE_IMAGES)
                         .setBackBtnInMainActivity(true)
@@ -100,7 +98,6 @@ public class MainActivity extends NewDocumentActivity implements Picker.PickList
         //声明需要访问thuocr文件夹
         ensurePermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, R.string.permission_explanation);
     }
-
 
     @SuppressWarnings("unused")
     public void onEventMainThread(final PermissionGrantedEvent event) {
@@ -140,7 +137,7 @@ public class MainActivity extends NewDocumentActivity implements Picker.PickList
 
     /**
      * 如果应用启动之后发现没有安装任何语言，这个时候就会去将assets目录下的tessdata.zip复制到sd卡中，并安装这些默认的语言包
-     * <p>
+     * <p/>
      * Start the InstallActivity if possible and needed.
      */
     private void startInstallActivityIfNeeded() {
@@ -178,7 +175,6 @@ public class MainActivity extends NewDocumentActivity implements Picker.PickList
         }
     }
 
-
     @Override
     protected void onPause() {
         super.onPause();
@@ -188,6 +184,10 @@ public class MainActivity extends NewDocumentActivity implements Picker.PickList
 
     @Override
     public void onPickedSuccessfully(ArrayList<ImageEntry> images) {
+
+        for (ImageEntry image : images) {
+            Log.i(LOG_TAG, image.toString());
+        }
 
     }
 

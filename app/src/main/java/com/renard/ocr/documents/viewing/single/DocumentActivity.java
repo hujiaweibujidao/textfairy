@@ -47,7 +47,6 @@ import com.renard.ocr.base.HintDialog;
 import com.renard.ocr.documents.creation.NewDocumentActivity;
 import com.renard.ocr.documents.viewing.DocumentContentProvider;
 import com.renard.ocr.documents.viewing.DocumentContentProvider.Columns;
-import com.renard.ocr.language.OcrLanguage;
 import com.renard.ocr.util.PreferencesUtils;
 
 import java.util.HashSet;
@@ -89,7 +88,7 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
 
     private int mParentId;
     private Cursor mCursor;
-    private TtsActionCallback mActionCallback;
+    //private TtsActionCallback mActionCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,7 +113,7 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
         setDocumentFragmentType();
         initToolbar();
 
-        mActionCallback = new TtsActionCallback(this);
+        //mActionCallback = new TtsActionCallback(this);
     }
 
     @Override
@@ -198,7 +197,12 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
             mAnalytics.optionsCreatePdf();
             exportAsPdf();
             return true;
+        }else if (itemId == R.id.item_share_text) {
+            mAnalytics.optionsShareText();
+            shareText();
+            return true;
         }
+
 //        else if (itemId == R.id.item_text_options) {
 //            Intent i = new Intent(this, TextSettingsActivity.class);
 //            startActivityForResult(i, REQUEST_CODE_OPTIONS);
@@ -228,6 +232,7 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
 //            shareText();
 //            return true;
 //        }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -252,10 +257,9 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
         builder.show();
     }
 
-
-    void startTextToSpeech() {
-        startSupportActionMode(mActionCallback);
-    }
+//    void startTextToSpeech() {
+//        startSupportActionMode(mActionCallback);
+//    }
 
 
     void copyTextToClipboard() {
@@ -319,23 +323,23 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
         clipboard.setText(text);
     }
 
-    public void onTtsLanguageChosen(OcrLanguage lang) {
-        mActionCallback.onTtsLanguageChosen(lang);
-    }
-
-    public void onTtsCancelled() {
-        mActionCallback.onTtsCancelled();
-    }
-
-    public boolean isTtsLanguageAvailable(OcrLanguage lang) {
-        return mActionCallback.isLanguageAvailable(lang);
-    }
+//    public void onTtsLanguageChosen(OcrLanguage lang) {
+//        mActionCallback.onTtsLanguageChosen(lang);
+//    }
+//
+//    public void onTtsCancelled() {
+//        mActionCallback.onTtsCancelled();
+//    }
+//
+//    public boolean isTtsLanguageAvailable(OcrLanguage lang) {
+//        return mActionCallback.isLanguageAvailable(lang);
+//    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_TTS_CHECK) {
-            mActionCallback.onTtsCheck(resultCode);
+            //mActionCallback.onTtsCheck(resultCode);
         } else if (requestCode == REQUEST_CODE_OPTIONS) {
             Fragment frag = getSupportFragmentManager().findFragmentById(R.id.document_fragment_container);
             if (frag instanceof DocumentPagerFragment) {
@@ -345,11 +349,11 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
         } else if (resultCode == RESULT_OK) {
             switch (requestCode) {
                 case REQUEST_CODE_TABLE_OF_CONTENTS:
-                    int documentPos = data.getIntExtra(TableOfContentsActivity.EXTRA_DOCUMENT_POS, -1);
-                    DocumentContainerFragment fragment = getDocumentContainer();
-                    if (fragment != null) {
-                        ((DocumentPagerFragment) fragment).setDisplayedPage(documentPos);
-                    }
+//                    int documentPos = data.getIntExtra(TableOfContentsActivity.EXTRA_DOCUMENT_POS, -1);
+//                    DocumentContainerFragment fragment = getDocumentContainer();
+//                    if (fragment != null) {
+//                        ((DocumentPagerFragment) fragment).setDisplayedPage(documentPos);
+//                    }
                     break;
             }
         }

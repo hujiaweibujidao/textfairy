@@ -47,7 +47,6 @@ import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
 import android.util.Pair;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
@@ -56,8 +55,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
-import com.renard.ocr.base.MonitoredActivity;
 import com.renard.ocr.R;
+import com.renard.ocr.base.MonitoredActivity;
 import com.renard.ocr.base.TextFairyApplication;
 import com.renard.ocr.documents.creation.crop.CropImageActivity;
 import com.renard.ocr.documents.creation.visualisation.OCRActivity;
@@ -195,26 +194,6 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int itemId = item.getItemId();
-        if (itemId == R.id.item_camera) {
-            checkRam(MemoryWarningDialog.DoAfter.START_CAMERA);
-            return true;
-        } else if (itemId == R.id.item_gallery) {
-            checkRam(MemoryWarningDialog.DoAfter.START_GALLERY);
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        getMenuInflater().inflate(R.menu.base_document_activity_options, menu);//添加两个操作按钮 拍照 图库
-//        return true;
-//    }
-
-    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (RESULT_OK == resultCode) {//返回了成功
             switch (requestCode) {
@@ -281,7 +260,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
         }
     }
 
-    //启动摄像头
+    //启动相机
     protected void startCamera() {
         mAnalytics.startCamera();
         try {
@@ -410,7 +389,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
         }
     }
 
-    protected abstract int getParentId();
+    protected abstract int getParentId();//toread 抽象方法
 
     //启动ocr Activity去进行ocr操作
     void startOcrActivity(long nativePix, boolean accessibilityMode) {
@@ -731,12 +710,10 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
             dismissDialog(PDF_PROGRESS_DIALOG_ID);
             if (files != null && files.first.size() > 0) {
                 if (files.first.size() > 1) {
-                    //we have more than one pdf file
-                    //share by sending them
+                    //we have more than one pdf file share by sending them
                     sharePDFBySending(files);
                 } else {
-                    // single pdf file
-                    // share by opening pdf viewer
+                    // single pdf file share by opening pdf viewer
                     Intent target = new Intent(Intent.ACTION_VIEW);
                     target.setDataAndType(files.first.get(0), "application/pdf");
                     target.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);

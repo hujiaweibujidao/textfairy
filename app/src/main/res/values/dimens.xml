@@ -4,7 +4,6 @@
     <dimen name="crop_handle_edge_radius">5dp</dimen>
     <dimen name="crop_edge_width">3dp</dimen>
     <dimen name="crop_hit_hysteresis">40dp</dimen>
-    <dimen name="button_height">42dp</dimen>
     <dimen name="crop_margin">24dp</dimen>
 
     <!-- Default screen margins, per the Android Design guidelines. -->
@@ -12,12 +11,10 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="default_padding">8dp</dimen>
     <dimen name="default_padding_half">4dp</dimen>
-    <dimen name="two_line_item_margin">4dp</dimen>
 
     <dimen name="min_grid_size">20mm</dimen>
     <dimen name="default_element_padding">16dp</dimen>
     <!--<dimen name="grid_spacing">9dip</dimen>-->
-    <dimen name="google_play_icon_padding">33dp</dimen>
     <dimen name="caption_text_size">16sp</dimen>
 
     <dimen name="dropshadow_padding_left">5px</dimen>
@@ -26,11 +23,9 @@
     <dimen name="dropshadow_padding_bottom">9px</dimen>
 
     <!--mip-->
-    <dimen name="album_height">180dp</dimen>
 
     <dimen name="image_spacing">2dp</dimen>
     <dimen name="image_checked_padding">4dp</dimen>
-    <dimen name="album_spacing">2dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="grid_spacing">2dp</dimen>
     <dimen name="grid_title_height">42dp</dimen>

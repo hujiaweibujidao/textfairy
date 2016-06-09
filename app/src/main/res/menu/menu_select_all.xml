@@ -5,6 +5,5 @@
     <item
         android:id="@+id/action_select_all"
         android:title="@string/action_select_all"
-        android:icon="@android:drawable/ic_menu_save"
         app:showAsAction="always"/>
 </menu>

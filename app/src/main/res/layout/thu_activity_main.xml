@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
@@ -12,90 +11,169 @@
         android:id="@+id/toolbar"
         layout="@layout/toolbar"/>
 
-    <ScrollView
-        android:id="@+id/main_content"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/toolbar"
-        android:scrollbars="none">
+        android:layout_above="@+id/main_actions"
+        android:padding="@dimen/default_padding"
+        android:orientation="vertical">
 
-        <LinearLayout
+        <!--<ImageView-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="center"-->
+            <!--android:padding="20dp"-->
+            <!--android:src="@drawable/warte1"/>-->
+
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:padding="@dimen/activity_horizontal_margin"
-            android:orientation="vertical">
+            android:gravity="left"
+            android:padding="@dimen/default_padding_half"
+            android:text="@string/default_language"
+            android:textColor="@color/grey3"
+            android:textSize="14sp"/>
 
-            <include
-                android:id="@+id/ocr_settings"
-                layout="@layout/thu_main_layout"
+        <RadioGroup
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-            <Button
-                android:id="@+id/start_camera"
-                style="@style/Base.TextAppearance.AppCompat.Medium"
-                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="4dp"
-                android:layout_marginBottom="@dimen/default_padding"
-                android:layout_marginTop="@dimen/default_padding"
-                android:text="@string/option_camera_title"
-                android:textColor="@android:color/white"
-                android:theme="@style/ColoredButton"
-                android:visibility="visible"/>
+                android:padding="@dimen/default_padding_half"
+                android:text="@string/language_chinese_simple"/>
 
-            <Button
-                android:id="@+id/start_gallary"
-                style="@style/Base.TextAppearance.AppCompat.Medium"
-                android:layout_width="match_parent"
+            <RadioButton
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="4dp"
-                android:layout_marginBottom="@dimen/default_padding"
-                android:layout_marginTop="@dimen/default_padding"
-                android:text="@string/option_gallery_title"
-                android:textColor="@android:color/white"
-                android:theme="@style/ColoredButton"
-                android:visibility="visible"/>
+                android:padding="@dimen/default_padding_half"
+                android:text="@string/language_chinese_tradition"/>
 
-            <Button
-                android:id="@+id/start_batch"
-                style="@style/Base.TextAppearance.AppCompat.Medium"
-                android:layout_width="match_parent"
+            <RadioButton
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="4dp"
-                android:layout_marginBottom="@dimen/default_padding"
-                android:layout_marginTop="@dimen/default_padding"
-                android:text="@string/option_batch"
-                android:textColor="@android:color/white"
-                android:theme="@style/ColoredButton"
-                android:visibility="visible"/>
+                android:padding="@dimen/default_padding_half"
+                android:text="@string/language_english"/>
 
-            <Button
-                android:id="@+id/document_grid"
-                style="@style/Base.TextAppearance.AppCompat.Medium"
-                android:layout_width="match_parent"
+        </RadioGroup>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:text="@string/default_layout"
+            android:textColor="@color/grey3"
+            android:textSize="14sp"/>
+
+        <RadioGroup
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:dividerPadding="@dimen/default_padding_half"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="4dp"
-                android:layout_marginBottom="@dimen/default_padding"
-                android:layout_marginTop="@dimen/default_padding"
-                android:text="@string/history_ocr"
-                android:textColor="@android:color/white"
-                android:theme="@style/ColoredButton"
-                android:visibility="visible"/>
+                android:padding="@dimen/default_padding_half"
+                android:text="@string/layout_complex"/>
 
-        </LinearLayout>
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/default_padding_half"
+                android:text="@string/layout_simple"/>
 
-    </ScrollView>
+        </RadioGroup>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:padding="@dimen/default_padding_half"
+            android:text="@string/settings_others"
+            android:textColor="@color/grey3"
+            android:textSize="14sp"/>
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/auto_analyse_layout"
+            android:checked="true"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/main_actions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/main_thu"
+        android:padding="@dimen/default_padding"
+        android:gravity="bottom"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/start_camera"
+            style="@style/Base.TextAppearance.AppCompat.Medium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/default_padding"
+            android:padding="@dimen/default_padding"
+            android:text="@string/option_camera_title"
+            android:textColor="@android:color/white"
+            android:theme="@style/ColoredButton"
+            android:visibility="visible"
+            tools:visiblity="visible"/>
+
+        <Button
+            android:id="@+id/start_gallary"
+            style="@style/Base.TextAppearance.AppCompat.Medium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/default_padding"
+            android:padding="@dimen/default_padding"
+            android:text="@string/option_gallery_title"
+            android:textColor="@android:color/white"
+            android:theme="@style/ColoredButton"
+            android:visibility="visible"
+            tools:visiblity="visible"/>
+
+        <Button
+            android:id="@+id/start_batch"
+            style="@style/Base.TextAppearance.AppCompat.Medium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/default_padding"
+            android:padding="@dimen/default_padding"
+            android:text="@string/option_batch"
+            android:textColor="@android:color/white"
+            android:theme="@style/ColoredButton"
+            android:visibility="visible"/>
+
+        <Button
+            android:id="@+id/document_grid"
+            style="@style/Base.TextAppearance.AppCompat.Medium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/default_padding"
+            android:padding="@dimen/default_padding"
+            android:text="@string/history_ocr"
+            android:textColor="@android:color/white"
+            android:theme="@style/ColoredButton"
+            android:visibility="visible"/>
+
+    </LinearLayout>
 
     <TextView
-        android:id="@+id/thu_ocr"
+        android:id="@+id/main_thu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="10dp"
-        android:layout_gravity="bottom"
         android:gravity="center"
+        android:padding="@dimen/default_padding"
         android:text="@string/thu_ocr"
         android:textColor="@color/grey3"
         android:textSize="14sp"/>

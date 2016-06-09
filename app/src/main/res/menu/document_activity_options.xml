@@ -7,12 +7,18 @@
         android:title="@string/option_view_mode"
         app:showAsAction="ifRoom">
     </item>
+
+    <item
+        android:id="@+id/item_share_text"
+        android:icon="@android:drawable/ic_menu_share"
+        android:title="@string/share_text"
+        app:showAsAction="ifRoom">
+    </item>
+
     <item
         android:id="@+id/item_export_as_pdf"
         android:icon="@drawable/ic_action_pdf_dark"
         android:title="@string/export_as_pdf"
         app:showAsAction="ifRoom">
     </item>
-
-    <!--android:icon="@drawable/ic_action_pdf"-->
 </menu>

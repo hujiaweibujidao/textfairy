@@ -71,6 +71,7 @@ import de.greenrobot.event.EventBus;
  * 2.修改界面布局,添加thu声明
  * 3.删除了修改标题菜单项功能 -> 1.显示title有问题 2.修改title界面有异常
  * 4.去掉grid选择状态下的动画
+ * 5.选择模式下的菜单简化，如果只选中了一个文档，那么只有删除操作，多个文档有删除和合并的操作
  *
  * @author renard
  */
@@ -242,17 +243,18 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
                 cancelMultiSelectionMode();
                 mode.finish();
                 return true;
-            } else if (itemId == R.id.item_export_as_pdf) {
-                new CreatePDFTask(mDocumentAdapter.getSelectedDocumentIds()).execute();
-                cancelMultiSelectionMode();
-                mode.finish();
-                return true;
             } else if (itemId == R.id.item_join) {
                 joinDocuments(mDocumentAdapter.getSelectedDocumentIds());
                 cancelMultiSelectionMode();
                 mode.finish();
                 return true;
             }
+//            else if (itemId == R.id.item_export_as_pdf) {
+//                new CreatePDFTask(mDocumentAdapter.getSelectedDocumentIds()).execute();
+//                cancelMultiSelectionMode();
+//                mode.finish();
+//                return true;
+//            }
 //            else if (itemId == R.id.item_edit_title) {
 //                final Set<Integer> selectedDocs = mDocumentAdapter.getSelectedDocumentIds();
 //                final int documentId = selectedDocs.iterator().next();
@@ -454,23 +456,13 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         //hujiawei 编辑title、合并文档等功能的显示或者不显示
         if (mActionMode != null) {
             // change state of action mode depending on the selection
-            //final MenuItem editItem = mActionMode.getMenu().findItem(R.id.item_edit_title);
             final MenuItem joinItem = mActionMode.getMenu().findItem(R.id.item_join);
-            final MenuItem pdfItem = mActionMode.getMenu().findItem(R.id.item_export_as_pdf);
             if (checkedIds.size() == 1) {//一个文档的时候可以导出pdf,多个文档的时候可以合并文档
-                //editItem.setVisible(true);
-                //editItem.setEnabled(true);
                 joinItem.setVisible(false);
                 joinItem.setEnabled(false);
-                pdfItem.setVisible(true);
-                pdfItem.setEnabled(true);
             } else {
-                //editItem.setVisible(false);
-                //editItem.setEnabled(false);
                 joinItem.setVisible(true);
                 joinItem.setEnabled(true);
-                pdfItem.setVisible(false);
-                pdfItem.setEnabled(false);
             }
         }
     }

@@ -1,15 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="greeting">THU OCR</string>
     <string name="installing">正在安装语言包...</string>
     <string name="install_error_disk_space">安装失败:没有足够的空间</string>
     <string name="install_error">安装失败:无法安装配置文件</string>
     <string name="app_name">THU OCR</string>
-    <string name="empty_grid_camera">点击这里通过拍照获取图片并进行OCR处理</string>
-    <string name="empty_grid_fairy">清华大学电子系图文信息处理实验室</string>
-    <string name="empty_grid_gallery">点击这里从图库中选择图片并进行OCR处理</string>
-    <string name="empty_grid_language">本应用支持中文简体、中文繁体和英文三种语言的文本识别</string>
-    <string name="start_app">开始体验</string>
+    <string name="start_app">开始使用</string>
     <string name="no_sd_card">未检测到SD卡!</string>
     <string name="image_source">请选择图片来源</string>
     <string name="no_gallery_found">本机未发现任何图库!</string>
@@ -29,18 +24,15 @@
     <string name="permission_explanation">请求读写SD卡的权限</string>
     <string name="permission_explanation_title">缺失权限</string>
     <string name="button_column_pick_completed">开始进行文本识别</string>
-    <string name="document_layout_dialog">共有多少列?</string>
+    <string name="document_layout_dialog">选择布局</string>
     <string name="default_ocr_language">chi_sim</string>
     <string name="default_ocr_display_language">Chinese (Simplified)</string>
     <string name="text_is_in">选择语言</string>
     <string name="cancel">取消</string>
     <string name="start_scan">开始</string>
-    <string name="layout_simple">只有一列</string>
-    <string name="layout_complex">不止一列</string>
+    <string name="layout_simple">简单布局(只有一列)</string>
+    <string name="layout_complex">复杂布局(不止一列)</string>
     <string name="progress_ocr">正在读取文本</string>
-    <string name="ocr_result_is_bad">识别结果糟糕</string>
-    <string name="ocr_result_is_good">识别结果很好</string>
-    <string name="ocr_result_is_ok">识别结果不错</string>
     <string name="progress_choose_columns">请选择你需要的内容</string>
     <string name="progress_analyse_layout">正在分析布局</string>
     <string name="progress_assemble_pix">正在整理图片</string>
@@ -61,10 +53,8 @@
     <string name="item_uncheck">{fa-square-o}</string>
     <string name="edit_dialog_title">修改文档名</string>
     <string name="edit_title_hint">输入文档名</string>
-    <string name="edit_title">修改文档名</string>
     <string name="keep_camera_steady">保持摄像头平稳</string>
     <string name="text_is_blurry">图片有些模糊,处理可能需要较长时间而且准确率不高</string>
-    <string name="continue_editing">继续</string>
     <string name="continue_ocr">继续</string>
     <string name="new_image">换一张图</string>
     <string name="memory_low">内存不足</string>
@@ -80,13 +70,13 @@
     <string name="install_ok">语言包安装成功</string>
     <string name="empty_document_grid">没有文档</string>
     <string name="close_app">退出应用</string>
-    <string name="label_document_grid">文档管理</string>
-    <string name="label_document">文档内容</string>
+    <string name="label_document_grid">处理记录</string>
+    <string name="label_document">处理结果</string>
     <string name="option_camera_title">拍照获取图片</string>
     <string name="option_gallery_title">从图库选择图片</string>
-    <string name="thu_ocr">清华大学电子系图文信息处理实验室</string>
-    <string name="option_batch">批量处理图片</string>
-    <string name="history_ocr">处理记录管理</string>
+    <string name="thu_ocr">清华大学电子系智能图文信息处理研究室</string>
+    <string name="option_batch">选择图片</string>
+    <string name="history_ocr">处理记录</string>
 
     <!--mip-->
     <string name="action_deselect_all">全不选</string>
@@ -97,5 +87,16 @@
     <string name="image_thumbnail">图片缩略图</string>
     <string name="you_cant_check_more_images">不能再选了</string>
     <string name="image_check">选中图片</string>
+    <string name="language_chinese_simple">简体中文</string>
+    <string name="language_chinese_tradition">繁体中文</string>
+    <string name="language_english">英文</string>
+    <string name="default_layout">默认布局</string>
+    <string name="default_language">默认语言</string>
+    <string name="auto_analyse_layout">自动分析布局</string>
+    <string name="settings_others">其他设置</string>
+    <string name="share_subject">OCR处理结果</string>
+    <string name="share_chooser_title">选择分享的方式</string>
+    <string name="share_text">分享</string>
+    <string name="stop">停止</string>
 
 </resources>
