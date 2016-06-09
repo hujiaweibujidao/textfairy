@@ -90,16 +90,6 @@ public class MainActivity extends NewDocumentActivity implements Picker.PickList
     }
 
     @Override
-    public String getScreenName() {
-        return "Main";
-    }
-
-    @Override
-    protected int getHintDialogId() {
-        return 0;
-    }
-
-    @Override
     protected void onResume() {
         // ViewServer.get(this).setFocusedWindow(this);
         super.onResume();

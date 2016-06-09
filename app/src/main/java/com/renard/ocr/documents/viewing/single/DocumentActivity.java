@@ -92,11 +92,6 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
     private TtsActionCallback mActionCallback;
 
     @Override
-    public String getScreenName() {
-        return "";
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -127,11 +122,6 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
         super.initToolbar();
         setToolbarMessage(R.string.label_document);//修改标题
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-    }
-
-    @Override
-    protected int getHintDialogId() {
-        return HINT_DIALOG_ID;
     }
 
     @Override

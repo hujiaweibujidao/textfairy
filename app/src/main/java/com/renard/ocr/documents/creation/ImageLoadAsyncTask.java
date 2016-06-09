@@ -11,7 +11,7 @@ import com.crashlytics.android.Crashlytics;
 import com.googlecode.leptonica.android.Pix;
 import com.googlecode.leptonica.android.ReadFile;
 import com.googlecode.leptonica.android.Scale;
-import com.renard.ocr.util.OCR;
+import com.googlecode.tesseract.android.OCR;
 import com.renard.ocr.base.TextFairyApplication;
 
 import java.io.IOException;

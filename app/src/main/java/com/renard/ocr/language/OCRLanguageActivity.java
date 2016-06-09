@@ -146,12 +146,6 @@ public class OCRLanguageActivity extends MonitoredActivity {
         new LoadListAsyncTask().execute();
     }
 
-    @Override
-    protected int getHintDialogId() {
-        return -1;
-    }
-
-
     private OCRLanguageAdapter initLanguageList() {
         OCRLanguageAdapter adapter = new OCRLanguageAdapter(getApplicationContext(), false);
         List<OcrLanguage> languages = OcrLanguageDataStore.getAvailableOcrLanguages(this);
@@ -286,11 +280,6 @@ public class OCRLanguageActivity extends MonitoredActivity {
     protected void onPause() {
         super.onPause();
         overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-    }
-
-    @Override
-    public String getScreenName() {
-        return "Ocr Languages";
     }
 
 }

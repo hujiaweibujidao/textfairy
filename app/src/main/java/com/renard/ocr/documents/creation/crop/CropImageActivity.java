@@ -47,7 +47,7 @@ import com.googlecode.leptonica.android.Convert;
 import com.googlecode.leptonica.android.Pix;
 import com.googlecode.leptonica.android.Projective;
 import com.googlecode.leptonica.android.Rotate;
-import com.renard.ocr.util.OCR;
+import com.googlecode.tesseract.android.OCR;
 import com.renard.ocr.base.HintDialog;
 import com.renard.ocr.base.MonitoredActivity;
 import com.renard.ocr.R;
@@ -92,11 +92,6 @@ public class CropImageActivity extends MonitoredActivity implements BlurWarningD
     private CropHighlightView mCrop;
     private Optional<CropData> mCropData = Optional.absent();
     private Optional<PreparePixForCropTask> mPrepareTask = Optional.absent();
-
-    @Override
-    public String getScreenName() {
-        return "";
-    }
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -194,11 +189,6 @@ public class CropImageActivity extends MonitoredActivity implements BlurWarningD
             }
         });
     }
-
-    @Override
-    protected int getHintDialogId() {
-        return HINT_DIALOG_ID;
-    } //提示信息的dialog id
 
     //在这里接收需要裁剪的图片准备阶段返回的结果 （由PreparePixForCropTask发送结果返回CropData）
     @SuppressWarnings("unused")

@@ -16,14 +16,6 @@
 
 package com.renard.ocr.documents.viewing.single;
 
-import com.renard.ocr.documents.viewing.DocumentContentProvider;
-import com.renard.ocr.documents.viewing.DocumentContentProvider.Columns;
-import com.renard.ocr.base.HintDialog;
-import com.renard.ocr.base.MonitoredActivity;
-import com.renard.ocr.R;
-import com.renard.ocr.documents.viewing.single.SimpleDocumentAdapter.DocumentViewHolder;
-import com.renard.ocr.documents.viewing.single.SimpleDocumentAdapter.ViewBinder;
-
 import android.app.Dialog;
 import android.content.Intent;
 import android.database.Cursor;
@@ -39,6 +31,14 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
+import com.renard.ocr.R;
+import com.renard.ocr.base.HintDialog;
+import com.renard.ocr.base.MonitoredActivity;
+import com.renard.ocr.documents.viewing.DocumentContentProvider;
+import com.renard.ocr.documents.viewing.DocumentContentProvider.Columns;
+import com.renard.ocr.documents.viewing.single.SimpleDocumentAdapter.DocumentViewHolder;
+import com.renard.ocr.documents.viewing.single.SimpleDocumentAdapter.ViewBinder;
+
 public class TableOfContentsActivity extends MonitoredActivity implements LoaderManager.LoaderCallbacks<Cursor>, OnItemClickListener {
     private final static String[] PROJECTION = {Columns.ID, Columns.TITLE, Columns.OCR_TEXT, Columns.CREATED};
 
@@ -47,12 +47,6 @@ public class TableOfContentsActivity extends MonitoredActivity implements Loader
     public final static String EXTRA_DOCUMENT_POS = "document_pos";
     private ListView mList;
     private static final int HINT_DIALOG_ID = 2;
-
-
-    @Override
-    public String getScreenName() {
-        return "Table of contents";
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,11 +62,6 @@ public class TableOfContentsActivity extends MonitoredActivity implements Loader
         mList = (ListView) findViewById(R.id.list);
         mList.setOnItemClickListener(this);
         getSupportLoaderManager().initLoader(0, null, this);
-    }
-
-    @Override
-    protected int getHintDialogId() {
-        return -1;
     }
 
     @Override

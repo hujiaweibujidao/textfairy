@@ -36,7 +36,7 @@ import android.widget.Toast;
 
 import com.googlecode.leptonica.android.Pix;
 import com.googlecode.leptonica.android.Pixa;
-import com.renard.ocr.util.OCR;
+import com.googlecode.tesseract.android.OCR;
 import com.renard.ocr.base.MonitoredActivity;
 import com.renard.ocr.base.PermissionGrantedEvent;
 import com.renard.ocr.R;
@@ -374,12 +374,6 @@ public class OCRActivity extends MonitoredActivity implements LayoutChoseListene
         }
     }
 
-
-    @Override
-    protected int getHintDialogId() {
-        return -1;
-    }
-
     //询问用户关于图片中文字的布局情况
     private void askUserAboutDocumentLayout() {
         LayoutQuestionDialog dialog = LayoutQuestionDialog.newInstance();
@@ -405,11 +399,6 @@ public class OCRActivity extends MonitoredActivity implements LayoutChoseListene
     @Override
     protected void onPause() {
         super.onPause();
-    }
-
-    @Override
-    public String getScreenName() {
-        return "";
     }
 
     @Override

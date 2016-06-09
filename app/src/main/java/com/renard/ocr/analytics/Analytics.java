@@ -1,6 +1,6 @@
 package com.renard.ocr.analytics;
 
-import com.renard.ocr.documents.creation.crop.BlurDetectionResult;
+import com.renard.ocr.cropimage.image_processing.BlurDetectionResult;
 import com.renard.ocr.documents.creation.visualisation.LayoutQuestionDialog;
 import com.renard.ocr.language.OcrLanguage;
 

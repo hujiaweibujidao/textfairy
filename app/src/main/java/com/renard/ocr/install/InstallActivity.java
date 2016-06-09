@@ -73,11 +73,6 @@ public class InstallActivity extends MonitoredActivity implements InstallTaskFra
     private InstallTaskFragment mInstallTaskFragment;
     private AnimationDrawable mFairyAnimation;
 
-    @Override
-    public String getScreenName() {
-        return "Install Activity";
-    }
-
     @SuppressWarnings("deprecation")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -123,11 +118,6 @@ public class InstallActivity extends MonitoredActivity implements InstallTaskFra
 //        startActivity(intent);
 //    }
 
-
-    @Override
-    protected int getHintDialogId() {
-        return 0;
-    }
 
     private void startInstallAnimation() {
 

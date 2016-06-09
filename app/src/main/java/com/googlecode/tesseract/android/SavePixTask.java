@@ -1,8 +1,10 @@
-package com.renard.ocr.util;
+package com.googlecode.tesseract.android;
 
 import android.os.AsyncTask;
 
 import com.googlecode.leptonica.android.Pix;
+import com.googlecode.tesseract.android.OCR;
+import com.renard.ocr.util.Util;
 
 import java.io.File;
 import java.io.IOException;

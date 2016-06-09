@@ -35,7 +35,6 @@ import android.widget.TextView;
 
 import com.renard.ocr.R;
 import com.renard.ocr.analytics.Analytics;
-import com.renard.ocr.documents.creation.crop.BaseActivityInterface;
 
 import java.util.ArrayList;
 
@@ -46,21 +45,159 @@ import de.greenrobot.event.EventBus;
  * <p>
  * update
  * 1.去掉appicon上的点击事件
+ * 2.去掉两个抽象方法，将类变为非抽象类
  */
-public abstract class MonitoredActivity extends AppCompatActivity implements BaseActivityInterface {
+public class MonitoredActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = MonitoredActivity.class.getSimpleName();
 
     static final int MY_PERMISSIONS_REQUEST = 232;
-
     private final Handler mHandler = new Handler();
     private final ArrayList<LifeCycleListener> mListeners = new ArrayList<LifeCycleListener>();
 
-    private int mDialogId = -1;
     private TextView mToolbarMessage;
     private AlertDialog mPermissionDialog;
 
     protected Analytics mAnalytics;
+
+    public Analytics getAnaLytics() {
+        return mAnalytics;
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        for (LifeCycleListener listener : mListeners) {
+            listener.onActivityPaused(this);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        for (LifeCycleListener listener : mListeners) {
+            listener.onActivityResumed(this);
+        }
+        final String screenName = this.getClass().getSimpleName();//
+        if (!TextUtils.isEmpty(screenName)) {
+            mAnalytics.sendScreenView(screenName);
+        }
+    }
+
+    @Override
+    protected synchronized void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        for (LifeCycleListener listener : mListeners) {
+            listener.onActivityCreated(this);
+        }
+        TextFairyApplication application = (TextFairyApplication) getApplication();
+        mAnalytics = application.getAnalytics();
+
+        Log.i(LOG_TAG, "onCreate: " + this.getClass());
+    }
+
+    protected void initToolbar() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        mToolbarMessage = (TextView) toolbar.findViewById(R.id.toolbar_text);
+        setToolbarMessage(R.string.app_name);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+    }
+
+    //设置toolbar上显示的文本
+    public void setToolbarMessage(@StringRes int stringId) {
+        mToolbarMessage.setVisibility(View.VISIBLE);
+        mToolbarMessage.setText(stringId);
+    }
+
+    public void setToolbarMessage(String message) {
+        mToolbarMessage.setVisibility(View.VISIBLE);
+        mToolbarMessage.setText(message);
+    }
+
+    @Override
+    protected synchronized void onDestroy() {
+        super.onDestroy();
+        mHandler.removeCallbacksAndMessages(null);
+        if (mPermissionDialog != null) {
+            mPermissionDialog.cancel();
+        }
+        for (LifeCycleListener listener : mListeners) {
+            listener.onActivityDestroyed(this);
+        }
+    }
+
+    @Override
+    protected synchronized void onStart() {
+        super.onStart();
+        for (LifeCycleListener listener : mListeners) {
+            listener.onActivityStarted(this);
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        for (LifeCycleListener listener : mListeners) {
+            listener.onActivityStopped(this);
+        }
+        Log.i(LOG_TAG, "onStop: " + this.getClass());
+    }
+
+    public void ensurePermission(String permission, @StringRes int explanation) {
+        if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {//解释需要权限
+                explainPermission(permission, explanation);
+            } else {//申请获取权限
+                ActivityCompat.requestPermissions(this, new String[]{permission}, MY_PERMISSIONS_REQUEST);
+            }
+        } else {//已经拿到了权限，发送通知，回调onEventMainThread(final PermissionGrantedEvent event)方法
+            EventBus.getDefault().post(new PermissionGrantedEvent(permission));
+        }
+    }
+
+    private void explainPermission(final String permission, int explanation) {
+        //PermissionExplanationDialog.newInstance(R.string.permission_explanation_title, explanation, permission);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(explanation);
+        builder.setTitle(R.string.permission_explanation_title);
+        builder.setNegativeButton(R.string.close_app, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                finish();
+            }
+        });
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                ActivityCompat.requestPermissions(MonitoredActivity.this, new String[]{permission}, MY_PERMISSIONS_REQUEST);
+            }
+        });
+        mPermissionDialog = builder.show();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    EventBus.getDefault().post(new PermissionGrantedEvent(permissions[0]));
+                } else {
+                    finish();
+                }
+            }
+        }
+    }
+
+    public synchronized void addLifeCycleListener(LifeCycleListener listener) {
+        if (mListeners.contains(listener))
+            return;
+        mListeners.add(listener);
+    }
+
+    public synchronized void removeLifeCycleListener(LifeCycleListener listener) {
+        mListeners.remove(listener);
+    }
 
     //Activity生命周期监听器
     public interface LifeCycleListener {
@@ -95,152 +232,6 @@ public abstract class MonitoredActivity extends AppCompatActivity implements Bas
         }
 
         public void onActivityStopped(MonitoredActivity activity) {
-        }
-    }
-
-    public synchronized void addLifeCycleListener(LifeCycleListener listener) {
-        if (mListeners.contains(listener))
-            return;
-        mListeners.add(listener);
-    }
-
-    public synchronized void removeLifeCycleListener(LifeCycleListener listener) {
-        mListeners.remove(listener);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        for (LifeCycleListener listener : mListeners) {
-            listener.onActivityPaused(this);
-        }
-    }
-
-    public abstract String getScreenName();
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        for (LifeCycleListener listener : mListeners) {
-            listener.onActivityResumed(this);
-        }
-        final String screenName = getScreenName();
-        if (!TextUtils.isEmpty(screenName)) {
-            mAnalytics.sendScreenView(screenName);
-        }
-    }
-
-    @Override
-    protected synchronized void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        for (LifeCycleListener listener : mListeners) {
-            listener.onActivityCreated(this);
-        }
-        TextFairyApplication application = (TextFairyApplication) getApplication();
-        mAnalytics = application.getAnalytics();
-
-        Log.i(LOG_TAG, "onCreate: " + this.getClass());
-    }
-
-    public Analytics getAnaLytics() {
-        return mAnalytics;
-    }
-
-    protected void initToolbar() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        mToolbarMessage = (TextView) toolbar.findViewById(R.id.toolbar_text);
-        setToolbarMessage(R.string.app_name);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-    }
-
-    public void setToolbarMessage(@StringRes int stringId) {
-        mToolbarMessage.setVisibility(View.VISIBLE);
-        mToolbarMessage.setText(stringId);
-    }
-
-    public void setToolbarMessage(String message) {
-        mToolbarMessage.setText(message);
-    }
-
-    protected abstract int getHintDialogId();
-
-    @Override
-    protected synchronized void onDestroy() {
-        super.onDestroy();
-        mHandler.removeCallbacksAndMessages(null);
-        if (mPermissionDialog != null) {
-            mPermissionDialog.cancel();
-        }
-        for (LifeCycleListener listener : mListeners) {
-            listener.onActivityDestroyed(this);
-        }
-    }
-
-    @Override
-    protected synchronized void onStart() {
-        super.onStart();
-        for (LifeCycleListener listener : mListeners) {
-            listener.onActivityStarted(this);
-        }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        for (LifeCycleListener listener : mListeners) {
-            listener.onActivityStopped(this);
-        }
-        Log.i(LOG_TAG, "onStop: " + this.getClass());
-    }
-
-    @Override
-    public void setDialogId(int dialogId) {
-        mDialogId = dialogId;
-    }
-
-    public void ensurePermission(String permission, @StringRes int explanation) {
-        if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {//解释需要权限
-                explainPermission(permission, explanation);
-            } else {//申请获取权限
-                ActivityCompat.requestPermissions(this, new String[]{permission}, MY_PERMISSIONS_REQUEST);
-            }
-        } else {
-            EventBus.getDefault().post(new PermissionGrantedEvent(permission));//已经拿到了权限，发送通知，回调onEventMainThread(final PermissionGrantedEvent event)方法
-        }
-    }
-
-    private void explainPermission(final String permission, int explanation) {
-        //PermissionExplanationDialog.newInstance(R.string.permission_explanation_title, explanation, permission);
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(explanation);
-        builder.setTitle(R.string.permission_explanation_title);
-        builder.setNegativeButton(R.string.close_app, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                finish();
-            }
-        });
-        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                ActivityCompat.requestPermissions(MonitoredActivity.this, new String[]{permission}, MY_PERMISSIONS_REQUEST);
-            }
-        });
-        mPermissionDialog = builder.show();
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST: {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    EventBus.getDefault().post(new PermissionGrantedEvent(permissions[0]));
-                } else {
-                    finish();
-                }
-            }
         }
     }
 

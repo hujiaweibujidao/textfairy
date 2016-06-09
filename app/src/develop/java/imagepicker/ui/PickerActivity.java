@@ -86,16 +86,6 @@ public class PickerActivity extends MonitoredActivity {
     }
 
     @Override
-    protected int getHintDialogId() {
-        return 0;
-    }
-
-    @Override
-    public String getScreenName() {
-        return "Image Picker";
-    }
-
-    @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(KEY_ACTION_BAR_TITLE, getSupportActionBar().getTitle().toString());

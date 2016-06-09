@@ -210,18 +210,8 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
     }
 
     @Override
-    public String getScreenName() {
-        return "Document Grid";
-    }
-
-    @Override
     protected int getParentId() {
         return -1;
-    }
-
-    @Override
-    protected int getHintDialogId() {
-        return 0;
     }
 
     @Override

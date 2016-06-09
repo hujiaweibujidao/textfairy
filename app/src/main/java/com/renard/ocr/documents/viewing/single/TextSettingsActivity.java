@@ -16,10 +16,6 @@
 
 package com.renard.ocr.documents.viewing.single;
 
-import com.renard.ocr.R;
-import com.renard.ocr.base.MonitoredActivity;
-import com.renard.ocr.util.PreferencesUtils;
-
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
@@ -29,6 +25,10 @@ import android.widget.Button;
 import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.TextView;
+
+import com.renard.ocr.R;
+import com.renard.ocr.base.MonitoredActivity;
+import com.renard.ocr.util.PreferencesUtils;
 
 public class TextSettingsActivity extends MonitoredActivity {
 
@@ -58,11 +58,6 @@ public class TextSettingsActivity extends MonitoredActivity {
             PreferencesUtils.applyTextPreferences(mPreviewText, mPreferences);
         }
 
-    }
-
-    @Override
-    public String getScreenName() {
-        return "Text Settings";
     }
 
     @Override
@@ -101,11 +96,6 @@ public class TextSettingsActivity extends MonitoredActivity {
                 finish();
             }
         });
-    }
-
-    @Override
-    protected int getHintDialogId() {
-        return -1;
     }
 
     @Override

@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.renard.ocr.util;
+package com.googlecode.tesseract.android;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -29,8 +29,6 @@ import com.googlecode.leptonica.android.Boxa;
 import com.googlecode.leptonica.android.Pix;
 import com.googlecode.leptonica.android.Pixa;
 import com.googlecode.leptonica.android.WriteFile;
-import com.googlecode.tesseract.android.OcrProgressListener;
-import com.googlecode.tesseract.android.TessBaseAPI;
 import com.googlecode.tesseract.android.TessBaseAPI.PageSegMode;
 import com.renard.ocr.R;
 import com.renard.ocr.analytics.Analytics;
@@ -38,6 +36,8 @@ import com.renard.ocr.base.MonitoredActivity;
 import com.renard.ocr.base.TextFairyApplication;
 import com.renard.ocr.documents.creation.crop.CropImageScaler;
 import com.renard.ocr.language.OcrLanguage;
+import com.renard.ocr.util.MemoryInfo;
+import com.renard.ocr.util.Util;
 
 import java.io.File;
 
