@@ -14,7 +14,8 @@ import com.renard.ocr.documents.viewing.single.TopDialogFragment;
 /**
  * 提示内存不够的对话框窗口
  *
- * @author renard
+ * update
+ * 1.添加新的DoAfter：MIP
  */
 public class MemoryWarningDialog extends TopDialogFragment {
 
@@ -26,7 +27,7 @@ public class MemoryWarningDialog extends TopDialogFragment {
     private static final String EXTRA_DO_AFTER = "extra_do_after";
 
     public enum DoAfter {
-        START_GALLERY, START_CAMERA;
+        START_GALLERY, START_CAMERA, START_MIP;
     }
 
     public static MemoryWarningDialog newInstance(long availableMemory, DoAfter doAfter) {
@@ -62,6 +63,8 @@ public class MemoryWarningDialog extends TopDialogFragment {
                     activity.startCamera();
                 } else if (doAfter == DoAfter.START_GALLERY) {
                     activity.startGallery();
+                }else if (doAfter == DoAfter.START_MIP){
+                    activity.startMip();
                 }
             }
         });

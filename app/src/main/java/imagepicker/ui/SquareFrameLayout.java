@@ -5,6 +5,8 @@ import android.util.AttributeSet;
 import android.widget.FrameLayout;
 
 /**
+ * 正方形的framelayout
+ *
  * Created by yazeed44 on 6/16/15.
  */
 public class SquareFrameLayout extends FrameLayout {

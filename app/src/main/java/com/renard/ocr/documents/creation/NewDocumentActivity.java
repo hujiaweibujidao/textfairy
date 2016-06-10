@@ -80,6 +80,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import imagepicker.model.ImageEntry;
+import imagepicker.util.Picker;
+
 /**
  * DocumentGridActivity 和 DocumentActivity 的父类，处理了打开摄像头或者图片选择图片的过程，也处理了保存文件的过程
  * <p/>
@@ -89,7 +92,7 @@ import java.util.Set;
  *
  * @author renard
  */
-public abstract class NewDocumentActivity extends MonitoredActivity {
+public abstract class NewDocumentActivity extends MonitoredActivity implements Picker.PickListener{
 
     private final static String LOG_TAG = NewDocumentActivity.class.getSimpleName();
 
@@ -113,8 +116,9 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
     //请求码
     private final static int REQUEST_CODE_MAKE_PHOTO = 0;//拍照
     private final static int REQUEST_CODE_PICK_PHOTO = 1;//选择照片
-    final static int REQUEST_CODE_CROP_PHOTO = 2;//裁剪图片
+    protected final static int REQUEST_CODE_CROP_PHOTO = 2;//裁剪图片
     protected final static int REQUEST_CODE_OCR = 3;//ocr
+    protected final static int REQUEST_CODE_MIP = 4;//mip 多图选择
 
     private static final String DATE_CAMERA_INTENT_STARTED_STATE = "com.renard.ocr.android.photo.TakePhotoActivity.dateCameraIntentStarted";
     private static final String STATE_RECEIVER_REGISTERED = "state_receiver_registered";
@@ -126,25 +130,20 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
     private boolean mReceiverRegistered = false;
     private ImageSource mImageSource = ImageSource.CAMERA;
 
-    //摄像头返回的结果
-    private static class CameraResult {
-        public CameraResult(int requestCode, int resultCode, Intent data, ImageSource source) {
-            mRequestCode = requestCode;
-            mResultCode = resultCode;
-            mData = data;
-            mSource = source;
-        }
-
-        private int mRequestCode;
-        private int mResultCode;
-        private Intent mData;
-        private final ImageSource mSource;
-    }
-
     private ProgressDialog pdfProgressDialog;
     private ProgressDialog deleteProgressDialog;
     private CameraResult mCameraResult;
     private AsyncTask<Void, Void, ImageLoadAsyncTask.LoadResult> mBitmapLoadTask;
+
+    //you can override to perform operations in the Activity at the same point* where its fragments are resumed.
+    @Override
+    protected void onResumeFragments() {//这里是关键，拍照或者选图之后这个方法就会被回调，而此时mCameraResult已经不为空了
+        super.onResumeFragments();
+        if (mCameraResult != null) {
+            onTakePhotoActivityResult(mCameraResult);
+            mCameraResult = null;
+        }
+    }
 
     @TargetApi(11)
     @Override
@@ -205,7 +204,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
                 case REQUEST_CODE_MAKE_PHOTO:
                     mCameraResult = new CameraResult(requestCode, resultCode, data, ImageSource.CAMERA);
                     break;
-                case REQUEST_CODE_PICK_PHOTO:
+                case REQUEST_CODE_PICK_PHOTO://不论是拍照，还是选图，都是使用CameraResult
                     mCameraResult = new CameraResult(requestCode, resultCode, data, ImageSource.PICK);
                     break;
             }
@@ -214,10 +213,10 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
                 case PICK:
                     startGallery();
                     break;
-                case INTENT:
-                    break;
                 case CAMERA:
                     startCamera();
+                    break;
+                case INTENT://通过intent进入的
                     break;
             }
         }
@@ -229,11 +228,43 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
         Log.i(LOG_TAG, "available ram = " + availableMegs);
         if (availableMegs < MemoryInfo.MINIMUM_RECOMMENDED_RAM) {//可用内存小于推荐最小值，弹出提示信息
             MemoryWarningDialog.newInstance(availableMegs, doAfter).show(getSupportFragmentManager(), MemoryWarningDialog.TAG);
-        } else if (doAfter == MemoryWarningDialog.DoAfter.START_CAMERA) {
+        } else if (doAfter == MemoryWarningDialog.DoAfter.START_CAMERA) {//内存足够的话就直接执行
             startCamera();
         } else if (doAfter == MemoryWarningDialog.DoAfter.START_GALLERY) {
             startGallery();
+        }else if (doAfter == MemoryWarningDialog.DoAfter.START_MIP){
+            startMip();
         }
+    }
+
+    public void startMip() {
+        cameraPicUri = null;
+
+        new Picker.Builder(this, this, R.style.AppBaseTheme)
+                .setPickMode(Picker.PickMode.MULTIPLE_IMAGES) //由于我修改了PickActivity的界面布局，所以single模式存在问题
+                .setBackBtnInMainActivity(true)
+                .disableCaptureImageFromCamera()
+                .build()
+                .startActivity();
+    }
+
+    @Override
+    public void onPickedSuccessfully(ArrayList<ImageEntry> images) {
+        //String.valueOf(Uri.fromFile(new File(image.path)))
+        //file:///storage/emulated/0/Pictures/Screenshots/S60606-173227.jpg
+
+        //如果是一张图片，直接进入下一步；如果是多张图片，进入多张图片的处理界面
+        //现在假设只处理第一张图片，并伪造一个mCameraResult -> 这种方式可行 -> 但是目前需求是要进入到多张图片的处理界面
+        int requestCode = REQUEST_CODE_MIP;
+        int resultCode = RESULT_OK;
+        Intent data = new Intent();
+        data.setData(Uri.fromFile(new File(images.get(0).path)));
+        mCameraResult = new CameraResult(requestCode, resultCode, data, ImageSource.MIP);
+    }
+
+    @Override
+    public void onCancel() {
+        //Toast.makeText(this, R.string.no_image_picked, Toast.LENGTH_SHORT).show();
     }
 
     //启动图库
@@ -254,7 +285,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
 
         Intent chooser = Intent.createChooser(intent, getString(R.string.image_source));//选择一种图片来源
         try {
-            startActivityForResult(chooser, REQUEST_CODE_PICK_PHOTO);
+            startActivityForResult(chooser, REQUEST_CODE_PICK_PHOTO);//for result!!!
         } catch (ActivityNotFoundException e) {
             Toast.makeText(this, R.string.no_gallery_found, Toast.LENGTH_LONG).show();
         }
@@ -283,70 +314,12 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
                 }
                 cameraPicUri = Uri.fromFile(image);
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, cameraPicUri);//设置好拍照结果图片的保存位置
-                startActivityForResult(intent, REQUEST_CODE_MAKE_PHOTO);
+                startActivityForResult(intent, REQUEST_CODE_MAKE_PHOTO);//for result!!!
             } catch (IOException e) {
                 showFileError(PixLoadStatus.IO_ERROR);
             }
-
         } catch (ActivityNotFoundException e) {
             showFileError(PixLoadStatus.CAMERA_APP_NOT_FOUND);
-        }
-    }
-
-    //拍照结果返回，接下来就是根据cameraPicUri去加载图片数据了
-    private void onTakePhotoActivityResult(CameraResult cameraResult) {
-        if (cameraResult.mResultCode == RESULT_OK) {
-            if (cameraResult.mRequestCode == REQUEST_CODE_MAKE_PHOTO) {
-                Cursor myCursor = null;
-                Date dateOfPicture;
-                //check if there is a file at the uri we specified
-                if (cameraPicUri != null) {
-                    File f = new File(cameraPicUri.getPath());
-                    if (f.isFile() && f.exists() && f.canRead()) {
-                        //all is well
-                        Log.i(LOG_TAG, "onTakePhotoActivityResult");
-                        loadBitmapFromContentUri(cameraPicUri, ImageSource.CAMERA);//加载对应的图片
-                        return;
-                    }
-
-                }
-                //try to look up the image by querying the media content provider
-                try {
-                    // Create a Cursor to obtain the file Path for the large image
-                    String[] largeFileProjection = {MediaStore.Images.ImageColumns._ID, MediaStore.Images.ImageColumns.DATA, MediaStore.Images.ImageColumns.ORIENTATION, MediaStore.Images.ImageColumns.DATE_TAKEN};
-                    String largeFileSort = MediaStore.Images.ImageColumns._ID + " DESC";
-                    myCursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, largeFileProjection, null, null, largeFileSort);
-                    if (myCursor != null) {
-                        myCursor.moveToFirst();
-                        // This will actually give you the file path location of the image.
-                        String largeImagePath = myCursor.getString(myCursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DATA));
-                        Uri tempCameraPicUri = Uri.fromFile(new File(largeImagePath));
-                        dateOfPicture = new Date(myCursor.getLong(myCursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DATE_TAKEN)));
-                        if (dateOfPicture.getTime() == 0 || (dateOfPicture.after(dateCameraIntentStarted))) {
-                            cameraPicUri = tempCameraPicUri;
-                        }
-                    }
-                } catch (Exception ignored) {
-                } finally {
-                    if (myCursor != null) {
-                        myCursor.close();
-                    }
-                }
-            }
-
-            if (cameraPicUri == null) {
-                try {
-                    cameraPicUri = mCameraResult.mData.getData();
-                } catch (Exception e) {
-                    showFileError(PixLoadStatus.CAMERA_APP_ERROR);
-                }
-            }
-
-            if (cameraPicUri != null) {
-                loadBitmapFromContentUri(cameraPicUri, mCameraResult.mSource);
-            } else {
-                showFileError(PixLoadStatus.CAMERA_NO_IMAGE_RETURNED);
-            }
         }
     }
 
@@ -355,6 +328,11 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
         if (TextFairyApplication.isRelease()) {
             Crashlytics.log("Loading " + cameraPicUri.toString() + " from " + source.name());
         }
+        Log.i(LOG_TAG, "Loading " + cameraPicUri.toString() + " from " + source.name());//
+        //Loading content://media/external/images/media/261 from PICK
+        //Loading file:///storage/emulated/0/Pictures/JPEG_20160610_133233_.jpg from CAMERA
+        //Loading file:///storage/emulated/0/Pictures/JPEG_20160610_000648_.jpg from MIP
+
         mImageSource = source;
         if (mBitmapLoadTask != null) {
             mBitmapLoadTask.cancel(true);
@@ -364,9 +342,9 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
         AccessibilityManager am = (AccessibilityManager) getSystemService(ACCESSIBILITY_SERVICE);
         boolean isAccessibilityEnabled = am.isEnabled();
         boolean isExploreByTouchEnabled = AccessibilityManagerCompat.isTouchExplorationEnabled(am);
-        final boolean skipCrop = isExploreByTouchEnabled && isAccessibilityEnabled;
+        final boolean skipCrop = isExploreByTouchEnabled && isAccessibilityEnabled;//toread 两者都为true就可以跳过图片裁剪
 
-        registerImageLoaderReceiver();
+        registerImageLoaderReceiver();//注册图片加载监听器，加载过程能收到通知 -> mMessageReceiver 接收通知并处理
         mBitmapLoadTask = new ImageLoadAsyncTask(this, skipCrop, cameraPicUri).execute();//启动图片加载
     }
 
@@ -397,20 +375,10 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
         intent.putExtra(EXTRA_NATIVE_PIX, nativePix);
         intent.putExtra(OCRActivity.EXTRA_USE_ACCESSIBILITY_MODE, accessibilityMode);
         intent.putExtra(OCRActivity.EXTRA_PARENT_DOCUMENT_ID, getParentId());
-        startActivityForResult(intent, REQUEST_CODE_OCR);//for result
+        startActivityForResult(intent, REQUEST_CODE_OCR);//for result!!!
     }
 
-    @Override
-    protected void onResumeFragments() {
-        super.onResumeFragments();
-        if (mCameraResult != null) {
-            onTakePhotoActivityResult(mCameraResult);
-            mCameraResult = null;
-        }
-    }
-
-    //处理图片加载完成之后的事件监听
-    // handler for received Intents for the image loaded event
+    //处理图片加载完成之后的事件监听 handler for received Intents for the image loaded event
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -420,7 +388,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
             //Additionally i use commitAllowStateLoss as its not terribly important to preserve the state of the loading dialog
             if (mReceiverRegistered) {
                 Log.i(LOG_TAG, "onReceive " + NewDocumentActivity.this);
-                if (intent.getAction().equalsIgnoreCase(ImageLoadAsyncTask.ACTION_IMAGE_LOADED)) {//图片加载完成之后开始处理图片
+                if (intent.getAction().equalsIgnoreCase(ImageLoadAsyncTask.ACTION_IMAGE_LOADED)) {//图片加载完成之后开始处理图片，加载结果都放在intent中了
                     unRegisterImageLoadedReceiver();
                     final long nativePix = intent.getLongExtra(ImageLoadAsyncTask.EXTRA_PIX, 0);
                     final int statusNumber = intent.getIntExtra(ImageLoadAsyncTask.EXTRA_STATUS, PixLoadStatus.SUCCESS.ordinal());
@@ -437,13 +405,13 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
     private void handleLoadedImage(long nativePix, PixLoadStatus pixLoadStatus, boolean skipCrop) {
         dismissLoadingImageProgressDialog();
 
-        if (pixLoadStatus == PixLoadStatus.SUCCESS) {//跳过了图片裁剪
-            if (skipCrop) {
+        if (pixLoadStatus == PixLoadStatus.SUCCESS) {//加载成功
+            if (skipCrop) {//跳过了图片裁剪，直接进入ocr
                 startOcrActivity(nativePix, true);
             } else {//进入图片裁剪阶段
                 Intent actionIntent = new Intent(this, CropImageActivity.class);
                 actionIntent.putExtra(NewDocumentActivity.EXTRA_NATIVE_PIX, nativePix);
-                startActivityForResult(actionIntent, NewDocumentActivity.REQUEST_CODE_CROP_PHOTO);//
+                startActivityForResult(actionIntent, NewDocumentActivity.REQUEST_CODE_CROP_PHOTO);//for result!!!
             }
         } else {
             showFileError(pixLoadStatus);
@@ -456,7 +424,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
         if (prev != null) {
             Log.i(LOG_TAG, "dismissing dialog");
             DialogFragment df = (DialogFragment) prev;
-            df.dismissAllowingStateLoss();
+            df.dismissAllowingStateLoss();//状态没有用，所以dismissAllowingStateLoss
         } else {
             Log.i(LOG_TAG, "cannot dismiss dialog. its null! " + this);
         }
@@ -471,6 +439,81 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
         ft.add(dialog, IMAGE_LOAD_PROGRESS_TAG);
         ft.commitAllowingStateLoss();
     }
+
+    //选图或者拍照结果返回，接下来就是根据PicUri去加载图片数据了
+    private void onTakePhotoActivityResult(CameraResult cameraResult) {
+        if (cameraResult.mResultCode == RESULT_OK) {
+            if (cameraResult.mRequestCode == REQUEST_CODE_MAKE_PHOTO) {//如果是拍照返回的结果，下面就是从中拿到cameraPicUri
+                Cursor myCursor = null;
+                Date dateOfPicture;
+                //check if there is a file at the uri we specified
+                if (cameraPicUri != null) {
+                    File f = new File(cameraPicUri.getPath());
+                    if (f.isFile() && f.exists() && f.canRead()) {
+                        //all is well
+                        Log.i(LOG_TAG, "onTakePhotoActivityResult");
+                        loadBitmapFromContentUri(cameraPicUri, ImageSource.CAMERA);//加载对应的图片
+                        return;
+                    }
+                }
+                //try to look up the image by querying the media content provider
+                try {
+                    // Create a Cursor to obtain the file Path for the large image
+                    String[] largeFileProjection = {MediaStore.Images.ImageColumns._ID, MediaStore.Images.ImageColumns.DATA, MediaStore.Images.ImageColumns.ORIENTATION, MediaStore.Images.ImageColumns.DATE_TAKEN};
+                    String largeFileSort = MediaStore.Images.ImageColumns._ID + " DESC";
+                    myCursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, largeFileProjection, null, null, largeFileSort);
+                    if (myCursor != null) {
+                        myCursor.moveToFirst();
+                        // This will actually give you the file path location of the image.
+                        String largeImagePath = myCursor.getString(myCursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DATA));
+                        Uri tempCameraPicUri = Uri.fromFile(new File(largeImagePath));
+                        dateOfPicture = new Date(myCursor.getLong(myCursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DATE_TAKEN)));
+                        if (dateOfPicture.getTime() == 0 || (dateOfPicture.after(dateCameraIntentStarted))) {
+                            cameraPicUri = tempCameraPicUri;
+                        }
+                    }
+                } catch (Exception ignored) {
+                } finally {
+                    if (myCursor != null) {
+                        myCursor.close();
+                    }
+                }
+            }
+
+            if (cameraPicUri == null) {//选图比较简单，直接取出来cameraPicUri
+                try {
+                    cameraPicUri = mCameraResult.mData.getData();
+                } catch (Exception e) {
+                    showFileError(PixLoadStatus.CAMERA_APP_ERROR);
+                }
+            }
+
+            if (cameraPicUri != null) {//cameraPicUri不为空就可以加载图片了
+                loadBitmapFromContentUri(cameraPicUri, mCameraResult.mSource);
+            } else {
+                showFileError(PixLoadStatus.CAMERA_NO_IMAGE_RETURNED);
+            }
+        }
+    }
+
+    //摄像头返回的结果
+    private static class CameraResult {
+        public CameraResult(int requestCode, int resultCode, Intent data, ImageSource source) {
+            mRequestCode = requestCode;
+            mResultCode = resultCode;
+            mData = data;
+            mSource = source;
+        }
+
+        private int mRequestCode;
+        private int mResultCode;
+        private Intent mData;
+        private final ImageSource mSource;
+    }
+
+    /**
+     * 其他功能
+     */
 
     void showFileError(PixLoadStatus status) {
         showFileError(status, null);
@@ -599,8 +642,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
                 if (args != null) {
                     final int max = args.getInt(DIALOG_ARG_MAX);
                     final int progress = args.getInt(DIALOG_ARG_PROGRESS);
-                    // final int secondaryProgress =
-                    // args.getInt(DIALOG_ARG_SECONDARY_PROGRESS);
+                    // final int secondaryProgress = args.getInt(DIALOG_ARG_SECONDARY_PROGRESS);
                     final String message = args.getString(DIALOG_ARG_MESSAGE);
                     final String title = args.getString(DIALOG_ARG_TITLE);
                     if (id == PDF_PROGRESS_DIALOG_ID) {
@@ -618,7 +660,6 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
                                 }
                             }
                         });
-
                     } else if (id == DELETE_PROGRESS_DIALOG_ID) {
                         runOnUiThread(new Runnable() {
 
@@ -653,7 +694,6 @@ public abstract class NewDocumentActivity extends MonitoredActivity {
             SaveDocumentTask saveTask = new SaveDocumentTask(this, documentUri, newTitle);
             saveTask.execute();
         }
-
     }
 
     /**

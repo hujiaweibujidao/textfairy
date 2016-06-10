@@ -49,6 +49,7 @@ public class PickerActivity extends MonitoredActivity {
     public static final String KEY_SHOULD_SHOW_ACTIONBAR_UP = "shouldShowUpKey";
     public static final String CAPTURED_IMAGES_ALBUM_NAME = "captured_images";//captured_images
     public static final String CAPTURED_IMAGES_DIR = Environment.getExternalStoragePublicDirectory(CAPTURED_IMAGES_ALBUM_NAME).getAbsolutePath();
+
     private static final int REQUEST_PORTRAIT_RFC = 1337;
     private static final int REQUEST_PORTRAIT_FFC = REQUEST_PORTRAIT_RFC + 1;
 
@@ -73,6 +74,7 @@ public class PickerActivity extends MonitoredActivity {
     protected void onCreate(Bundle savedInstanceState) {
         mPickOptions = (EventBus.getDefault().getStickyEvent(Events.OnPublishPickOptionsEvent.class)).options;
         initTheme();
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pick);
 
@@ -356,7 +358,6 @@ public class PickerActivity extends MonitoredActivity {
         }
 
         if (sCheckedImages.size() < mPickOptions.limit || mPickOptions.limit == NO_LIMIT) {
-
             for (final ImageEntry imageEntry : mSelectedAlbum.imageList) {
                 if (mPickOptions.limit != NO_LIMIT && sCheckedImages.size() + 1 > mPickOptions.limit) {
                     //Hit the limit
@@ -439,7 +440,6 @@ public class PickerActivity extends MonitoredActivity {
     }
 
     private void handleMultipleModeAddition(final ImageEntry imageEntry) {
-
         if (mPickOptions.pickMode != Picker.PickMode.MULTIPLE_IMAGES) {
             return;
         }
@@ -461,7 +461,6 @@ public class PickerActivity extends MonitoredActivity {
 
         boolean isAllImagesSelected = true;
         for (final ImageEntry albumChildImage : mSelectedAlbum.imageList) {
-
             if (!sCheckedImages.contains(albumChildImage)) {
                 isAllImagesSelected = false;
                 break;
@@ -469,7 +468,6 @@ public class PickerActivity extends MonitoredActivity {
         }
 
         final Fragment imageThumbnailFragment = getSupportFragmentManager().findFragmentByTag(ImagesThumbnailFragment.TAG);
-
         return isAllImagesSelected && imageThumbnailFragment != null && imageThumbnailFragment.isVisible();
     }
 

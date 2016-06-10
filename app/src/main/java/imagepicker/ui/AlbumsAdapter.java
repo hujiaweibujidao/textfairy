@@ -22,6 +22,7 @@ import imagepicker.util.Picker;
 import imagepicker.util.Util;
 
 /**
+ * 相册adapter
  *
  * Created by yazeed44 on 11/22/14.
  */
@@ -64,7 +65,6 @@ public class AlbumsAdapter extends RecyclerView.Adapter<AlbumsAdapter.AlbumViewH
         EventBus.getDefault().postSticky(new Events.OnClickAlbumEvent(album));
     }
 
-
     public void setHeight(final View layout) {
         final int height = mRecycler.getMeasuredWidth() / mRecycler.getResources().getInteger(R.integer.num_columns_albums);
         layout.setLayoutParams(new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
@@ -84,6 +84,7 @@ public class AlbumsAdapter extends RecyclerView.Adapter<AlbumsAdapter.AlbumViewH
                 .into(holder.thumbnail);
     }
 
+    //ViewHolder
     static class AlbumViewHolder extends RecyclerView.ViewHolder {
         protected final ImageView thumbnail;
         protected final TextView count;

@@ -17,20 +17,18 @@ import com.renard.ocr.documents.creation.MemoryWarningDialog;
 import com.renard.ocr.documents.creation.NewDocumentActivity;
 import com.renard.ocr.documents.creation.PixLoadStatus;
 import com.renard.ocr.documents.viewing.grid.DocumentGridActivity;
+import com.renard.ocr.install.InstallActivity;
 import com.renard.ocr.language.OcrLanguage;
 import com.renard.ocr.language.OcrLanguageDataStore;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
-import imagepicker.model.ImageEntry;
-import imagepicker.util.Picker;
 
 /**
  * 应用首页,控制中心,核心功能入口
  */
-public class MainActivity extends NewDocumentActivity implements Picker.PickListener {
+public class MainActivity extends NewDocumentActivity {
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
@@ -44,7 +42,7 @@ public class MainActivity extends NewDocumentActivity implements Picker.PickList
         setContentView(R.layout.thu_activity_main);
 
         initToolbar();
-        if (savedInstanceState == null) {
+        if (savedInstanceState == null) {//从其他应用中可以直接进入到这个应用
             checkForImageIntent(getIntent());
         }
 
@@ -60,18 +58,16 @@ public class MainActivity extends NewDocumentActivity implements Picker.PickList
                 checkRam(MemoryWarningDialog.DoAfter.START_GALLERY);
             }
         });
+
+        //选择图片
         findViewById(R.id.start_batch).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new Picker.Builder(MainActivity.this, MainActivity.this, R.style.AppBaseTheme)
-                        .setPickMode(Picker.PickMode.MULTIPLE_IMAGES)
-                        .setBackBtnInMainActivity(true)
-                        .disableCaptureImageFromCamera()
-                        .build()
-                        .startActivity();
-
+                checkRam(MemoryWarningDialog.DoAfter.START_MIP);
             }
         });
+
+        //处理记录
         findViewById(R.id.document_grid).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -81,11 +77,10 @@ public class MainActivity extends NewDocumentActivity implements Picker.PickList
 
     }
 
-    //NewDocumentActivity 三个需要实现的抽象方法
     @Override
     protected int getParentId() {
         return -1;
-    }
+    }//NewDocumentActivity 需要实现的抽象方法
 
     @Override
     protected void onResume() {
@@ -120,7 +115,7 @@ public class MainActivity extends NewDocumentActivity implements Picker.PickList
         String type = intent.getType();
 
         if (Intent.ACTION_SEND.equals(action) && type != null) {
-            Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+            Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);//
             if (imageUri != null) {
                 loadBitmapFromContentUri(imageUri, ImageSource.INTENT);//加载图片
             } else {
@@ -137,7 +132,6 @@ public class MainActivity extends NewDocumentActivity implements Picker.PickList
 
     /**
      * 如果应用启动之后发现没有安装任何语言，这个时候就会去将assets目录下的tessdata.zip复制到sd卡中，并安装这些默认的语言包
-     * <p/>
      * Start the InstallActivity if possible and needed.
      */
     private void startInstallActivityIfNeeded() {
@@ -147,7 +141,7 @@ public class MainActivity extends NewDocumentActivity implements Picker.PickList
         if (state.equals(Environment.MEDIA_MOUNTED)) {//sd卡存在
             if (installedOCRLanguages.isEmpty()) {//只有在安装语言为空的时候才会去安装,以前不论安装了哪些语言都不再重新安装
                 Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setClassName(this, com.renard.ocr.install.InstallActivity.class.getName());
+                intent.setClassName(this, InstallActivity.class.getName());
                 startActivityForResult(intent, REQUEST_CODE_INSTALL);//进入安装语言包 for result
             }
         } else {
@@ -166,9 +160,9 @@ public class MainActivity extends NewDocumentActivity implements Picker.PickList
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CODE_INSTALL) {
-            if (RESULT_OK != resultCode) {
-                finish();// install failed, quit immediately
+        if (requestCode == REQUEST_CODE_INSTALL) {//安装默认语言包
+            if (RESULT_OK != resultCode) {//安装失败，立即退出
+                finish();
             } // install successfull, show happy fairy or introduction text
         } else {
             super.onActivityResult(requestCode, resultCode, data);
@@ -182,17 +176,4 @@ public class MainActivity extends NewDocumentActivity implements Picker.PickList
         mBusIsRegistered = false;
     }
 
-    @Override
-    public void onPickedSuccessfully(ArrayList<ImageEntry> images) {
-
-        for (ImageEntry image : images) {
-            Log.i(LOG_TAG, image.toString());
-        }
-
-    }
-
-    @Override
-    public void onCancel() {
-
-    }
 }

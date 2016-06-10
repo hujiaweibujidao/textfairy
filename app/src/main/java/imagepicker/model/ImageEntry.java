@@ -7,7 +7,7 @@ import android.provider.MediaStore;
 import java.io.Serializable;
 
 /**
- *
+ * 图片
  *
  * Created by yazeed44 on 6/14/15.
  */
@@ -39,9 +39,7 @@ public class ImageEntry implements Serializable {
 
     @Override
     public String toString() {
-        return "ImageEntry{" +
-                "path='" + path + '\'' +
-                '}';
+        return "ImageEntry{path='" + path + '\'' + '}';
     }
 
     public static class Builder {

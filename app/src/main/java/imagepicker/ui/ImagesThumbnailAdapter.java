@@ -24,11 +24,11 @@ import imagepicker.util.Picker;
 import imagepicker.util.Util;
 
 /**
+ * 图片adapter
  *
  * Created by yazeed44 on 11/23/14.
  */
 public class ImagesThumbnailAdapter extends RecyclerView.Adapter<ImagesThumbnailAdapter.ImageViewHolder> implements Util.OnClickImage {
-
 
     protected final AlbumEntry mAlbum;
     protected final RecyclerView mRecyclerView;
@@ -86,7 +86,6 @@ public class ImagesThumbnailAdapter extends RecyclerView.Adapter<ImagesThumbnail
 
     @Override
     public void onClickImage(View layout, ImageView thumbnail, ImageView check) {
-
         final int position = Util.getPositionOfChild(layout, R.id.image_layout, mRecyclerView);
         final ImageViewHolder holder = (ImageViewHolder) mRecyclerView.getChildViewHolder(layout);
         pickImage(holder, mAlbum.imageList.get(position));
@@ -113,8 +112,9 @@ public class ImagesThumbnailAdapter extends RecyclerView.Adapter<ImagesThumbnail
             holder.itemView.setBackgroundColor(mPickOptions.imageBackgroundColorWhenChecked);
             holder.check.setBackgroundColor(mPickOptions.imageBackgroundColorWhenChecked);
             holder.thumbnail.setColorFilter(mPickOptions.checkedImageOverlayColor);
-            final int padding = mRecyclerView.getContext().getResources().getDimensionPixelSize(R.dimen.image_checked_padding);
-            holder.itemView.setPadding(padding, padding, padding, padding);
+            //final int padding = mRecyclerView.getContext().getResources().getDimensionPixelSize(R.dimen.image_checked_padding);
+            //holder.itemView.setPadding(padding, padding, padding, padding);
+            holder.itemView.setPadding(0, 0, 0, 0);//hujiawei 去掉此处的padding
         } else {
             holder.check.setBackgroundColor(mPickOptions.imageCheckColor);
             holder.itemView.setBackgroundColor(mPickOptions.imageBackgroundColor);
@@ -131,7 +131,6 @@ public class ImagesThumbnailAdapter extends RecyclerView.Adapter<ImagesThumbnail
             holder.videoIcon.setImageDrawable(mVideoIcon);
             holder.videoIcon.setVisibility(View.VISIBLE);
         }
-
     }
 
     public void pickImage(final ImageViewHolder holder, final ImageEntry imageEntry) {
@@ -145,6 +144,7 @@ public class ImagesThumbnailAdapter extends RecyclerView.Adapter<ImagesThumbnail
         drawGrid(holder, imageEntry);
     }
 
+    //ViewHolder
     public static class ImageViewHolder extends RecyclerView.ViewHolder {
         private final ImageView thumbnail;
         private final ImageView check;

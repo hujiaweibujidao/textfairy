@@ -173,6 +173,5 @@
     <string name="auto_analyse_layout">Auto analyse layout</string>
     <string name="settings_others">Other Settings</string>
     <string name="share_text">Share</string>
-
-
+    <string name="no_image_picked">No image picked</string>
 </resources>

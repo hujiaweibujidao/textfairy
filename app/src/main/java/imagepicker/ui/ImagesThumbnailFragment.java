@@ -17,7 +17,8 @@ import imagepicker.util.Picker;
 
 
 /**
- *
+ * 图片列表界面
+ * <p/>
  * Created by yazeed44 on 11/23/14.
  */
 public class ImagesThumbnailFragment extends Fragment {
@@ -55,7 +56,6 @@ public class ImagesThumbnailFragment extends Fragment {
         mImagesRecycler.addItemDecoration(new SpacesItemDecoration(getResources().getDimensionPixelSize(R.dimen.image_spacing)));
     }
 
-
     public void onEvent(final Events.OnClickAlbumEvent event) {
         mImagesRecycler.setAdapter(new ImagesThumbnailAdapter(this, event.albumEntry, mImagesRecycler, mPickOptions));
     }
@@ -68,6 +68,5 @@ public class ImagesThumbnailFragment extends Fragment {
     public void onEvent(final Events.OnUpdateImagesThumbnailEvent redrawImage) {
         mImagesRecycler.getAdapter().notifyDataSetChanged();
     }
-
 
 }

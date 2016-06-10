@@ -72,7 +72,6 @@ public class ImagesPagerFragment extends Fragment implements PhotoViewAttacher.O
     public void onPause() {
         super.onPause();
         EventBus.getDefault().unregister(this);
-
         mDoneFab.hide();
     }
 
@@ -89,7 +88,6 @@ public class ImagesPagerFragment extends Fragment implements PhotoViewAttacher.O
             mDoneFab.show();
             mDoneFab.bringToFront();
         }
-
     }
 
     @Override
@@ -117,7 +115,6 @@ public class ImagesPagerFragment extends Fragment implements PhotoViewAttacher.O
 
 
     public void onEvent(final Events.OnPickImageEvent pickImageEvent) {
-
         mDoneFab.setVisibility(View.VISIBLE);
         mDoneFab.show();
         mDoneFab.bringToFront();

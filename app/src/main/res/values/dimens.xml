@@ -14,8 +14,8 @@
 
     <dimen name="min_grid_size">20mm</dimen>
     <dimen name="default_element_padding">16dp</dimen>
-    <!--<dimen name="grid_spacing">9dip</dimen>-->
     <dimen name="caption_text_size">16sp</dimen>
+    <!--<dimen name="grid_spacing">9dip</dimen>-->
 
     <dimen name="dropshadow_padding_left">5px</dimen>
     <dimen name="dropshadow_padding_right">9px</dimen>
@@ -23,7 +23,6 @@
     <dimen name="dropshadow_padding_bottom">9px</dimen>
 
     <!--mip-->
-
     <dimen name="image_spacing">2dp</dimen>
     <dimen name="image_checked_padding">4dp</dimen>
     <dimen name="fab_margin">16dp</dimen>

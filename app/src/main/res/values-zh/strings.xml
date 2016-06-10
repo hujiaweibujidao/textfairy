@@ -98,5 +98,6 @@
     <string name="share_chooser_title">选择分享的方式</string>
     <string name="share_text">分享</string>
     <string name="stop">停止</string>
+    <string name="no_image_picked">未选择任何图片</string>
 
 </resources>

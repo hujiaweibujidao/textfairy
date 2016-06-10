@@ -27,8 +27,8 @@ import imagepicker.util.Util;
 
 
 /**
- * 相册列表
- *
+ * 相册列表界面
+ * <p/>
  * Created by yazeed44 on 11/22/14.
  */
 public class AlbumsFragment extends Fragment implements RequestListener<ArrayList> {
@@ -79,17 +79,17 @@ public class AlbumsFragment extends Fragment implements RequestListener<ArrayLis
     }
 
     @Override
-    public void onRequestFailure(SpiceException spiceException) {
+    public void onRequestFailure(SpiceException spiceException) {//RequestListener
         Log.e(TAG, spiceException.getMessage());
     }
 
     @Override
-    public void onRequestSuccess(final ArrayList albumEntries) {
+    public void onRequestSuccess(final ArrayList albumEntries) {//RequestListener
         if (hasLoadedSuccessfully(albumEntries)) {
             mAlbumList = albumEntries;
 
             final AlbumsAdapter albumsAdapter = new AlbumsAdapter(this, albumEntries, mAlbumsRecycler);
-            mAlbumsRecycler.setAdapter(albumsAdapter);
+            mAlbumsRecycler.setAdapter(albumsAdapter);//
 
             EventBus.getDefault().postSticky(new Events.OnAlbumsLoadedEvent(mAlbumList));
             if (!mShouldPerformClickOnCapturedAlbum) {
@@ -104,7 +104,6 @@ public class AlbumsFragment extends Fragment implements RequestListener<ArrayLis
                     } else {
                         mAlbumsRecycler.postDelayed(this, 100);
                     }
-
                 }
             }, 100);
         }
@@ -114,7 +113,6 @@ public class AlbumsFragment extends Fragment implements RequestListener<ArrayLis
         mAlbumsRecycler.setHasFixedSize(true);
         final GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), getResources().getInteger(R.integer.num_columns_albums));
         gridLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-
         mAlbumsRecycler.setLayoutManager(gridLayoutManager);
     }
 
@@ -133,19 +131,18 @@ public class AlbumsFragment extends Fragment implements RequestListener<ArrayLis
 
     public void onEvent(final Events.OnReloadAlbumsEvent reloadAlbums) {
         mShouldPerformClickOnCapturedAlbum = true;
-
         EventBus.getDefault().removeStickyEvent(Events.OnAlbumsLoadedEvent.class);
         mAlbumList = null;
         setupAdapter();
     }
 
     private void pickLatestCapturedImage() {
-            for (final AlbumEntry albumEntry : mAlbumList) {
-                if (albumEntry.name.equals(PickerActivity.CAPTURED_IMAGES_ALBUM_NAME)) {
-                    EventBus.getDefault().postSticky(new Events.OnPickImageEvent(Util.getAllPhotosAlbum(mAlbumList).imageList.get(0)));
-                    mAlbumsRecycler.getChildAt(mAlbumList.indexOf(albumEntry)).performClick();
-                }
+        for (final AlbumEntry albumEntry : mAlbumList) {
+            if (albumEntry.name.equals(PickerActivity.CAPTURED_IMAGES_ALBUM_NAME)) {
+                EventBus.getDefault().postSticky(new Events.OnPickImageEvent(Util.getAllPhotosAlbum(mAlbumList).imageList.get(0)));
+                mAlbumsRecycler.getChildAt(mAlbumList.indexOf(albumEntry)).performClick();
             }
+        }
     }
 
 }

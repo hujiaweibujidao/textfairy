@@ -55,21 +55,6 @@ public class InstallActivity extends MonitoredActivity implements InstallTaskFra
     @Bind(R.id.fairy_text)
     protected TextView mFairyText;
 
-//    @Bind(R.id.content_view)
-//    protected View mContentView;
-//    @Bind(R.id.fairy_container)
-//    protected View mFairyContainer;
-//    @Bind(R.id.fairy_text_bubble)
-//    protected View mFairySpeechBubble;
-//    @Bind(R.id.tip1)
-//    protected View mTip1;
-//    @Bind(R.id.tip2)
-//    protected View mTip2;
-//    @Bind(R.id.tip3)
-//    protected View mTip3;
-//    @Bind(R.id.promo)
-//    protected View mYoutube;
-
     private InstallTaskFragment mInstallTaskFragment;
     private AnimationDrawable mFairyAnimation;
 
@@ -109,33 +94,7 @@ public class InstallActivity extends MonitoredActivity implements InstallTaskFra
         supportFragmentManager.beginTransaction().add(mInstallTaskFragment, TAG_TASK_FRAGMENT).commitAllowingStateLoss();
     }
 
-
-//    @OnClick(R.id.promo)
-//    public void clickOnYoutubeLink() {
-//        mAnalytics.sendClickYoutube();
-//        final String link = getString(R.string.youtube_promo_link);
-//        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
-//        startActivity(intent);
-//    }
-
-
     private void startInstallAnimation() {
-
-//        mTip1.setAlpha(0);
-//        mTip2.setAlpha(0);
-//        mTip3.setAlpha(0);
-//        mYoutube.setAlpha(0);
-//
-//        ObjectAnimator anim1 = ObjectAnimator.ofFloat(mTip1, "alpha", 1);
-//        ObjectAnimator anim2 = ObjectAnimator.ofFloat(mTip2, "alpha", 1);
-//        ObjectAnimator anim3 = ObjectAnimator.ofFloat(mTip3, "alpha", 1);
-//        ObjectAnimator anim4 = ObjectAnimator.ofFloat(mYoutube, "alpha", 1);
-//        AnimatorSet set = new AnimatorSet();
-//        set.setStartDelay(300);
-//        set.setDuration(600);
-//        set.playTogether(anim1, anim2, anim3, anim4);
-//        set.start();
-
         mFairyAnimation.start();
         mFairyText.setText(R.string.installing);
     }
@@ -204,22 +163,7 @@ public class InstallActivity extends MonitoredActivity implements InstallTaskFra
 
     @Override
     public void onProgressUpdate(int progress) {//去掉这里的复杂的fairy移动动画
-//        final float translateX = getTranslateX(progress);
-//        translateTextfairy((int) translateX);
     }
-
-//    private void translateTextfairy(int translateX) {
-//        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) mFairyContainer.getLayoutParams();
-//        lp.leftMargin = translateX;
-//        mFairyContainer.setLayoutParams(lp);
-//    }
-//
-//    private float getTranslateX(float progress) {
-//        final int fairyEndX = mContentView.getWidth() / 2;
-//        final int fairyStartX = mImageViewFairy.getWidth() / 2;
-//        final int maxTravelDistance = Math.min(fairyEndX - fairyStartX, mContentView.getWidth() - mFairyContainer.getWidth());
-//        return maxTravelDistance * (progress / 100);
-//    }
 
     @Override
     public void onCancelled() {

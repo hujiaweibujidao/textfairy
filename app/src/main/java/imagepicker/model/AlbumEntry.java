@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 /**
- *
+ * 相册
  *
  * Created by yazeed44 on 6/14/15.
  */
