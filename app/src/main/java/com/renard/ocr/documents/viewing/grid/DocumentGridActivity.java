@@ -289,7 +289,7 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
     //初始化gridview
     private void initGridView() {
         mGridView = (GridView) findViewById(R.id.gridview);
-        mDocumentAdapter = new DocumentGridAdapter(this, R.layout.document_element, this);
+        mDocumentAdapter = new DocumentGridAdapter(this, R.layout.element_document, this);
 
         registerForContextMenu(mGridView);//toread
 

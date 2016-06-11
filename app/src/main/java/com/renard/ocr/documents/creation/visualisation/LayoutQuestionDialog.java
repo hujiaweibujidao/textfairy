@@ -152,7 +152,6 @@ public class LayoutQuestionDialog extends DialogFragment {
             }
         });
 
-
         final Spinner langButton = (Spinner) layout.findViewById(R.id.button_language);
         List<OcrLanguage> installedLanguages = OcrLanguageDataStore.getInstalledOCRLanguages(context);
 
@@ -209,7 +208,6 @@ public class LayoutQuestionDialog extends DialogFragment {
 
 
         return builder.create();
-
     }
 
 }

@@ -174,4 +174,10 @@
     <string name="settings_others">Other Settings</string>
     <string name="share_text">Share</string>
     <string name="no_image_picked">No image picked</string>
+    <string name="dialog_settings">Settings</string>
+    <string name="default_mode">Default Page Segment Mode</string>
+    <string name="mode_table">Table</string>
+    <string name="mode_image">Image</string>
+    <string name="mode_v_text">Vertical Text</string>
+    <string name="mode_h_text">Horizontal Text</string>
 </resources>

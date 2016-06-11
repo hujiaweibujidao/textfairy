@@ -49,14 +49,12 @@ public class OcrLanguage implements Parcelable {
         long size = in.readLong();
         boolean isInstalled = in.readInt() != 0;
         mInstallStatus = new InstallStatus(isInstalled, size);
-
     }
 
     public OcrLanguage(final String value, final String displayText, boolean installed, long size) {
         mInstallStatus = new InstallStatus(installed, size);
         mValue = value;
         mDisplayText = displayText;
-
     }
 
     public static final Creator CREATOR = new Creator() {

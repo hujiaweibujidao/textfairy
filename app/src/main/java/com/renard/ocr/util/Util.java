@@ -40,8 +40,8 @@ import android.util.Log;
 
 import com.googlecode.leptonica.android.Pix;
 import com.googlecode.leptonica.android.WriteFile;
-import com.renard.ocr.base.MonitoredActivity;
 import com.renard.ocr.R;
+import com.renard.ocr.base.MonitoredActivity;
 import com.renard.ocr.documents.viewing.grid.FastBitmapDrawable;
 
 import java.io.File;
@@ -158,11 +158,10 @@ public class Util {
         return null;
     }
 
+    //获取指定文档的缩略图
     public static FastBitmapDrawable getDocumentThumbnail(int documentId) {
         FastBitmapDrawable drawable;
-
         drawable = mCache.get(documentId);
-
         if (drawable == null) {
             final Bitmap bitmap = loadDocumentThumbnail(documentId);
             if (bitmap != null) {
@@ -233,6 +232,7 @@ public class Util {
         return o;
     }
 
+    //确定缩放因子
     public static int determineScaleFactor(int w, int h, int maxWidth, int maxHeight) {
         int scale = 1;
         if (w > maxWidth || h > maxHeight) {
@@ -242,6 +242,7 @@ public class Util {
     }
 
     /***
+     * 根据uri获取对应的文件路径
      * returns file path for the image at the given uri
      */
     public static String getPathForUri(Context context, Uri uri) {
@@ -278,7 +279,7 @@ public class Util {
 
     }
 
-    //name是last_scan，文件是png类型
+    //保存pix到指定目录，name是last_scan，文件是png类型
     public static File savePixToDir(final Pix pix, final String name, File picDir) throws IOException {
         final String fileName = name + ".png";
         if (!picDir.exists()) {
@@ -299,6 +300,7 @@ public class Util {
         return image;
     }
 
+    //保存pix到sd中
     public static File savePixToSD(final Pix pix, final String name) throws IOException {
         File picDir = new File(Environment.getExternalStorageDirectory(), IMAGE_DIRECTORY);
         return savePixToDir(pix, name, picDir);
@@ -343,7 +345,7 @@ public class Util {
 
     /**
      * 创建一个缩略图并放入到内存缓存中
-     *
+     * <p/>
      * creates a thumbnail file and puts it into the in memory cache
      */
     public static void createThumbnail(final Context context, final File image, final int documentId) {
@@ -373,23 +375,20 @@ public class Util {
                 }
             }
         }
-
     }
 
-
-	/*
+    /*
      * Compute the sample size as a function of minSideLength and
-	 * maxNumOfPixels. minSideLength is used to specify that minimal width or
-	 * height of a bitmap. maxNumOfPixels is used to specify the maximal size in
-	 * pixels that are tolerable in terms of memory usage.
-	 * 
-	 * The function returns a sample size based on the constraints. Both size
-	 * and minSideLength can be passed in as IImage.UNCONSTRAINED, which
-	 * indicates no care of the corresponding constraint. The functions prefers
-	 * returning a sample size that generates a smaller bitmap, unless
-	 * minSideLength = IImage.UNCONSTRAINED.
-	 */
-
+     * maxNumOfPixels. minSideLength is used to specify that minimal width or
+     * height of a bitmap. maxNumOfPixels is used to specify the maximal size in
+     * pixels that are tolerable in terms of memory usage.
+     *
+     * The function returns a sample size based on the constraints. Both size
+     * and minSideLength can be passed in as IImage.UNCONSTRAINED, which
+     * indicates no care of the corresponding constraint. The functions prefers
+     * returning a sample size that generates a smaller bitmap, unless
+     * minSideLength = IImage.UNCONSTRAINED.
+     */
     private static Bitmap transform(Matrix scaler, Bitmap source, int targetWidth, int targetHeight, boolean scaleUp) {
         int deltaX = source.getWidth() - targetWidth;
         int deltaY = source.getHeight() - targetHeight;
@@ -454,22 +453,14 @@ public class Util {
         return b2;
     }
 
-    //后台任务的封装类，它能监听某个Activity的生命周期
+    //后台任务的封装类，它既在后台执行某个任务，又能监听某个Activity的生命周期，同时控制着前台显示的进度对话框
     private static class BackgroundJob extends MonitoredActivity.LifeCycleAdapter implements Runnable {
 
-        private final MonitoredActivity mActivity;
         @Nullable
         private final ProgressDialog mDialog;//后台任务执行的时候显示的进度条对话框
         private final Runnable mJob;//后台执行的任务
-        private final Handler mHandler;//
-
-        private final Runnable mCleanupRunner = new Runnable() {
-            public void run() {
-                mActivity.removeLifeCycleListener(BackgroundJob.this);
-                if (mDialog != null && mDialog.getWindow() != null)
-                    mDialog.dismiss();
-            }
-        };
+        private final MonitoredActivity mActivity;//当前的activity
+        private final Handler mHandler;//传入进来的handler用于发送runnable
 
         public BackgroundJob(MonitoredActivity activity, Runnable job, @Nullable ProgressDialog dialog, Handler handler) {
             mActivity = activity;
@@ -481,16 +472,24 @@ public class Util {
 
         public void run() {
             try {
-                mJob.run();
+                mJob.run();//运行runnable
             } finally {
                 mHandler.post(mCleanupRunner);//任务结束之后发送消息
             }
         }
 
+        private final Runnable mCleanupRunner = new Runnable() {
+            public void run() {
+                mActivity.removeLifeCycleListener(BackgroundJob.this);
+                if (mDialog != null && mDialog.getWindow() != null)
+                    mDialog.dismiss();
+            }
+        };
+
         @Override
         public void onActivityDestroyed(MonitoredActivity activity) {
-            // We get here only when the onDestroyed being called before
-            // the mCleanupRunner. So, run it now and remove it from the queue
+            // We get here only when the onDestroyed being called before the mCleanupRunner.
+            // So, run it now and remove it from the queue
             mCleanupRunner.run();
             mHandler.removeCallbacks(mCleanupRunner);
         }
@@ -510,7 +509,19 @@ public class Util {
         }
     }
 
+    //开启一个后台任务，前台显示进度对话框
+    public static void startBackgroundJob(MonitoredActivity activity, String title, String message, Runnable job, Handler handler) {
+        if (!activity.isFinishing()) {
+            ProgressDialog dialog = ProgressDialog.show(activity, title, message, true, false);
+            new Thread(new BackgroundJob(activity, job, dialog, handler)).start();
+        } else {
+            new Thread(new BackgroundJob(activity, job, null, handler)).start();
+        }
+    }
+
     /**
+     * 获取剩余存储空间大小
+     *
      * @return the free space on sdcard in bytes
      */
     public static long GetFreeSpaceB() {
@@ -524,15 +535,9 @@ public class Util {
         }
     }
 
-    public static void startBackgroundJob(MonitoredActivity activity, String title, String message, Runnable job, Handler handler) {
-        if (!activity.isFinishing()) {
-            ProgressDialog dialog = ProgressDialog.show(activity, title, message, true, false);
-            new Thread(new BackgroundJob(activity, job, dialog, handler)).start();
-        } else {
-            new Thread(new BackgroundJob(activity, job, null, handler)).start();
-        }
-    }
-
+    /**
+     * 复制数据
+     */
     public static long copy(InputStream input, OutputStream output) throws IOException {
         byte[] buffer = new byte[1024 * 4];
         long count = 0;

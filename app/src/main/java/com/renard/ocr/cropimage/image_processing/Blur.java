@@ -30,14 +30,12 @@ public class Blur {
         System.loadLibrary("image_processing_jni");
     }
 
-
     public static BlurDetectionResult blurDetect(Pix pixs) {
         if (pixs == null) {
             throw new IllegalArgumentException("Source pix must be non-null");
         }
         return nativeBlurDetect(pixs.getNativePix());
     }
-
 
     // ***************
     // * NATIVE CODE *

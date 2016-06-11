@@ -28,12 +28,10 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 
-import com.renard.ocr.base.MonitoredActivity;
 import com.renard.ocr.R;
+import com.renard.ocr.base.MonitoredActivity;
 import com.renard.ocr.documents.viewing.single.DocumentActivity.DocumentContainerFragment;
-import com.renard.ocr.util.PreferencesUtils;
 import com.viewpagerindicator.CirclePageIndicator;
 
 /**
@@ -82,14 +80,14 @@ public class DocumentPagerFragment extends Fragment implements DocumentContainer
         }
     }
 
-    public void applyTextPreferences() {
-        final int count = mPager.getChildCount();
-        for (int i = 0; i < count; i++) {
-            View v = mPager.getChildAt(i);
-            EditText e = (EditText) v.findViewById(R.id.editText_document);
-            PreferencesUtils.applyTextPreferences(e, getActivity());
-        }
-    }
+//    public void applyTextPreferences() {
+//        final int count = mPager.getChildCount();
+//        for (int i = 0; i < count; i++) {
+//            View v = mPager.getChildAt(i);
+//            EditText e = (EditText) v.findViewById(R.id.editText_document);
+//            PreferencesUtils.applyTextPreferences(e, getActivity());
+//        }
+//    }
 
     public void setDisplayedPage(final int pageno) {
         mPager.setCurrentItem(pageno, true);

@@ -30,10 +30,10 @@
     <string name="text_is_in">选择语言</string>
     <string name="cancel">取消</string>
     <string name="start_scan">开始</string>
-    <string name="layout_simple">简单布局(只有一列)</string>
-    <string name="layout_complex">复杂布局(不止一列)</string>
+    <string name="layout_simple">简单布局</string>
+    <string name="layout_complex">复杂布局</string>
     <string name="progress_ocr">正在读取文本</string>
-    <string name="progress_choose_columns">请选择你需要的内容</string>
+    <string name="progress_choose_columns">选择需要处理的内容</string>
     <string name="progress_analyse_layout">正在分析布局</string>
     <string name="progress_assemble_pix">正在整理图片</string>
     <string name="progress_dewarp">正在矫正文本</string>
@@ -60,7 +60,7 @@
     <string name="memory_low">内存不足</string>
     <string name="memory_low_warning">如果继续的话应用可能崩溃</string>
     <string name="memory_low_description">当前手机只有 %d MB 剩余内存,请关闭一些应用或者重启手机</string>
-    <string name="progress_image_detection">正在搜索文本</string>
+    <string name="progress_image_detection">正在搜索内容</string>
     <string name="camera_app_error">相机应用出错</string>
     <string name="camera_app_not_found">未找到相机应用</string>
     <string name="camera_no_image_returned">相机应用未返回图片</string>
@@ -99,5 +99,12 @@
     <string name="share_text">分享</string>
     <string name="stop">停止</string>
     <string name="no_image_picked">未选择任何图片</string>
+    <string name="please_tap_on_column">请先选择需要处理的内容</string>
+    <string name="dialog_settings">应用设置</string>
+    <string name="default_mode">默认版式</string>
+    <string name="mode_table">表格</string>
+    <string name="mode_image">图片</string>
+    <string name="mode_v_text">竖排文本</string>
+    <string name="mode_h_text">横排文本</string>
 
 </resources>

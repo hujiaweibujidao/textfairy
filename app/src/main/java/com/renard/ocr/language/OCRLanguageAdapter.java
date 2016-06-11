@@ -51,7 +51,6 @@ public class OCRLanguageAdapter extends BaseAdapter implements ListAdapter {
         return true;
     }
 
-
     private static class ViewHolder {
         ViewFlipper mFlipper;
         TextView mTextViewLanguage;
@@ -70,7 +69,6 @@ public class OCRLanguageAdapter extends BaseAdapter implements ListAdapter {
         mLanguages.addAll(languages);
         Collections.sort(mLanguages, mLanguageComparator);
     }
-
 
     public void add(OcrLanguage language) {
         mLanguages.add(language);
@@ -102,7 +100,7 @@ public class OCRLanguageAdapter extends BaseAdapter implements ListAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
         if (convertView == null) {
-            convertView = mInflater.inflate(R.layout.ocr_language_list_item, null);
+            convertView = mInflater.inflate(R.layout.language_list_item, null);
             holder = new ViewHolder();
             holder.mFlipper = (ViewFlipper) convertView.findViewById(R.id.viewFlipper);
             holder.mTextViewLanguage = (TextView) convertView.findViewById(R.id.textView_language);

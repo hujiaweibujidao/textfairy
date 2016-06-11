@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_above="@+id/main_actions"
+    android:layout_below="@+id/toolbar"
+    android:orientation="vertical"
+    android:padding="@dimen/activity_horizontal_margin">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="left"
+        android:padding="@dimen/default_padding"
+        android:text="@string/default_language"
+        android:textColor="@color/grey3"
+        android:textSize="14sp"/>
+
+    <RadioGroup
+        android:id="@+id/settings_rg_language"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/settings_rb_chisim"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/default_padding_half"
+            android:text="@string/language_chinese_simple"/>
+
+        <RadioButton
+            android:id="@+id/settings_rb_chitra"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/default_padding_half"
+            android:text="@string/language_chinese_tradition"/>
+
+        <RadioButton
+            android:id="@+id/settings_rb_eng"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/default_padding_half"
+            android:text="@string/language_english"/>
+
+    </RadioGroup>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="left"
+        android:padding="@dimen/default_padding"
+        android:text="@string/default_layout"
+        android:textColor="@color/grey3"
+        android:textSize="14sp"/>
+
+    <RadioGroup
+        android:id="@+id/settings_rg_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:dividerPadding="@dimen/default_padding_half"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/settings_rb_simple"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/default_padding_half"
+            android:text="@string/layout_simple"/>
+
+        <RadioButton
+            android:id="@+id/settings_rb_complex"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/default_padding_half"
+            android:text="@string/layout_complex"/>
+
+    </RadioGroup>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="left"
+        android:padding="@dimen/default_padding"
+        android:text="@string/default_mode"
+        android:textColor="@color/grey3"
+        android:textSize="14sp"/>
+
+    <worker8.com.github.radiogroupplus.RadioGroupPlus
+        android:id="@+id/settings_rg_mode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/settings_rb_htext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/default_padding_half"
+                android:text="@string/mode_h_text"/>
+
+            <RadioButton
+                android:id="@+id/settings_rb_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/default_padding_half"
+                android:text="@string/mode_image"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/settings_rb_vtext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/default_padding_half"
+                android:text="@string/mode_v_text"/>
+
+            <RadioButton
+                android:id="@+id/settings_rb_table"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/default_padding_half"
+                android:text="@string/mode_table"/>
+
+        </LinearLayout>
+
+    </worker8.com.github.radiogroupplus.RadioGroupPlus>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="left"
+        android:padding="@dimen/default_padding"
+        android:text="@string/settings_others"
+        android:textColor="@color/grey3"
+        android:textSize="14sp"/>
+
+    <CheckBox
+        android:id="@+id/settings_cb_autolayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:padding="@dimen/default_padding_half"
+        android:text="@string/auto_analyse_layout"/>
+
+</LinearLayout>

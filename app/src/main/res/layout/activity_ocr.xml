@@ -23,7 +23,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-
+        android:layout_marginBottom="@dimen/default_padding"
         android:background="@color/start_activity_buttons_background">
 
         <Button
@@ -31,7 +31,6 @@
             android:theme="@style/ColoredButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/default_padding"
             android:gravity="center"
             android:text="@string/button_column_pick_completed"
             android:textSize="18sp"

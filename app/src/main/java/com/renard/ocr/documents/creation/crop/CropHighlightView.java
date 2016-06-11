@@ -30,12 +30,14 @@ import android.widget.ImageView;
 
 import com.renard.ocr.R;
 
-//用于裁剪图片的曲边梯形框框
-
-// This class is used by CropImage to display a highlighted cropping trapezoid
-// overlayed with the image. There are two coordinate spaces in use. One is
-// image, another is screen. computeLayout() uses mMatrix to map from image
-// space to screen space.
+/**
+ * 用于裁剪图片的曲边梯形框框
+ *
+ * This class is used by CropImage to display a highlighted cropping trapezoid
+ * overlayed with the image. There are two coordinate spaces in use. One is
+ * image, another is screen. computeLayout() uses mMatrix to map from image
+ * space to screen space.
+ */
 class CropHighlightView implements HighLightView {
 
     @SuppressWarnings("unused")
@@ -66,7 +68,6 @@ class CropHighlightView implements HighLightView {
     private final int mCropEdgeHandleRadius;
     private final float mHysteresis;
 
-
     public CropHighlightView(ImageView ctx, Rect imageRect, RectF cropRect) {
         mContext = ctx;
         final int progressColor = mContext.getResources().getColor(R.color.progress_color);
@@ -76,10 +77,10 @@ class CropHighlightView implements HighLightView {
         final int edgeWidth = mContext.getResources().getDimensionPixelSize(R.dimen.crop_edge_width);
         mMatrix = new Matrix(ctx.getImageMatrix());
         Log.i(LOG_TAG, "image = " + imageRect.toString() + " crop = " + cropRect.toString());
+        //image = Rect(0, 0 - 1552, 2096) crop = RectF(155.0, 427.0, 1396.0, 1668.0)
         mTrapzoid = new CroppingTrapezoid(cropRect, imageRect);
 
         mDrawRect = computeLayout();
-
         mFocusPaint.setARGB(125, 50, 50, 50);
         mFocusPaint.setStyle(Paint.Style.FILL);
 
@@ -88,7 +89,6 @@ class CropHighlightView implements HighLightView {
         mOutlinePaint.setStyle(Paint.Style.FILL_AND_STROKE);
         mOutlinePaint.setAntiAlias(true);
     }
-
 
     public void setFocus(boolean f) {
         mIsFocused = f;

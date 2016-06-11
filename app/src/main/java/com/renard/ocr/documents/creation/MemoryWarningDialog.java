@@ -20,7 +20,6 @@ import com.renard.ocr.documents.viewing.single.TopDialogFragment;
 public class MemoryWarningDialog extends TopDialogFragment {
 
     private static final String SCREEN_NAME = "Memory Warning Dialog";
-
     public static final String TAG = MemoryWarningDialog.class.getSimpleName();
 
     private static final String EXTRA_MEMORY = "extra_available_memory";
@@ -45,6 +44,7 @@ public class MemoryWarningDialog extends TopDialogFragment {
         final DoAfter doAfter = DoAfter.values()[getArguments().getInt(EXTRA_DO_AFTER)];
         final long availableMegs = getArguments().getLong(EXTRA_MEMORY);
         getAnalytics().sendScreenView(SCREEN_NAME);
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this.getActivity());
         View view = getActivity().getLayoutInflater().inflate(R.layout.dialog_memory_warning, null);
         TextView description = (TextView) view.findViewById(R.id.memory_low_description);

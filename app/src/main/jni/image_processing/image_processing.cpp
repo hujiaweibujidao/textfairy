@@ -35,7 +35,8 @@ using namespace std;
 #ifdef __cplusplus
 extern "C" {
 #endif  /* __cplusplus */
-    
+
+    //类OCR中的几个方法，都将在native层被调用。在nativeInit方法中这些方法被赋值，随后它们就可以被多次调用了
     static jmethodID onProgressImage, onProgressValues, onProgressText, onLayoutElements, onUTF8Result, onLayoutPix;
     
     static JNIEnv *cachedEnv;
@@ -43,40 +44,17 @@ extern "C" {
     static FILE *inputFile;
     static int pipes[2];
 
-
     jint JNI_OnLoad(JavaVM* vm, void* reserved) {
         return JNI_VERSION_1_6;
     }
 
-    
-    void Java_com_googlecode_tesseract_android_OCR_nativeInit(JNIEnv *env, jobject _thiz) {
-        jclass cls = env->FindClass("com/googlecode/tesseract/android/OCR");
-        onProgressImage = env->GetMethodID(cls, "onProgressImage", "(J)V");
-        onProgressText = env->GetMethodID(cls, "onProgressText", "(I)V");
-        onLayoutElements = env->GetMethodID(cls, "onLayoutElements", "(II)V");
-        onUTF8Result = env->GetMethodID(cls, "onUTF8Result", "(Ljava/lang/String;)V");
-        onLayoutPix = env->GetMethodID(cls, "onLayoutPix", "(J)V");
-        
-    }
-    jstring Java_com_googlecode_tesseract_android_OCR_stopCaptureLogs(JNIEnv *env, jobject _thiz) {
-        char readBuffer[256];
-        std:stringstream logbuffer;
-        while (fgets(readBuffer, sizeof readBuffer, inputFile) != NULL) {
-            logbuffer<<readBuffer;
-            __android_log_print(ANDROID_LOG_ERROR, "stderr", readBuffer);
-        }
-
-        close(pipes[0]);
-        fclose(inputFile);
-        const std::string& tmp = logbuffer.str();
-        const char* cstr = tmp.c_str();
-        return env->NewStringUTF(cstr);
+    void JNI_OnUnload(JavaVM *vm, void *reserved) {
     }
 
+    //开始记录日志
     void Java_com_googlecode_tesseract_android_OCR_startCaptureLogs(JNIEnv *env, jobject _thiz) {
         int lWriteFD = dup(STDERR_FILENO);
-        if ( lWriteFD < 0 )
-        {
+        if ( lWriteFD < 0 ) {
             LOGE("Unable to get STDERR file descriptor.");
             return;
         }
@@ -97,42 +75,68 @@ extern "C" {
             return;
         }
     }
-    
-    void JNI_OnUnload(JavaVM *vm, void *reserved) {
+
+    //结束记录日志
+    jstring Java_com_googlecode_tesseract_android_OCR_stopCaptureLogs(JNIEnv *env, jobject _thiz) {
+        char readBuffer[256];
+        std:stringstream logbuffer;
+        while (fgets(readBuffer, sizeof readBuffer, inputFile) != NULL) {
+            logbuffer<<readBuffer;
+            __android_log_print(ANDROID_LOG_ERROR, "stderr", readBuffer);
+        }
+
+        close(pipes[0]);
+        fclose(inputFile);
+        const std::string& tmp = logbuffer.str();
+        const char* cstr = tmp.c_str();
+        return env->NewStringUTF(cstr);
     }
-    
+
+    //几个常用的方法，初始化和重置env和object的操作
     void initStateVariables(JNIEnv* env, jobject *object) {
         cachedEnv = env;
         cachedObject = object;
     }
-    
+
     void resetStateVariables() {
         cachedEnv = NULL;
         cachedObject = NULL;
     }
-    
+
     bool isStateValid() {
         if (cachedEnv != NULL && cachedObject != NULL) {
             return true;
         } else {
             LOGI("state is cancelled");
             return false;
-            
         }
     }
-    
+
+    //初始化就是设置当前的method变量指向对应的java类的method
+    void Java_com_googlecode_tesseract_android_OCR_nativeInit(JNIEnv *env, jobject _thiz) {
+        jclass cls = env->FindClass("com/googlecode/tesseract/android/OCR");
+        onProgressImage = env->GetMethodID(cls, "onProgressImage", "(J)V");
+        onProgressText = env->GetMethodID(cls, "onProgressText", "(I)V");
+        onLayoutElements = env->GetMethodID(cls, "onLayoutElements", "(II)V");
+        onUTF8Result = env->GetMethodID(cls, "onUTF8Result", "(Ljava/lang/String;)V");
+        onLayoutPix = env->GetMethodID(cls, "onLayoutPix", "(J)V");
+    }
+
+    //调用onProgressText方法，第三个参数是message的id
     void messageJavaCallback(int message) {
         if (isStateValid()) {
             cachedEnv->CallVoidMethod(*cachedObject, onProgressText, message);
         }
     }
-    
+
+    //调用onProgressImage方法，第三个方法是pix的long地址
     void pixJavaCallback(Pix* pix) {
         if (isStateValid()) {
             cachedEnv->CallVoidMethod(*cachedObject, onProgressImage, (jlong) pix);
         }
     }
-    
+
+    //调用onLayoutPix
     void callbackLayout(const Pix* pixpreview) {
         if (isStateValid()) {
             cachedEnv->CallVoidMethod(*cachedObject, onLayoutPix, (jlong)pixpreview);
@@ -140,7 +144,7 @@ extern "C" {
         messageJavaCallback(MESSAGE_ANALYSE_LAYOUT);
     }
     
-    
+    //在startOCRForComplexLayout中被调用，合并选中的部分片段 combineSelectedPixa
     jlongArray Java_com_googlecode_tesseract_android_OCR_combineSelectedPixa(JNIEnv *env, jobject thiz, jlong nativePixaText, jlong nativePixaImage, jintArray selectedTexts, jintArray selectedImages) {
         LOGV(__FUNCTION__);
         Pixa *pixaTexts = (PIXA *) nativePixaText;
@@ -176,30 +180,30 @@ extern "C" {
         env->ReleaseIntArrayElements(selectedImages, imageindexes, 0);
         return result;
     }
-    
-    
-    
+
+    //分析布局，OCR类中的startLayoutAnalysis方法调用到这个方法。需要注意的是这个方法还会调用java层的onLayoutElements方法以完成布局！
     jint Java_com_googlecode_tesseract_android_OCR_nativeAnalyseLayout(JNIEnv *env, jobject thiz, jint nativePix) {
         LOGV(__FUNCTION__);
         Pix *pixOrg = (PIX *) nativePix;
         Pix* pixTextlines = NULL;
-        Pixa* pixaTexts, *pixaImages;
+        Pixa* pixaTexts, *pixaImages;//文本片段集合，图片片段集合
         initStateVariables(env, &thiz);
         
         Pix* pixb, *pixhm;
-        messageJavaCallback(MESSAGE_IMAGE_DETECTION);
+        messageJavaCallback(MESSAGE_IMAGE_DETECTION);//MESSAGE_IMAGE_DETECTION 搜索图片、文本
         
         PixBinarizer binarizer(false);
         Pix* pixOrgClone = pixClone(pixOrg);
         pixb = binarizer.binarize(pixOrgClone, pixJavaCallback);
-        pixJavaCallback(pixb);
+        pixJavaCallback(pixb);//
         
 //        SkewCorrector skewCorrector(false);
 //        Pix* pixbRotated = skewCorrector.correctSkew(pixb, NULL);
 //        pixDestroy(&pixb);
 //        pixb = pixbRotated;
 //        pixJavaCallback(pixb);
-        
+
+        //这里应该是自动分析布局的方法调用
         segmentComplexLayout(pixOrg, NULL, pixb, &pixaImages, &pixaTexts, callbackLayout, true);
         
         if (isStateValid()) {
@@ -209,7 +213,8 @@ extern "C" {
         resetStateVariables();
         return (jint) 0;
     }
-    
+
+    //检测模糊状态
     jobject Java_com_renard_ocr_cropimage_image_1processing_Blur_nativeBlurDetect(JNIEnv *env, jobject thiz, jlong nativePix) {
         Pix *pixOrg = (PIX *) nativePix;
         PixBlurDetect blurDetector(true);
@@ -221,14 +226,15 @@ extern "C" {
         boxGetGeometry(maxBlurLoc,&x,&y,&w,&h);
         //pixRenderBox(pixBlended,maxBlurLoc,2,L_SET_PIXELS);
         log("pix = %p, blur=%f, box=(%i,%i - %i,%i)processing time %f\n",pixBlended, blurValue,x,y,w,h,stopTimerNested(timer));
+        //(native): pix = 0xde79ae78, blur=0.203324, box=(739,520 - 6,4)processing time 1.240000
+
         //create result
         jclass cls = env->FindClass("com/renard/ocr/cropimage/image_processing/BlurDetectionResult");
         jmethodID constructor = env->GetMethodID(cls, "<init>", "(JDJ)V");
         return env->NewObject(cls, constructor, (jlong)pixBlended, (jdouble)blurValue, (jlong)maxBlurLoc);
     }
     
-    
-    
+    //在OCR的startOCRForSimpleLayout方法中调用，返回的是二值化并且矫正过后的图片
     jlong Java_com_googlecode_tesseract_android_OCR_nativeOCRBook(JNIEnv *env, jobject thiz, jlong nativePix) {
         LOGV(__FUNCTION__);
         Pix *pixOrg = (PIX *) nativePix;
@@ -236,11 +242,8 @@ extern "C" {
         initStateVariables(env, &thiz);
 
         bookpage(pixOrg, &pixText , messageJavaCallback, pixJavaCallback, false);
-
         resetStateVariables();
-        
         return (jlong)pixText;
-        
     }
     
 #ifdef __cplusplus

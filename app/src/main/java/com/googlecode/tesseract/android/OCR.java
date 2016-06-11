@@ -46,7 +46,7 @@ import java.io.File;
  */
 public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgressListener {
 
-    private static final String TAG = OCR.class.getSimpleName();
+    //private static final String TAG = OCR.class.getSimpleName();
 
     public static final int MESSAGE_PREVIEW_IMAGE = 3;
     public static final int MESSAGE_END = 4;
@@ -58,6 +58,7 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
     public static final int MESSAGE_LAYOUT_ELEMENTS = 10;
     public static final int MESSAGE_LAYOUT_PIX = 11;
     public static final int MESSAGE_EXPLANATION_TEXT = 12;
+
     public static final String EXTRA_WORD_BOX = "word_box";
     public static final String EXTRA_OCR_BOX = "ocr_box";
     private static final String LOG_TAG = OCR.class.getSimpleName();
@@ -97,27 +98,20 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
         activity.addLifeCycleListener(this);
     }
 
-    /**
-     * called from native code
-     */
-    private synchronized void onProgressImage(final long nativePix) {
-        if (mMessenger != null && mIsActivityAttached) {
-            Log.i(TAG, "onProgressImage " + nativePix);
-            Pix preview = new Pix(nativePix);
-            CropImageScaler scaler = new CropImageScaler();
-            final CropImageScaler.ScaleResult scale = scaler.scale(preview, mPreviewWidthUnScaled, mPreviewHeightUnScaled);
-            final Bitmap previewBitmap = WriteFile.writeBitmap(scale.getPix());
-            if (previewBitmap != null) {
-                scale.getPix().recycle();
-                mPreviewHeight = previewBitmap.getHeight();
-                mPreviewWith = previewBitmap.getWidth();
-                sendMessage(MESSAGE_PREVIEW_IMAGE, previewBitmap);
-            }
-        }
+    @Override
+    public synchronized void onActivityDestroyed(MonitoredActivity activity) {
+        mIsActivityAttached = false;
+        cancel();
     }
 
+    @Override
+    public synchronized void onActivityResumed(MonitoredActivity activity) {
+        mIsActivityAttached = true;
+    }
 
     /**
+     * TessractAPI会调用这个方法来更新当前处理进度
+     * <p/>
      * called from tess api
      *
      * @param percent of ocr process comleted
@@ -141,6 +135,7 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
         sendMessage(MESSAGE_TESSERACT_PROGRESS, percent, b);//发送处理进度的消息
     }
 
+    //记录进度
     private void logProgressToCrashlytics(int percent) {
         if (TextFairyApplication.isRelease()) {
             long availableMegs = MemoryInfo.getFreeMemory(mApplicationContext);
@@ -150,17 +145,44 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
     }
 
     /**
-     * static const int MESSAGE_IMAGE_DETECTION = 0; static const int
-     * MESSAGE_IMAGE_DEWARP = 1; static const int MESSAGE_OCR = 2; static const
-     * int MESSAGE_ASSEMBLE_PIX = 3; static const int MESSAGE_ANALYSE_LAYOUT =
-     * 4;
+     * 处理图片发生了变化
+     * <p/>
+     * 这个方法被native层调用，传入的nativePix是native层处理得到的pix，传回到这里之后要更新界面显示的图片
+     * <p/>
+     * called from native code
      */
+    private synchronized void onProgressImage(final long nativePix) {
+        if (mMessenger != null && mIsActivityAttached) {
+            Log.i(LOG_TAG, "onProgressImage " + nativePix);
+            Pix preview = new Pix(nativePix);
+            CropImageScaler scaler = new CropImageScaler();//这里要按照原来的比例缩放native层处理得到的图片以显示在界面上
+            final CropImageScaler.ScaleResult scale = scaler.scale(preview, mPreviewWidthUnScaled, mPreviewHeightUnScaled);
+            final Bitmap previewBitmap = WriteFile.writeBitmap(scale.getPix());//将pix转成bitmap方便前台展示
+            if (previewBitmap != null) {
+                scale.getPix().recycle();
+                mPreviewHeight = previewBitmap.getHeight();
+                mPreviewWith = previewBitmap.getWidth();
+                sendMessage(MESSAGE_PREVIEW_IMAGE, previewBitmap);
+            }
+        }
+    }
 
+    /**
+     * 提示文本发生了变化
+     * <p/>
+     * 这个方法被native层调用，根据id值发送不同的消息，实际上就是后端告诉前端处理过程进行到哪一步了
+     * <p/>
+     * static const int MESSAGE_IMAGE_DETECTION = 0;
+     * static const int MESSAGE_IMAGE_DEWARP = 1;
+     * static const int MESSAGE_OCR = 2;
+     * static const int MESSAGE_ASSEMBLE_PIX = 3;
+     * static const int MESSAGE_ANALYSE_LAYOUT = 4;
+     */
     private void onProgressText(int id) {
         int messageId = 0;
         switch (id) {
             case 0:
-                messageId = R.string.progress_image_detection;
+                messageId = R.string.progress_image_detection;//在nativeAnalyseLayout方法中发出
                 break;
             case 1:
                 messageId = R.string.progress_dewarp;
@@ -174,7 +196,6 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
             case 4:
                 messageId = R.string.progress_analyse_layout;
                 break;
-
         }
         if (messageId != 0) {
             sendMessage(MESSAGE_EXPLANATION_TEXT, messageId);
@@ -182,13 +203,25 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
     }
 
     /**
+     * 这个方法是在native层被调用的，而且是在方法nativeAnalyseLayout中调用的，它识别出图片中的文本片段集合和图片片段集合，通知给前台，由用户来选择内容
+     *
+     * @param nativePixaText   文本片段集合
+     * @param nativePixaImages 图片片段集合
+     */
+    private void onLayoutElements(int nativePixaText, int nativePixaImages) {
+        sendMessage(MESSAGE_LAYOUT_ELEMENTS, nativePixaText, nativePixaImages);
+    }
+
+    /**
+     * 分析布局的时候会被调用
+     * 在native中的nativeAnalyseLayout方法中会调用segmentComplexLayout，后者会调用onLayoutPix方法
      * called from native
      *
      * @param nativePix pix pointer
      */
     private void onLayoutPix(long nativePix) {
         if (mMessenger != null && mIsActivityAttached) {
-            Log.i(TAG, "onLayoutPix " + nativePix);
+            Log.i(LOG_TAG, "onLayoutPix " + nativePix);
             Pix preview = new Pix(nativePix);
             CropImageScaler scaler = new CropImageScaler();
             final CropImageScaler.ScaleResult scale = scaler.scale(preview, mPreviewWidthUnScaled, mPreviewHeightUnScaled);
@@ -218,11 +251,6 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
      */
     private void onUTF8Result(String utf8Text) {
         sendMessage(MESSAGE_UTF8_TEXT, utf8Text);
-    }
-
-    //这个方法是在native层被调用的，调用之后会发送消息
-    private void onLayoutElements(int nativePixaText, int nativePixaImages) {
-        sendMessage(MESSAGE_LAYOUT_ELEMENTS, nativePixaText, nativePixaImages);
     }
 
     private void sendMessage(int what) {
@@ -260,7 +288,6 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
     //最终都是调用这个sendMessage方法，消息发送之后在OCRActivity中被处理 166行附近
     private synchronized void sendMessage(int what, int arg1, int arg2, Object object, Bundle b) {
         if (mIsActivityAttached && !mStopped) {
-
             Message m = Message.obtain();
             m.what = what;
             m.arg1 = arg1;
@@ -275,18 +302,7 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
         }
     }
 
-    @Override
-    public synchronized void onActivityDestroyed(MonitoredActivity activity) {
-        mIsActivityAttached = false;
-        cancel();
-    }
-
-    @Override
-    public synchronized void onActivityResumed(MonitoredActivity activity) {
-        mIsActivityAttached = true;
-    }
-
-    //确定ocr模式
+    //确定ocr模式，中文不支持
     private int determineOcrMode(String lang) {
         boolean hasCubeSupport = OcrLanguage.hasCubeSupport(lang);//是否支持cube
         boolean canCombine = OcrLanguage.canCombineCubeAndTesseract(lang);//
@@ -295,11 +311,11 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
         } else if (hasCubeSupport) {
             return TessBaseAPI.OEM_DEFAULT;
         } else {
-            return TessBaseAPI.OEM_TESSERACT_ONLY;
+            return TessBaseAPI.OEM_TESSERACT_ONLY;//
         }
     }
 
-    //确定ocr语言
+    //确定ocr语言，chi_sim等
     private String determineOcrLanguage(String ocrLanguage) {
         final String english = "eng";
         if (!ocrLanguage.equals(english) && addEnglishData(ocrLanguage)) {
@@ -307,7 +323,6 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
         } else {
             return ocrLanguage;
         }
-
     }
 
     // when combining languages that have multi byte characters with english
@@ -327,10 +342,9 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
                 || mLanguage.equalsIgnoreCase("vie"));
     }
 
-
     /**
+     * 这个方法由OCRActivity的handler在MESSAGE_LAYOUT_ELEMENTS情况下跳转过来的
      * 复杂布局，开始进行OCR处理
-     *
      * native code takes care of both Pixa, do not use them after calling this function
      *
      * @param pixaText   must contain the binary text parts
@@ -346,40 +360,46 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
             public void run() {
                 try {
                     final String tessDir = Util.getTessDir(context);
+
+                    //将选中的部分合并起来，作为要识别的内容，得到的是一个新图片！
                     long[] columnData = combineSelectedPixa(pixaText.getNativePixa(), pixaImages.getNativePixa(), selectedTexts, selectedImages);
-                    long pixOrgPointer = columnData[0];
-                    long pixOcrPointer = columnData[1];
-                    long boxaColumnsPointer = columnData[2];
+                    long pixOrgPointer = columnData[0];//
+                    long pixOcrPointer = columnData[1];//
+                    long boxaColumnsPointer = columnData[2];//
 
                     sendMessage(MESSAGE_FINAL_IMAGE, pixOrgPointer);
                     sendMessage(MESSAGE_EXPLANATION_TEXT, R.string.progress_ocr);
+
                     Boxa boxa;
                     Pix pixOcr;
                     synchronized (OCR.this) {
                         logMemory(context);
                         final String ocrLanguages = determineOcrLanguage(lang);
                         int ocrMode = determineOcrMode(lang);
+                        if (!initTessApi(tessDir, ocrLanguages, ocrMode)) return; //初始化Tessract
 
-                        if (!initTessApi(tessDir, ocrLanguages, ocrMode)) return;
                         pixOcr = new Pix(pixOcrPointer);
-                        mTess.setPageSegMode(PageSegMode.PSM_SINGLE_BLOCK);
+                        mTess.setPageSegMode(PageSegMode.PSM_SINGLE_BLOCK);//setPageSegMode 不能单独为某个box设置PageSegMode
                         mTess.setImage(pixOcr);
                         boxa = new Boxa(boxaColumnsPointer);
                         mOriginalHeight = pixOcr.getHeight();
                         mOriginalWidth = pixOcr.getWidth();
                     }
+
                     synchronized (OCR.this) {
                         if (mStopped) {
                             return;
                         }
                     }
+
                     int xb, yb, wb, hb;
-                    int columnCount = boxa.getCount();
+                    int columnCount = boxa.getCount();//片段总数
                     float accuracy = 0;
                     int[] geometry = new int[4];
                     StringBuilder hocrText = new StringBuilder();
                     StringBuilder htmlText = new StringBuilder();
-                    for (int i = 0; i < columnCount; i++) {
+
+                    for (int i = 0; i < columnCount; i++) {//一个一个处理
                         if (!boxa.getGeometry(i, geometry)) {
                             continue;
                         }
@@ -388,12 +408,14 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
                         wb = geometry[2];
                         hb = geometry[3];
                         mTess.setRectangle(xb, yb, wb, hb);
+
                         synchronized (OCR.this) {
                             if (mStopped) {
                                 return;
                             }
                         }
                         hocrText.append(mTess.getHOCRText(0));
+
                         synchronized (OCR.this) {
                             if (mStopped) {
                                 return;
@@ -405,6 +427,7 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
                     int totalAccuracy = Math.round(accuracy / columnCount);
                     pixOcr.recycle();
                     boxa.recycle();
+
                     sendMessage(MESSAGE_HOCR_TEXT, hocrText.toString(), totalAccuracy);
                     sendMessage(MESSAGE_UTF8_TEXT, htmlText.toString(), totalAccuracy);
                 } finally {
@@ -427,7 +450,8 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
             sendMessage(MESSAGE_ERROR, R.string.error_tess_init);
             return false;
         }
-        mTess.setVariable(TessBaseAPI.VAR_CHAR_BLACKLIST, "ﬀﬁﬂﬃﬄﬅﬆ");//toread setVariable(VAR_TESSEDIT_CHAR_BLACKLIST, "xyz"); to ignore x, y and z.
+        mTess.setVariable(TessBaseAPI.VAR_CHAR_BLACKLIST, "ﬀﬁﬂﬃﬄﬅﬆ");//toread 后面这串字符串很奇怪
+        //toread setVariable(VAR_TESSEDIT_CHAR_BLACKLIST, "xyz"); to ignore x, y and z.
         return true;
     }
 
@@ -456,7 +480,6 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
      * @param pixs source pix on which to do layout analysis
      */
     public void startLayoutAnalysis(final Context context, final Pix pixs, int width, int height) {
-
         if (pixs == null) {
             throw new IllegalArgumentException("Source pix must be non-null");
         }
@@ -475,8 +498,8 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
     }
 
     /**
+     * 在OCRActivity中的onLayoutChosen方法调用之后直接调用，前提是当前布局是简单布局，它假设图片裁剪的区域整个部分是内容区域
      * 简单布局，开始进行OCR处理
-     *
      * native code takes care of the Pix, do not use it after calling this function
      *
      * @param context used to access the file system
@@ -498,7 +521,7 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
                     startCaptureLogs();
                     logMemory(context);
                     final String tessDir = Util.getTessDir(context);
-                    long nativeTextPix = nativeOCRBook(pixs.getNativePix());
+                    long nativeTextPix = nativeOCRBook(pixs.getNativePix());//nativeOCRBook 二值化以及矫正操作
                     Pix pixText = new Pix(nativeTextPix);
                     mOriginalHeight = pixText.getHeight();
                     mOriginalWidth = pixText.getWidth();
@@ -541,8 +564,6 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
                         sendMessage(MESSAGE_HOCR_TEXT, hocrText, accuracy);
                         sendMessage(MESSAGE_UTF8_TEXT, htmlText, accuracy);
                     }
-
-
                 } finally {
                     if (mTess != null) {
                         mTess.end();
@@ -558,7 +579,6 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
                 }
             }
         }).start();
-
     }
 
     //记录此时的剩余内存情况
@@ -569,20 +589,20 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
         }
     }
 
+    //--> hujiawei 将其保存到另一个目录，而且并不只保存最后一张图片
     final static String ORIGINAL_PIX_NAME = "last_scan";
 
-
+    //将pix保存到cache目录中，cache目录是应用的cache目录
     public static void savePixToCacheDir(Context context, Pix pix) {
         File dir = new File(context.getCacheDir(), context.getString(R.string.config_share_file_dir));
         new SavePixTask(pix, dir).execute();
     }
 
+    //应用只保存最后一张图片到cache目录中，这里是得到这张图片文件
     public static File getLastOriginalImageFromCache(Context context) {
         File dir = new File(context.getCacheDir(), context.getString(R.string.config_share_file_dir));
         return new File(dir, ORIGINAL_PIX_NAME + ".png");
-
     }
-
 
     public synchronized void cancel() {
         if (mTess != null) {
@@ -594,6 +614,9 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
         mStopped = true;
     }
 
+    // ******************
+    // * Native methods *
+    // ******************
 
     public static native void startCaptureLogs();
 
@@ -604,7 +627,7 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
     /**
      * takes ownership of nativePix.
      *
-     * @param nativePix
+     * @param nativePix native Pix
      * @return binarized and dewarped version of input pix
      */
     private native long nativeOCRBook(long nativePix);

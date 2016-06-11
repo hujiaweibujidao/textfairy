@@ -33,7 +33,6 @@ public class BlurDetectionResult {
     private final double mBlurValue;
     private final Box mMostBlurredRegion;
 
-
     public BlurDetectionResult(long blurPixPointer, double mBlurValue, long blurRegionPointer) {
         this.mPixBlur = new Pix(blurPixPointer);
         this.mBlurValue = mBlurValue;

@@ -46,7 +46,6 @@ public class ProgressDialogFragment extends DialogFragment {
 			//TextView title = (TextView) view.findViewById(R.id.title);
             //title.setText(titleId);
 			TextView message = (TextView) view.findViewById(R.id.message);
-
 			message.setText(messageId);
 		}
 		return view;

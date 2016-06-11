@@ -47,12 +47,10 @@ public class TextFairyApplication extends Application {
 
         trackCrashes();//Fabric是用来跟踪应用崩溃信息的
         createAnalytics();//google analytics
-
-        initTextPreferences();
-
         enableStrictMode();
         alwaysShowOverflowButton();
 
+        initTextPreferences();
         Iconify.with(new FontAwesomeModule());//font awesome
     }
 

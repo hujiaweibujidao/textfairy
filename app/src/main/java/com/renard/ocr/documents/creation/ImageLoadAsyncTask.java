@@ -53,7 +53,7 @@ public class ImageLoadAsyncTask extends AsyncTask<Void, Void, ImageLoadAsyncTask
     private final Context context;//ApplicationContext
     private final Uri cameraPicUri;
 
-    ImageLoadAsyncTask(NewDocumentActivity activity, boolean skipCrop, Uri cameraPicUri) {
+    public ImageLoadAsyncTask(NewDocumentActivity activity, boolean skipCrop, Uri cameraPicUri) {
         context = activity.getApplicationContext();
         this.skipCrop = skipCrop;
         this.cameraPicUri = cameraPicUri;
@@ -86,6 +86,7 @@ public class ImageLoadAsyncTask extends AsyncTask<Void, Void, ImageLoadAsyncTask
         }
         try {
             OCR.startCaptureLogs();
+
             Pix p = ReadFile.loadWithPicasso(context, cameraPicUri);//用picasso去加载图片得到bitmap再转换成pix
             if (p == null) {
                 if (TextFairyApplication.isRelease()) {
@@ -95,11 +96,11 @@ public class ImageLoadAsyncTask extends AsyncTask<Void, Void, ImageLoadAsyncTask
                 return new LoadResult(PixLoadStatus.IMAGE_FORMAT_UNSUPPORTED);
             }
 
-            final long pixPixelCount = p.getWidth() * p.getHeight();
+            final long pixPixelCount = p.getWidth() * p.getHeight();//加载成功
             if (pixPixelCount < MIN_PIXEL_COUNT) {
-                double scale = Math.sqrt(((double) MIN_PIXEL_COUNT) / pixPixelCount);
+                double scale = Math.sqrt(((double) MIN_PIXEL_COUNT) / pixPixelCount);//缩放的比例
                 Pix scaledPix = Scale.scale(p, (float) scale);//图片缩放
-                if (scaledPix.getNativePix() == 0) {
+                if (scaledPix.getNativePix() == 0) {//缩放失败
                     if (TextFairyApplication.isRelease()) {
                         Crashlytics.log("pix = (" + p.getWidth() + ", " + p.getHeight() + ")");
                         Crashlytics.logException(new IllegalStateException("scaled pix is 0"));

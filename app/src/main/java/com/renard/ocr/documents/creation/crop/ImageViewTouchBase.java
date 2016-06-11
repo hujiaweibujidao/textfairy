@@ -73,8 +73,7 @@ public abstract class ImageViewTouchBase extends ImageView {
     int mBottom;
 
     @Override
-    protected void onLayout(boolean changed, int left, int top,
-                            int right, int bottom) {
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         mLeft = left;
         mRight = right;
@@ -112,7 +111,6 @@ public abstract class ImageViewTouchBase extends ImageView {
     }
 
     private void setImageBitmap(final Bitmap bitmap, final int rotation) {
-
         final Bitmap old = mBitmapDisplayed.getBitmap();
 
         if (bitmap == null) {
@@ -175,10 +173,9 @@ public abstract class ImageViewTouchBase extends ImageView {
 
     // This function changes bitmap, reset base matrix according to the size
     // of the bitmap, and optionally reset the supplementary matrix.
-    //图片发生了旋转，所以要重置图片的matrix，甚至要重置图片的辅助matrix
+    //图片发生了变化（比如native层已经修改了图片）所以要重置图片的matrix，甚至要重置图片的辅助matrix
     public void setImageBitmapResetBase(final Bitmap bitmap, final boolean resetSupp, int rotation) {
         setImageRotateBitmapResetBase(new RotateBitmap(bitmap, rotation), resetSupp);
-
     }
 
     public void setImageRotateBitmapResetBase(final RotateBitmap bitmap, final boolean resetSupp) {

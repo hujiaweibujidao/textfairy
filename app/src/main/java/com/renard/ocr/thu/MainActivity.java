@@ -8,6 +8,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.renard.ocr.R;
@@ -33,7 +35,6 @@ public class MainActivity extends NewDocumentActivity {
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     private static final int REQUEST_CODE_INSTALL = 234;
-
     private boolean mBusIsRegistered = false;
 
     @Override
@@ -156,6 +157,21 @@ public class MainActivity extends NewDocumentActivity {
             });
             alert.show();
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.thu_menu_settings,menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId()== R.id.item_settings){
+            SettingsDialog.newInstance().show(getSupportFragmentManager(), SettingsDialog.TAG);
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

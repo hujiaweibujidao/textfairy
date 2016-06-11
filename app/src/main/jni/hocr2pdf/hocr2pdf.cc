@@ -78,7 +78,6 @@ int hocr2pdf(const char* imageFileName, const char* hocrText, PDFCodec* pdfConte
     
       LOGI("paged dimensions %.2f, %.2f", 72. * image.w / res, 72. * image.h / res);
 
-
 	  pdfContext->beginPage(72. * image.w / res, 72. * image.h / res);
 	  pdfContext->setFillColor(0, 0, 0);
 	  hocr2pdf(hocr, pdfContext, res, sloppy,!overlayImage);

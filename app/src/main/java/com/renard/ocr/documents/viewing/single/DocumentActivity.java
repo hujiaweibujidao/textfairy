@@ -17,7 +17,6 @@
 package com.renard.ocr.documents.viewing.single;
 
 import android.annotation.SuppressLint;
-import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -43,7 +42,6 @@ import android.view.Window;
 import android.widget.Toast;
 
 import com.renard.ocr.R;
-import com.renard.ocr.base.HintDialog;
 import com.renard.ocr.documents.creation.NewDocumentActivity;
 import com.renard.ocr.documents.viewing.DocumentContentProvider;
 import com.renard.ocr.documents.viewing.DocumentContentProvider.Columns;
@@ -88,7 +86,6 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
 
     private int mParentId;
     private Cursor mCursor;
-    //private TtsActionCallback mActionCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,7 +93,6 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
 
         setVolumeControlStream(AudioManager.STREAM_ALARM);//
         supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);//不确定的进度
-
         setContentView(R.layout.activity_document);
 
         if (!init(savedInstanceState)) {//初始化失败了
@@ -112,8 +108,6 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
 
         setDocumentFragmentType();
         initToolbar();
-
-        //mActionCallback = new TtsActionCallback(this);
     }
 
     @Override
@@ -257,11 +251,7 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
         builder.show();
     }
 
-//    void startTextToSpeech() {
-//        startSupportActionMode(mActionCallback);
-//    }
-
-
+    //复制文本内容到剪贴板上
     void copyTextToClipboard() {
         final String text = getPlainDocumentText();
         if (text == null) {
@@ -295,6 +285,7 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
         }
     }
 
+    //分享文本内容
     void shareText() {
         String shareBody = getPlainDocumentText();
         if (shareBody == null) {
@@ -308,7 +299,6 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
         sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
         startActivity(Intent.createChooser(sharingIntent, getResources().getString(R.string.share_chooser_title)));
     }
-
 
     @SuppressLint("NewApi")
     private void copyTextToClipboardNewApi(final String text) {
@@ -344,7 +334,7 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
             Fragment frag = getSupportFragmentManager().findFragmentById(R.id.document_fragment_container);
             if (frag instanceof DocumentPagerFragment) {
                 DocumentPagerFragment pagerFragment = (DocumentPagerFragment) frag;
-                pagerFragment.applyTextPreferences();
+                //pagerFragment.applyTextPreferences();
             }
         } else if (resultCode == RESULT_OK) {
             switch (requestCode) {
@@ -357,15 +347,6 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
                     break;
             }
         }
-    }
-
-    @Override
-    protected Dialog onCreateDialog(int id, Bundle args) {
-        switch (id) {
-            case HINT_DIALOG_ID:
-                return HintDialog.createDialog(this, R.string.document_help_title, "file:///android_res/raw/document_help.html");
-        }
-        return super.onCreateDialog(id, args);
     }
 
     @Override

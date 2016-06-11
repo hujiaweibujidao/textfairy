@@ -140,7 +140,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity implements P
     protected void onResumeFragments() {//这里是关键，拍照或者选图之后这个方法就会被回调，而此时mCameraResult已经不为空了
         super.onResumeFragments();
         if (mCameraResult != null) {
-            onTakePhotoActivityResult(mCameraResult);
+            onCameraResultReady(mCameraResult);
             mCameraResult = null;
         }
     }
@@ -218,6 +218,9 @@ public abstract class NewDocumentActivity extends MonitoredActivity implements P
                     break;
                 case INTENT://通过intent进入的
                     break;
+                case MIP:
+                    startMip();
+                    break;
             }
         }
     }
@@ -237,6 +240,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity implements P
         }
     }
 
+    //进入图片多选，它的回调和其他两种方式不同，它是自带了下面两个回调函数，而其他两种方式是在activityResult中获取结果
     public void startMip() {
         cameraPicUri = null;
 
@@ -359,9 +363,9 @@ public abstract class NewDocumentActivity extends MonitoredActivity implements P
     //注册图片加载receiver，图片加载完成了的话就会收到信息
     private synchronized void registerImageLoaderReceiver() {
         if (!mReceiverRegistered) {
-            Log.i(LOG_TAG, "registerImageLoaderReceiver " + mMessageReceiver);
-            final IntentFilter intentFilter = new IntentFilter(ImageLoadAsyncTask.ACTION_IMAGE_LOADED);
-            intentFilter.addAction(ImageLoadAsyncTask.ACTION_IMAGE_LOADING_START);
+            Log.i(LOG_TAG, "registerImageLoaderReceiver " + mMessageReceiver);//接收两个action的receiver
+            final IntentFilter intentFilter = new IntentFilter(ImageLoadAsyncTask.ACTION_IMAGE_LOADED);//action 1 ACTION_IMAGE_LOADED
+            intentFilter.addAction(ImageLoadAsyncTask.ACTION_IMAGE_LOADING_START);//action 2 ACTION_IMAGE_LOADING_START
             LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, intentFilter);//LocalBroadcastManager 进程内部的广播管理器
             mReceiverRegistered = true;
         }
@@ -404,11 +408,10 @@ public abstract class NewDocumentActivity extends MonitoredActivity implements P
     //处理加载的图片
     private void handleLoadedImage(long nativePix, PixLoadStatus pixLoadStatus, boolean skipCrop) {
         dismissLoadingImageProgressDialog();
-
         if (pixLoadStatus == PixLoadStatus.SUCCESS) {//加载成功
-            if (skipCrop) {//跳过了图片裁剪，直接进入ocr
+            if (skipCrop) {//跳过了图片裁剪，直接进入 OCRActivity
                 startOcrActivity(nativePix, true);
-            } else {//进入图片裁剪阶段
+            } else {//进入图片裁剪阶段 CropImageActivity
                 Intent actionIntent = new Intent(this, CropImageActivity.class);
                 actionIntent.putExtra(NewDocumentActivity.EXTRA_NATIVE_PIX, nativePix);
                 startActivityForResult(actionIntent, NewDocumentActivity.REQUEST_CODE_CROP_PHOTO);//for result!!!
@@ -441,7 +444,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity implements P
     }
 
     //选图或者拍照结果返回，接下来就是根据PicUri去加载图片数据了
-    private void onTakePhotoActivityResult(CameraResult cameraResult) {
+    private void onCameraResultReady(CameraResult cameraResult) {
         if (cameraResult.mResultCode == RESULT_OK) {
             if (cameraResult.mRequestCode == REQUEST_CODE_MAKE_PHOTO) {//如果是拍照返回的结果，下面就是从中拿到cameraPicUri
                 Cursor myCursor = null;
@@ -451,7 +454,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity implements P
                     File f = new File(cameraPicUri.getPath());
                     if (f.isFile() && f.exists() && f.canRead()) {
                         //all is well
-                        Log.i(LOG_TAG, "onTakePhotoActivityResult");
+                        Log.i(LOG_TAG, "onCameraResultReady");
                         loadBitmapFromContentUri(cameraPicUri, ImageSource.CAMERA);//加载对应的图片
                         return;
                     }
@@ -589,7 +592,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity implements P
                 deleteProgressDialog.setCancelable(false);
                 return deleteProgressDialog;
             case EDIT_TITLE_DIALOG_ID: //修改文档名
-                View layout = getLayoutInflater().inflate(R.layout.edit_title_dialog, null);
+                View layout = getLayoutInflater().inflate(R.layout.dialog_edit_title, null);
                 final Uri documentUri = Uri.parse(args.getString(DIALOG_ARG_DOCUMENT_URI));
                 final String oldTitle = args.getString(DIALOG_ARG_TITLE);
                 final EditText edit = (EditText) layout.findViewById(R.id.edit_title);

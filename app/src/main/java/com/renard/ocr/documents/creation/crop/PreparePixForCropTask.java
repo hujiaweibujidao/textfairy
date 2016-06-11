@@ -11,7 +11,11 @@ import com.renard.ocr.cropimage.image_processing.BlurDetectionResult;
 
 import de.greenrobot.event.EventBus;
 
+/**
+ * 需要裁剪的数据CropData，里面包含了原始图片的bitmap，原图的模糊情况，原题的缩放情况
+ */
 class CropData {
+
     private final Bitmap mBitmap;
     private final CropImageScaler.ScaleResult mScaleResult;
     private final BlurDetectionResult mBlurriness;
@@ -44,6 +48,7 @@ class CropData {
  * 从Pix中获取要裁减的图像数据
  */
 public class PreparePixForCropTask extends AsyncTask<Void, Void, CropData> {
+
     private static final String TAG = PreparePixForCropTask.class.getName();
 
     private final Pix mPix;
@@ -71,6 +76,7 @@ public class PreparePixForCropTask extends AsyncTask<Void, Void, CropData> {
     protected void onPostExecute(CropData cropData) {
         super.onPostExecute(cropData);
         EventBus.getDefault().post(cropData);//处理完成之后将结果发送出去
+        //NewDocumentActivity中的onEventMainThread(final CropData cropData)方法会接收到
     }
 
     @Override

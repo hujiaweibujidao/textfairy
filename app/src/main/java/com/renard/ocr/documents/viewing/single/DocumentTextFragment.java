@@ -35,7 +35,6 @@ import android.widget.ViewSwitcher;
 import com.renard.ocr.R;
 import com.renard.ocr.documents.creation.NewDocumentActivity;
 import com.renard.ocr.documents.viewing.DocumentContentProvider;
-import com.renard.ocr.util.PreferencesUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -98,7 +97,7 @@ public class DocumentTextFragment extends Fragment implements TextWatcher {
             mHtmlTask.cancel(true);
         }
 
-        PreferencesUtils.applyTextPreferences(mEditText, getActivity());
+        //PreferencesUtils.applyTextPreferences(mEditText, getActivity());
 
         return view;
     }
@@ -134,7 +133,7 @@ public class DocumentTextFragment extends Fragment implements TextWatcher {
     @Override
     public void onStart() {
         super.onStart();
-        PreferencesUtils.applyTextPreferences(mEditText, getActivity());
+        //PreferencesUtils.applyTextPreferences(mEditText, getActivity());
     }
 
     @Override

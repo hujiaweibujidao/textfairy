@@ -34,8 +34,7 @@ import com.renard.ocr.documents.creation.crop.ImageViewTouchBase;
 import java.util.ArrayList;
 
 /**
- * 用于显示预览图片和OCR处理过程
- *
+ * 用于显示OCR处理过程中图片的变化
  * is used to show preview images and progress during ocr process
  *
  * @author renard
@@ -54,6 +53,7 @@ public class OCRImageView extends ImageViewTouchBase {
     private final Paint mTextRectPaint = new Paint();
     private final Paint mTouchedImageRectPaint = new Paint();
     private final Paint mTouchedTextRectPaint = new Paint();
+
     private ArrayList<RectF> mImageRects;
     private ArrayList<RectF> mTextRects;
 
@@ -132,7 +132,7 @@ public class OCRImageView extends ImageViewTouchBase {
         mScanLinePaint.setStyle(Style.STROKE);
         mWordPaint.setARGB(125, Color.red(progressColor), Color.green(progressColor), Color.blue(progressColor));
 
-        mImageRectPaint.setColor(progressColor);
+        mImageRectPaint.setColor(progressColor);//ff33b5e5 蓝色
         mImageRectPaint.setStrokeWidth(3F);
         mImageRectPaint.setAntiAlias(true);
         mImageRectPaint.setStyle(Style.STROKE);
@@ -143,7 +143,7 @@ public class OCRImageView extends ImageViewTouchBase {
         mTouchedImageRectPaint.setAntiAlias(true);
         mTouchedImageRectPaint.setStyle(Style.FILL);
 
-        mTextRectPaint.setColor(0xFF002AFF);
+        mTextRectPaint.setColor(0xFF002AFF);//红色
         mTextRectPaint.setStrokeWidth(3F);
         mTextRectPaint.setAntiAlias(true);
         mTextRectPaint.setStyle(Style.STROKE);
@@ -168,8 +168,7 @@ public class OCRImageView extends ImageViewTouchBase {
         mNumberStrokePaint.setStrokeWidth(2);
         mNumberStrokePaint.setAntiAlias(true);
 
-        // mNumberPaint.setMaskFilter(new EmbossMaskFilter(new float[] { 1, 1,
-        // 1},0.8f, 10, 4f));
+        // mNumberPaint.setMaskFilter(new EmbossMaskFilter(new float[] { 1, 1, 1},0.8f, 10, 4f));
         mProgress = -1;
     }
 

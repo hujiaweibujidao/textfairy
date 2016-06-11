@@ -4,9 +4,9 @@
           android:installLocation="auto"
           android:versionName="3.0.9">
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
         android:name=".base.TextFairyApplication"
@@ -30,7 +30,8 @@
         <provider
             android:name=".documents.viewing.DocumentContentProvider"
             android:authorities="com.renard.ocr"
-            android:exported="false"/>
+            android:exported="false">
+        </provider>
 
         <activity
             android:name=".thu.MainActivity"
@@ -42,7 +43,6 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND"/>
-
                 <category android:name="android.intent.category.DEFAULT"/>
 
                 <data android:mimeType="image/jpeg"/>
@@ -64,18 +64,11 @@
         <activity
             android:name=".documents.viewing.single.DocumentActivity"
             android:configChanges="keyboardHidden|keyboard"
-            android:label="@string/empty"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".documents.viewing.grid.DocumentGridActivity"/>
-        </activity>
-        <activity android:name=".documents.viewing.single.TextSettingsActivity"/>
-        <activity android:name=".documents.viewing.single.TableOfContentsActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".documents.viewing.single.DocumentActivity"/>
         </activity>
         <activity
             android:name=".install.InstallActivity"
