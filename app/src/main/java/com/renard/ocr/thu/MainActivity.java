@@ -81,7 +81,6 @@ public class MainActivity extends NewDocumentActivity {
 
     @Override
     protected void onResume() {
-        // ViewServer.get(this).setFocusedWindow(this);
         super.onResume();
         if (!mBusIsRegistered) {
             EventBus.getDefault().register(this);

@@ -26,19 +26,14 @@ import com.renard.ocr.language.OcrLanguage;
 public class PreferencesUtils {
 
     /* ids of the radio buttons pressed in the options dialogs */
-    public final static String PREFERENCES_SPACING_KEY = "line_spacing";
-    public final static String PREFERENCES_DESIGN_KEY = "text_design";
-    public final static String PREFERENCES_ALIGNMENT_KEY = "text_alignment";
-    public final static String PREFERENCES_TEXT_SIZE_KEY = "text_size";
-    private final static String PREFERENCES_TRAINING_DATA_DIR = "training_data_dir";
-
+    public final static String PREFERENCES_TRAINING_DATA_DIR = "training_data_dir";
     public final static String PREFERENCES_KEY = "text_preferences";
-    private static final String PREFERENCES_THUMBNAIL_HEIGHT = "thumbnail_width";
-    private static final String PREFERENCES_THUMBNAIL_WIDTH = "thumbnail_height";
-    private static final String PREFERENCES_HAS_ASKED_FOR_FEEDBACK = "has_asked_for_feedback";
-    private static final String PREFERENCES_IS_FIRST_START = "is_first_start";
+    public static final String PREFERENCES_THUMBNAIL_HEIGHT = "thumbnail_width";
+    public static final String PREFERENCES_THUMBNAIL_WIDTH = "thumbnail_height";
+    public static final String PREFERENCES_HAS_ASKED_FOR_FEEDBACK = "has_asked_for_feedback";
+    public static final String PREFERENCES_IS_FIRST_START = "is_first_start";
 
-    // actual language
+    //ocr language
     public static final String PREFERENCES_OCR_LANG = "ocr_language";
     public static final String PREFERENCES_OCR_LANG_DISPLAY = "ocr_language_display";
 

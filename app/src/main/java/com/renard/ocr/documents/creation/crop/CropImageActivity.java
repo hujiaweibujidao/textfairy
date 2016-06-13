@@ -60,14 +60,12 @@ import de.greenrobot.event.EventBus;
  * The activity can crop specific region of interest from an image.
  *
  * update
- * 1.去除了图片模糊的情况下提示对话框 -> todo 是否去掉检测图片模糊状况的部分代码？
+ * 1.去除了图片模糊的情况下提示对话框
  * 2.去除了第一次进入的时候的提示对话框
  *
  */
-public class CropImageActivity extends MonitoredActivity implements BlurWarningDialog.BlurDialogClickListener {
+public class CropImageActivity extends MonitoredActivity {
 
-    public static final int RESULT_NEW_IMAGE = RESULT_FIRST_USER + 1;
-    private static final int HINT_DIALOG_ID = 2;
     public static final String SCREEN_NAME = "Crop Image";
     private final Handler mHandler = new Handler();
 
@@ -170,7 +168,8 @@ public class CropImageActivity extends MonitoredActivity implements BlurWarningD
         if (cropData.getBitmap() == null) {//should not happen. Scaling of the original document failed some how. Maybe out of memory?
             mAnalytics.sendCropError();
             Toast.makeText(this, R.string.could_not_load_image, Toast.LENGTH_LONG).show();
-            onNewImageClicked();
+            setResult(RESULT_CANCELED);
+            finish();
             return;
         }
         mAnalytics.sendBlurResult(cropData.getBlurriness());
@@ -190,24 +189,23 @@ public class CropImageActivity extends MonitoredActivity implements BlurWarningD
         });
     }
 
-    //不同模糊状态下的图片的处理 -> hujiawei 这里进行了重要修改
+    //不同模糊状态下的图片的处理 -> hujiawei 这里进行了重要修改，删除提示信息
     private void handleBlurResult(CropData cropData) {
         mAnalytics.sendScreenView(SCREEN_NAME);
         showDefaultCroppingRectangle(cropData.getBitmap());//没啥问题就显示默认的裁剪区域
-
-//        switch (cropData.getBlurriness().getBlurriness()) {
-//            case NOT_BLURRED:
-//                mAnalytics.sendScreenView(SCREEN_NAME);
-//                showDefaultCroppingRectangle(cropData.getBitmap());//没啥问题就显示默认的裁剪区域
-//                break;
-//            case MEDIUM_BLUR://中度或者重度模糊的话就提示用户
-//            case STRONG_BLUR:
-//                setTitle(R.string.image_is_blurred);//显示图片过于模糊的情况
-//                BlurWarningDialog dialog = BlurWarningDialog.newInstance((float) cropData.getBlurriness().getBlurValue());
-//                final FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-//                fragmentTransaction.add(dialog, BlurWarningDialog.TAG).commitAllowingStateLoss();
-//                break;
-//        }
+        /*switch (cropData.getBlurriness().getBlurriness()) {
+            case NOT_BLURRED:
+                mAnalytics.sendScreenView(SCREEN_NAME);
+                showDefaultCroppingRectangle(cropData.getBitmap());//没啥问题就显示默认的裁剪区域
+                break;
+            case MEDIUM_BLUR://中度或者重度模糊的话就提示用户
+            case STRONG_BLUR:
+                setTitle(R.string.image_is_blurred);//显示图片过于模糊的情况
+                BlurWarningDialog dialog = BlurWarningDialog.newInstance((float) cropData.getBlurriness().getBlurValue());
+                final FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                fragmentTransaction.add(dialog, BlurWarningDialog.TAG).commitAllowingStateLoss();
+                break;
+        }*/
     }
 
     //调整操作按钮的显示与否
@@ -248,7 +246,7 @@ public class CropImageActivity extends MonitoredActivity implements BlurWarningD
 
                     Pix croppedPix = Clip.clipRectangle2(pix8, bb);//裁剪出pix8中bb部分的图片内容
                     if (croppedPix == null) {
-                        throw new IllegalStateException();
+                        //throw new IllegalStateException();
                     }
                     pix8.recycle();
 
@@ -270,11 +268,13 @@ public class CropImageActivity extends MonitoredActivity implements BlurWarningD
                         bilinear = rotatedPix;
                     }
                     if (bilinear == null) {
-                        throw new IllegalStateException();
+                        //throw new IllegalStateException();
                     }
 
                     OCR.savePixToCacheDir(CropImageActivity.this, bilinear.copy());//将裁剪之后的数据保存起来
+                    //todo 这里需要修改，bilinear是最终裁剪得到的结果，需要配置到ImageEntry中！
 
+                    //图片裁剪完成之后的操作！
                     Intent result = new Intent();
                     result.putExtra(NewDocumentActivity.EXTRA_NATIVE_PIX, bilinear.getNativePix());//裁剪之后的图片Pix放入到extra中
                     setResult(RESULT_OK, result);//进入代码在NewDocumentActivity 470行附近
@@ -334,7 +334,6 @@ public class CropImageActivity extends MonitoredActivity implements BlurWarningD
         mImageView.getImageMatrix().mapPoints(pts);
         /*
         int w = (Math.min(mBitmap.getWidth(), mBitmap.getHeight())) / 25;
-
         Rect focusArea = new Rect((int) (Math.max(c.x-w,0)*widthScale), (int) (Math.max(c.y-w,0)*heightScale), (int) (Math.min(c.x+w,mBitmap.getWidth())*widthScale), (int) (Math.min(c.y+w,mBitmap.getHeight())*heightScale));
 
         //final int progressColor = getResources().getColor(R.color.progress_color);
@@ -368,25 +367,6 @@ public class CropImageActivity extends MonitoredActivity implements BlurWarningD
         mCrop = hv;
         mCrop.setFocus(true);
         mImageView.invalidate();
-    }
-
-    //BlurDialogClickListener的两个回调函数
-    //todo hujiawei 去除了模糊提示对话框，那么这两个回调函数就没有用了
-    @Override
-    public void onContinueClicked() {//尽管图片模糊，但是仍然继续
-        if (mCropData.isPresent()) {
-            mAnalytics.sendScreenView(SCREEN_NAME);
-            showDefaultCroppingRectangle(mCropData.get().getBitmap());
-            setToolbarMessage(R.string.crop_title);
-            mImageView.zoomTo(1, 500);//0.5秒内缩放到1.0
-        }
-    }
-
-    @Override
-    public void onNewImageClicked() {//去选择新的图片
-        setResult(RESULT_NEW_IMAGE);//返回结果的处理在NewDocumentActivity的405行附近
-        mPix.recycle();
-        finish();
     }
 
 }

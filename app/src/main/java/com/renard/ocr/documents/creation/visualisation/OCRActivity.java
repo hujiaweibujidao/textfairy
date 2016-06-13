@@ -46,6 +46,7 @@ import com.renard.ocr.documents.creation.visualisation.LayoutQuestionDialog.Layo
 import com.renard.ocr.documents.viewing.DocumentContentProvider;
 import com.renard.ocr.documents.viewing.DocumentContentProvider.Columns;
 import com.renard.ocr.documents.viewing.grid.DocumentGridActivity;
+import com.renard.ocr.thu.MIPActivity;
 import com.renard.ocr.util.PreferencesUtils;
 import com.renard.ocr.util.Screen;
 import com.renard.ocr.util.Util;
@@ -101,8 +102,7 @@ public class OCRActivity extends MonitoredActivity implements LayoutChoseListene
         mParentId = getIntent().getIntExtra(EXTRA_PARENT_DOCUMENT_ID, -1);//从CropImageActivity跳转过来的话并没有这个参数
 
         if (nativePix == -1) {//没有对应的图片可以直接返回
-            Intent intent = new Intent(this, DocumentGridActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(this, MIPActivity.class));//返回到MIP
             finish();
             return;
         }
@@ -125,6 +125,8 @@ public class OCRActivity extends MonitoredActivity implements LayoutChoseListene
 
         //askUserAboutDocumentLayout();//hujiawei 不再询问用户布局情况，直接使用默认的布局
         Log.i(LOG_TAG, PreferencesUtils.getOCRLanguage(this).first);//chi_sim
+        Log.i(LOG_TAG, String.valueOf(PreferencesUtils.getLayout(this)==PreferencesUtils.LAYOUT_SIMPLE));//layout_simple?
+        Log.i(LOG_TAG, String.valueOf(PreferencesUtils.getMode(this)==PreferencesUtils.MODE_HTEXT));//mode_htext?
 
         if (PreferencesUtils.getLayout(this) == PreferencesUtils.LAYOUT_SIMPLE) {
             onLayoutChosen(LayoutKind.SIMPLE, PreferencesUtils.getOCRLanguage(this).first);
@@ -134,10 +136,10 @@ public class OCRActivity extends MonitoredActivity implements LayoutChoseListene
     }
 
     //询问用户关于图片中文字的布局情况
-    private void askUserAboutDocumentLayout() {
+    /*private void askUserAboutDocumentLayout() {
         LayoutQuestionDialog dialog = LayoutQuestionDialog.newInstance();
         dialog.show(getSupportFragmentManager(), LayoutQuestionDialog.TAG);
-    }
+    }*/
 
     //用户选好了布局之后该方法就会被调用
     @Override
@@ -151,6 +153,7 @@ public class OCRActivity extends MonitoredActivity implements LayoutChoseListene
             mOcrLanguage = ocrLanguage;
             setToolbarMessage(R.string.progress_start);
 
+            //todo 改进版本：简单布局的话那就不用继续了？复杂布局的话需要先进行自动布局分析（如果开启的话），然后选择布局情况。
             if (layoutKind == LayoutKind.SIMPLE) {//简单布局，这种情况下可以完全自动 --> todo mAccuracy = 0; ?
                 mOCR.startOCRForSimpleLayout(OCRActivity.this, ocrLanguage, pixOrg, mImageView.getWidth(), mImageView.getHeight());
             } else if (layoutKind == LayoutKind.COMPLEX) {//复杂布局，这种情况下还需要选择需要处理的列
@@ -212,7 +215,6 @@ public class OCRActivity extends MonitoredActivity implements LayoutChoseListene
                     mImageView.setImageBitmapResetBase(layoutPix, true, 0);
                     break;
                 }
-
                 case OCR.MESSAGE_LAYOUT_ELEMENTS: {//分析出图片中的布局元素，识别出来的结果包含文本片段集合和图片片段集合，接下来由用户选择需要处理的部分
                     int nativePixaText = msg.arg1;//文本集合
                     int nativePixaImages = msg.arg2;//图片集合
@@ -268,10 +270,16 @@ public class OCRActivity extends MonitoredActivity implements LayoutChoseListene
                 }
                 case OCR.MESSAGE_END: {//OCR处理结束，结束之后就保存文档
                     saveDocument(mFinalPix, hocrString, utf8String, mAccuracy);
+                    //hujiawei 算是失败返回了
+                    setResult(RESULT_OK);
+                    finish();
                     break;
                 }
                 case OCR.MESSAGE_ERROR: {//OCR出错了
                     Toast.makeText(getApplicationContext(), getText(msg.arg1), Toast.LENGTH_LONG).show();
+                    //hujiawei 算是失败返回了
+                    setResult(RESULT_CANCELED);
+                    finish();
                     break;
                 }
             }

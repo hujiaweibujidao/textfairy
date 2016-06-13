@@ -59,10 +59,11 @@ public class MIPActivity extends NewDocumentActivity implements Picker.PickListe
 
     private static final String LOG_TAG = "MIP activity";
 
+    private Button mButtonStart;
     private RecyclerView mRecyclerView;
     private ArrayList<ImageEntry> mImages;
     private MIPImagesAdapter mImageAdapter;
-    private Button mButtonStart;
+
     private MIPOCRTask mOCRTask;
     private ProgressDialog mProgressDialog;
 
@@ -71,6 +72,7 @@ public class MIPActivity extends NewDocumentActivity implements Picker.PickListe
     private String mUtf8Text;//识别结果 utf8
     private int mAccuracy;//OCR处理结果的准确度
     private Pix mFinalPix;//每张图片最终OCR处理的Pix
+
     private OCR mOCR;//OCR核心工具类
 
     @Override
@@ -104,7 +106,7 @@ public class MIPActivity extends NewDocumentActivity implements Picker.PickListe
     @Override
     protected void initToolbar() {
         super.initToolbar();
-        setToolbarMessage(R.string.title_activity_mip);
+        setToolbarMessage(R.string.title_mip);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
@@ -129,7 +131,7 @@ public class MIPActivity extends NewDocumentActivity implements Picker.PickListe
             mImages = images;
             setupImageList();
         } else {
-            for (ImageEntry imageEntry : images) {
+            for (ImageEntry imageEntry : images) {//只添加那些没有加入进来的图片
                 if (!mImages.contains(imageEntry)) {
                     mImages.add(imageEntry);
                 }
@@ -140,14 +142,45 @@ public class MIPActivity extends NewDocumentActivity implements Picker.PickListe
 
     @Override
     public void onCancel() {
-        Log.i(LOG_TAG, "User canceled picker activity");
         Toast.makeText(this, R.string.no_image_picked, Toast.LENGTH_SHORT).show();
     }
 
     //点击某个image触发
     @Override
     public void onClickImage(final ImageEntry imageEntry) {
-        fakeCameraResultReady(imageEntry);
+        fakeCameraResultReady(imageEntry);//这里是假装成原始应用一样开始进入图片裁剪和OCR处理的流程
+        //改进之后的点击图片是可以对图片的OCR之前进行一些配置 --> 但是改进的方法是保持原有的调用方式不变，修改原有的onActivityResult的处理方式
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RESULT_OK) {
+            switch (requestCode) {
+                case REQUEST_CODE_CROP_PHOTO: {//图片裁剪成功，可以进入到ocr了
+                    Toast.makeText(this, "crop image ok", Toast.LENGTH_SHORT).show();
+                    long nativePix = data.getLongExtra(EXTRA_NATIVE_PIX, 0);
+                    startOcrActivityForResult(nativePix, false);
+                    break;
+                }
+                case REQUEST_CODE_OCR: {//hujiawei 图片OCR返回的结果，本来是不处理的，因为得到结果是直接跳转到DocumentGridActivity中
+                    // 但是现在需要批量处理，只需要部分布局信息，之后才能执行完整的OCR操作
+                    Toast.makeText(this, "image ocr ok", Toast.LENGTH_SHORT).show();
+                    break;
+                }
+            }
+        } else {
+            switch (requestCode) {
+                case REQUEST_CODE_CROP_PHOTO: {//图片裁剪失败
+                    Toast.makeText(this, "crop image fail", Toast.LENGTH_SHORT).show();
+                    break;
+                }
+                case REQUEST_CODE_OCR: {//图片布局分析失败
+                    Toast.makeText(this, "image ocr fail", Toast.LENGTH_SHORT).show();
+                    break;
+                }
+            }
+        }
     }
 
     @Override
@@ -167,13 +200,17 @@ public class MIPActivity extends NewDocumentActivity implements Picker.PickListe
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.item_addimage) {//注意，这里并没有和NewDocumentActivity中一样调用之前checkRom
             checkRam(MemoryWarningDialog.DoAfter.START_MIP);
+        } else if (item.getItemId() == R.id.item_settings) {
+            SettingsDialog.newInstance().show(getSupportFragmentManager(), SettingsDialog.TAG);
         }
         return super.onOptionsItemSelected(item);
     }
 
     private int mCurrentProgressIndex = 1;
 
-    //多张图片的OCR任务
+    /**
+     * 多张图片的OCR处理任务
+     */
     class MIPOCRTask extends AsyncTask<Void, Integer, Boolean> {
 
         private Context context;
@@ -191,7 +228,7 @@ public class MIPActivity extends NewDocumentActivity implements Picker.PickListe
             mCurrentProgressIndex = 1;
             mProgressDialog = new ProgressDialog(context);
             mProgressDialog.setCanceledOnTouchOutside(false);//按返回键可以取消，点击窗口外面不可以取消
-            mProgressDialog.setMessage(String.format(getString(R.string.progress_ocr_dialog), mCurrentProgressIndex, mImages.size(), 0));//
+            mProgressDialog.setMessage(String.format(getString(R.string.progress_ocr_dialog), mCurrentProgressIndex, mImages.size(), ""));//
             mProgressDialog.setCancelable(true);
             mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
                 @Override
@@ -210,10 +247,12 @@ public class MIPActivity extends NewDocumentActivity implements Picker.PickListe
             super.onPostExecute(flag);
             if (mProgressDialog != null && mProgressDialog.isShowing()) {
                 mProgressDialog.dismiss();
+                mProgressDialog = null;
             }
             Screen.unlockOrientation((Activity) context);
             if (flag) {
                 startActivity(new Intent(MIPActivity.this, DocumentGridActivity.class));
+                finish();//todo 再考虑下是否finish
             } else {
                 Toast.makeText(MIPActivity.this, R.string.error_ocr_dialog, Toast.LENGTH_LONG).show();
             }
@@ -223,7 +262,7 @@ public class MIPActivity extends NewDocumentActivity implements Picker.PickListe
         protected void onProgressUpdate(Integer... values) {
             Log.i(LOG_TAG, "MIPOCRTask onProgressUpdate progress=" + values[0]);
             super.onProgressUpdate(values);
-            mProgressDialog.setMessage(String.format(getString(R.string.progress_ocr_dialog), values[0], mImages.size(), 0));//
+            mProgressDialog.setMessage(String.format(getString(R.string.progress_ocr_dialog), values[0], mImages.size(), ""));//
         }
 
         @Override
@@ -239,7 +278,9 @@ public class MIPActivity extends NewDocumentActivity implements Picker.PickListe
             return true;
         }
 
-        //对这张图片进行OCR处理
+        /**
+         * 对单张图片进行OCR处理，返回false表示处理失败
+         */
         private boolean imageOCR(ImageEntry image) {
             //1.摘自NewDocumentActivity中loadBitmapFromContentUri方法的代码
             Log.i(LOG_TAG, "load image");
@@ -293,33 +334,47 @@ public class MIPActivity extends NewDocumentActivity implements Picker.PickListe
         }
     }
 
-    //取消任务
+    //取消现有任务
     public void cancelTask() {
-        if (mOCRTask != null) {//取消现有任务
+        if (mOCRTask != null) {
             mOCRTask.cancel(true);
             mOCRTask = null;
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        if (mProgressDialog != null) {//有进度条对话框的话先清掉
+            mProgressDialog.dismiss();
+            mProgressDialog = null;
+            cancelTask();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
     /**
-     * 仿照的OCRActivity中的ProgressHandler，这个Handler并不做那么多的处理，很多消息都是空处理
+     * 仿照的OCRActivity中的ProgressHandler，处理是在UI线程中执行的。这个Handler并不做那么多的处理，有些消息是空处理。
      * todo MIPOCRHandler是非static的，可能会导致内存溢出
      */
     private class MIPOCRHandler extends Handler {
 
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case OCR.MESSAGE_EXPLANATION_TEXT: {//更新toolbar显示的步骤文本
+                case OCR.MESSAGE_EXPLANATION_TEXT: {//更新toolbar显示的步骤文本 --> hujiawei 不处理该消息
+                    if (mProgressDialog != null && mProgressDialog.isShowing()) {
+                        mProgressDialog.setMessage(String.format(getString(R.string.progress_ocr_dialog), mCurrentProgressIndex, mImages.size(), getString(msg.arg1)));//
+                    }
                     break;
                 }
                 case OCR.MESSAGE_TESSERACT_PROGRESS: {//更新显示的处理进度
                     int percent = msg.arg1;
                     if (mProgressDialog != null && mProgressDialog.isShowing()) {
-                        mProgressDialog.setMessage(String.format(getString(R.string.progress_ocr_dialog), mCurrentProgressIndex, mImages.size(), percent));//
+                        mProgressDialog.setMessage(String.format(getString(R.string.progress_ocr_dialog), mCurrentProgressIndex, mImages.size(), String.format("%s %%", percent)));//
                     }
                     break;
                 }
-                case OCR.MESSAGE_PREVIEW_IMAGE: {//在OCR的onPregressImage方法中被调用，表示后台对图片进行了处理，前台需要更新
+                case OCR.MESSAGE_PREVIEW_IMAGE: {//在OCR的onPregressImage方法中被调用，表示后台对图片进行了处理，前台需要更新 --> hujiawei 不处理该消息
                     break;
                 }
                 case OCR.MESSAGE_FINAL_IMAGE: {//在OCR的simpleLayout方法中发送消息，表示最终要进行OCR识别的图片
@@ -329,7 +384,7 @@ public class MIPActivity extends NewDocumentActivity implements Picker.PickListe
                     }
                     break;
                 }
-                case OCR.MESSAGE_LAYOUT_PIX: {//在分析布局的时候会发送该消息，同样这个时候也需要前台更新显示后台处理得到的图片
+                case OCR.MESSAGE_LAYOUT_PIX: {//在分析布局的时候会发送该消息，同样这个时候也需要前台更新显示后台处理得到的图片 --> hujiawei 不处理该消息
                     break;
                 }
                 case OCR.MESSAGE_LAYOUT_ELEMENTS: {//分析出图片中的布局元素，识别出来的结果包含文本片段集合和图片片段集合，接下来由用户选择需要处理的部分
@@ -380,7 +435,7 @@ public class MIPActivity extends NewDocumentActivity implements Picker.PickListe
                 }
             });
         }
- 
+
         try {
             Uri documentUri = saveDocumentToDB(imageFile, hocrString, utf8String, language);//保存文档
             if (imageFile != null) {//创建一个缩略图保存下来
@@ -426,7 +481,7 @@ public class MIPActivity extends NewDocumentActivity implements Picker.PickListe
             if (plainText != null) {
                 contentValues.put(DocumentContentProvider.Columns.OCR_TEXT, plainText);
             }
-            if (language !=null) {
+            if (language != null) {
                 contentValues.put(DocumentContentProvider.Columns.OCR_LANG, language);
             }
             if (getParentId() > -1) {

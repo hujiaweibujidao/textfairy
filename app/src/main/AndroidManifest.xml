@@ -33,7 +33,7 @@
             android:exported="false">
         </provider>
 
-        <!--删除了图片发送到该应用处理的功能-->
+        <!--主界面，删除了图片发送到该应用处理的功能-->
         <activity
             android:name=".thu.MainActivity"
             android:launchMode="singleTop">
@@ -43,6 +43,8 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <!--处理记录界面-->
         <activity
             android:name=".documents.viewing.grid.DocumentGridActivity"
             android:hardwareAccelerated="false"
@@ -51,9 +53,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".thu.MainActivity"/>
         </activity>
-        <activity
-            android:name=".documents.creation.visualisation.OCRActivity"
-            android:launchMode="singleTop"/>
+        <!--处理结果界面-->
         <activity
             android:name=".documents.viewing.single.DocumentActivity"
             android:configChanges="keyboardHidden|keyboard"
@@ -63,19 +63,36 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".documents.viewing.grid.DocumentGridActivity"/>
         </activity>
+
+        <!--选择多张图片进行配置和处理界面-->
+        <activity
+            android:name=".thu.MIPActivity"
+            android:theme="@style/MIP_theme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.renard.ocr.thu.MainActivity"/>
+        </activity>
+
+        <!--选择多张图片的界面-->
+        <activity android:name="imagepicker.ui.PickerActivity"/>
+        <service
+            android:name="imagepicker.util.OfflineSpiceService"
+            android:exported="false"/>
+
+        <!--应用首次进入安装语言包功能的界面-->
         <activity
             android:name=".install.InstallActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+        <service android:name=".language.OCRLanguageInstallService"/>
+
+        <!--原始应用中可视化OCR处理的界面-->
+        <activity
+            android:name=".documents.creation.visualisation.OCRActivity"
+            android:launchMode="singleTop"/>
         <activity
             android:name=".documents.creation.crop.CropImageActivity"
             android:configChanges="orientation|keyboardHidden"/>
-        <activity android:name=".language.OCRLanguageActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".documents.viewing.grid.DocumentGridActivity"/>
-        </activity>
-
-        <service android:name=".language.OCRLanguageInstallService"/>
+        <activity android:name=".language.OCRLanguageActivity"/>
 
         <receiver android:name=".language.DownloadBroadCastReceiver">
             <intent-filter>
@@ -83,21 +100,7 @@
             </intent-filter>
         </receiver>
 
-        <activity
-            android:name=".thu.MIPActivity"
-            android:label="@string/title_activity_mip"
-            android:theme="@style/MIP_theme">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.renard.ocr.thu.MainActivity"/>
-        </activity>
-
-        <!--mip-->
-        <activity android:name="imagepicker.ui.PickerActivity"/>
-        <service
-            android:name="imagepicker.util.OfflineSpiceService"
-            android:exported="false"/>
-
+        <!--fabric apikey-->
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="ef8b77a0fd2ef3e87c78497b9595a9234fe5b711"/>

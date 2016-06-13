@@ -93,6 +93,8 @@ public class DocumentGridAdapter extends CursorAdapter implements OnCheckedChang
 
     public DocumentGridAdapter(DocumentGridActivity activity, int elementLayout, OnCheckedChangeListener listener) {
         super(activity, activity.getContentResolver().query(DocumentContentProvider.CONTENT_URI, PROJECTION, DocumentContentProvider.Columns.PARENT_ID + "=-1", null, null), true);
+        //默认的query是取出parentId=-1的文档
+
         mElementLayoutId = elementLayout;
         mActivity = activity;
         mInflater = LayoutInflater.from(activity);
@@ -117,13 +119,13 @@ public class DocumentGridAdapter extends CursorAdapter implements OnCheckedChang
 
         holder.title.setVisibility(View.GONE);
         //有title显示title -> 不显示title,界面有问题
-//        String title = cursor.getString(mIndexTitle);
-//        if (title != null && title.length() > 0) {
-//            holder.title.setText(title);
-//            holder.title.setVisibility(View.VISIBLE);
-//        }else{
-//            holder.title.setVisibility(View.INVISIBLE);
-//        }
+        /*String title = cursor.getString(mIndexTitle);
+        if (title != null && title.length() > 0) {
+            holder.title.setText(title);
+            holder.title.setVisibility(View.VISIBLE);
+        }else{
+            holder.title.setVisibility(View.INVISIBLE);
+        }*/
 
         long created = cursor.getLong(mIndexCreated);//上面显示时间
         //hujiawei 修改时间显示格式 MMM dd, yyyy h:mmaa
@@ -164,17 +166,15 @@ public class DocumentGridAdapter extends CursorAdapter implements OnCheckedChang
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        View v = null;
-        DocumentViewHolder holder = null;
-        v = mInflater.inflate(mElementLayoutId, null, false);
+        View view = mInflater.inflate(mElementLayoutId, null, false);
         int index = cursor.getColumnIndex(Columns.ID);
         int documentId = cursor.getInt(index);
 
-        holder = new DocumentViewHolder(v);
+        DocumentViewHolder holder = new DocumentViewHolder(view);
         holder.documentId = documentId;
         holder.gridElement.setChecked(mSelectedDocuments.contains(documentId));
         holder.gridElement.setOnCheckedChangeListener(this);
-        v.setTag(holder);
+        view.setTag(holder);
 
         //hujiawei 删除下面这段代码没有效果
         FastBitmapDrawable start = Util.sDefaultDocumentThumbnail;
@@ -183,11 +183,11 @@ public class DocumentGridAdapter extends CursorAdapter implements OnCheckedChang
             startBitmap = start.getBitmap();
         }
         final CrossFadeDrawable transition = new CrossFadeDrawable(startBitmap, null);
-        transition.setCallback(v);
+        transition.setCallback(view);
         transition.setCrossFadeEnabled(true);
         holder.transition = transition;
 
-        return v;
+        return view;
     }
 
     //设置选中的文档编号

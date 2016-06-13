@@ -7,4 +7,10 @@
         android:title="@string/add_image"
         app:showAsAction="ifRoom">
     </item>
+    <item
+        android:id="@+id/item_settings"
+        android:icon="@android:drawable/ic_menu_preferences"
+        android:title="@string/dialog_settings"
+        app:showAsAction="ifRoom">
+    </item>
 </menu>

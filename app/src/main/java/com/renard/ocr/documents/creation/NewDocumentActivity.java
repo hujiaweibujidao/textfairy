@@ -115,8 +115,8 @@ public abstract class NewDocumentActivity extends MonitoredActivity implements P
     private static final String DIALOG_ARG_DOCUMENT_URI = "document_uri";
 
     //请求码
-    private final static int REQUEST_CODE_MAKE_PHOTO = 0;//拍照
-    private final static int REQUEST_CODE_PICK_PHOTO = 1;//选择照片
+    protected final static int REQUEST_CODE_MAKE_PHOTO = 0;//拍照
+    protected final static int REQUEST_CODE_PICK_PHOTO = 1;//选择照片
     protected final static int REQUEST_CODE_CROP_PHOTO = 2;//裁剪图片
     protected final static int REQUEST_CODE_OCR = 3;//ocr
     protected final static int REQUEST_CODE_MIP = 4;//mip 多图选择
@@ -197,30 +197,11 @@ public abstract class NewDocumentActivity extends MonitoredActivity implements P
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (RESULT_OK == resultCode) {//返回了成功
             switch (requestCode) {
-                case REQUEST_CODE_CROP_PHOTO: {//图片裁剪成功，可以进入到ocr了
-                    long nativePix = data.getLongExtra(EXTRA_NATIVE_PIX, 0);
-                    startOcrActivity(nativePix, false);
-                    break;
-                }
                 case REQUEST_CODE_MAKE_PHOTO:
                     mCameraResult = new CameraResult(requestCode, resultCode, data, ImageSource.CAMERA);
                     break;
                 case REQUEST_CODE_PICK_PHOTO://不论是拍照，还是选图，都是使用CameraResult
                     mCameraResult = new CameraResult(requestCode, resultCode, data, ImageSource.PICK);
-                    break;
-            }
-        } else if (CropImageActivity.RESULT_NEW_IMAGE == resultCode) {//在裁剪图片的时候出现任何错误都会返回到这里重新获取图片
-            switch (mImageSource) {
-                case PICK:
-                    startGallery();
-                    break;
-                case CAMERA:
-                    startCamera();
-                    break;
-                case INTENT://通过intent进入的
-                    break;
-                case MIP:
-                    startMip();
                     break;
             }
         }
@@ -288,7 +269,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity implements P
     protected abstract int getParentId();//toread NewDocumentActivity的抽象方法
 
     //启动ocr Activity去进行ocr操作
-    void startOcrActivity(long nativePix, boolean accessibilityMode) {
+    protected void startOcrActivityForResult(long nativePix, boolean accessibilityMode) {
         Intent intent = new Intent(this, OCRActivity.class);
         intent.putExtra(EXTRA_NATIVE_PIX, nativePix);
         intent.putExtra(OCRActivity.EXTRA_USE_ACCESSIBILITY_MODE, accessibilityMode);
@@ -425,7 +406,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity implements P
         dismissLoadingImageProgressDialog();
         if (pixLoadStatus == PixLoadStatus.SUCCESS) {//加载成功
             if (skipCrop) {//跳过了图片裁剪，直接进入 OCRActivity
-                startOcrActivity(nativePix, true);
+                startOcrActivityForResult(nativePix, true);
             } else {//进入图片裁剪阶段 CropImageActivity
                 Intent actionIntent = new Intent(this, CropImageActivity.class);
                 actionIntent.putExtra(NewDocumentActivity.EXTRA_NATIVE_PIX, nativePix);
@@ -536,7 +517,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity implements P
      * 其他功能
      */
 
-    void showFileError(PixLoadStatus status) {
+    protected void showFileError(PixLoadStatus status) {
         showFileError(status, null);
     }
 

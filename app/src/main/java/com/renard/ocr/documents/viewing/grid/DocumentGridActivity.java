@@ -228,18 +228,18 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
                 mode.finish();
                 return true;
             }
-//            else if (itemId == R.id.item_export_as_pdf) {
-//                new CreatePDFTask(mDocumentAdapter.getSelectedDocumentIds()).execute();
-//                cancelMultiSelectionMode();
-//                mode.finish();
-//                return true;
-//            }
-//            else if (itemId == R.id.item_edit_title) {
-//                final Set<Integer> selectedDocs = mDocumentAdapter.getSelectedDocumentIds();
-//                final int documentId = selectedDocs.iterator().next();
-//                getSupportLoaderManager().initLoader(documentId, null, DocumentGridActivity.this);//
-//                return true;
-//            }
+            /*else if (itemId == R.id.item_export_as_pdf) {
+                new CreatePDFTask(mDocumentAdapter.getSelectedDocumentIds()).execute();
+                cancelMultiSelectionMode();
+                mode.finish();
+                return true;
+            }
+            else if (itemId == R.id.item_edit_title) {
+                final Set<Integer> selectedDocs = mDocumentAdapter.getSelectedDocumentIds();
+                final int documentId = selectedDocs.iterator().next();
+                getSupportLoaderManager().initLoader(documentId, null, DocumentGridActivity.this);//
+                return true;
+            }*/
             return true;
         }
 
