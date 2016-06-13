@@ -3,7 +3,6 @@ package imagepicker.ui;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
-import android.media.MediaPlayer;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
@@ -505,16 +504,16 @@ public class PickerActivity extends MonitoredActivity {
     }
 
     public void onEvent(final Events.OnPickImageEvent pickImageEvent) {
-        if (mPickOptions.videosEnabled && mPickOptions.videoLengthLimit > 0 && pickImageEvent.imageEntry.isVideo) {
-            // Check to see if the selected video is too long in length
-            final MediaPlayer mp = MediaPlayer.create(this, Uri.parse(pickImageEvent.imageEntry.path));
-            final int duration = mp.getDuration();
-            mp.release();
-            if (duration > (mPickOptions.videoLengthLimit)) {
-                Toast.makeText(this, getResources().getString(R.string.video_too_long).replace("$", String.valueOf(mPickOptions.videoLengthLimit / 1000)), Toast.LENGTH_SHORT).show();
-                return; // Don't allow selection
-            }
-        }
+//        if (mPickOptions.videosEnabled && mPickOptions.videoLengthLimit > 0 && pickImageEvent.imageEntry.isVideo) {
+//            // Check to see if the selected video is too long in length
+//            final MediaPlayer mp = MediaPlayer.create(this, Uri.parse(pickImageEvent.imageEntry.path));
+//            final int duration = mp.getDuration();
+//            mp.release();
+//            if (duration > (mPickOptions.videoLengthLimit)) {
+//                Toast.makeText(this, getResources().getString(R.string.video_too_long).replace("$", String.valueOf(mPickOptions.videoLengthLimit / 1000)), Toast.LENGTH_SHORT).show();
+//                return; // Don't allow selection
+//            }
+//        }
 
         if (mPickOptions.pickMode == Picker.PickMode.MULTIPLE_IMAGES) {
             handleMultipleModeAddition(pickImageEvent.imageEntry);

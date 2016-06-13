@@ -49,7 +49,7 @@ public class ImageLoadAsyncTask extends AsyncTask<Void, Void, ImageLoadAsyncTask
     final static String ACTION_IMAGE_LOADING_START = ImageLoadAsyncTask.class.getName() + ".image.loading.start";
 
     public static final int MIN_PIXEL_COUNT = 3 * 1024 * 1024;
-    private final boolean skipCrop;
+    private final boolean skipCrop;//todo hujiawei skipCrop在这个类中并没有起到作用
     private final Context context;//ApplicationContext
     private final Uri cameraPicUri;
 

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
     android:id="@+id/image_layout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:focusable="false"
@@ -23,14 +24,6 @@
         android:background="@color/alter_image_check_color"
         android:contentDescription="@string/image_check"
         android:focusable="false"
-        android:focusableInTouchMode="false" />
-
-    <ImageView
-        android:id="@+id/image_video_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal|center_vertical"
-        android:contentDescription="@string/image_video_icon_desc"
-        android:visibility="gone" />
+        android:focusableInTouchMode="false"/>
 
 </FrameLayout>

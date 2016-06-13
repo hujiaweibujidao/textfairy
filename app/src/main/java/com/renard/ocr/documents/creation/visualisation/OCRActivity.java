@@ -46,7 +46,6 @@ import com.renard.ocr.documents.creation.visualisation.LayoutQuestionDialog.Layo
 import com.renard.ocr.documents.viewing.DocumentContentProvider;
 import com.renard.ocr.documents.viewing.DocumentContentProvider.Columns;
 import com.renard.ocr.documents.viewing.grid.DocumentGridActivity;
-import com.renard.ocr.documents.viewing.single.DocumentActivity;
 import com.renard.ocr.util.PreferencesUtils;
 import com.renard.ocr.util.Screen;
 import com.renard.ocr.util.Util;
@@ -126,7 +125,12 @@ public class OCRActivity extends MonitoredActivity implements LayoutChoseListene
 
         //askUserAboutDocumentLayout();//hujiawei 不再询问用户布局情况，直接使用默认的布局
         Log.i(LOG_TAG, PreferencesUtils.getOCRLanguage(this).first);//chi_sim
-        onLayoutChosen(LayoutKind.COMPLEX, PreferencesUtils.getOCRLanguage(this).first);
+
+        if (PreferencesUtils.getLayout(this) == PreferencesUtils.LAYOUT_SIMPLE) {
+            onLayoutChosen(LayoutKind.SIMPLE, PreferencesUtils.getOCRLanguage(this).first);
+        } else {
+            onLayoutChosen(LayoutKind.SIMPLE, PreferencesUtils.getOCRLanguage(this).first);
+        }
     }
 
     //询问用户关于图片中文字的布局情况
@@ -148,7 +152,6 @@ public class OCRActivity extends MonitoredActivity implements LayoutChoseListene
             setToolbarMessage(R.string.progress_start);
 
             if (layoutKind == LayoutKind.SIMPLE) {//简单布局，这种情况下可以完全自动 --> todo mAccuracy = 0; ?
-                //
                 mOCR.startOCRForSimpleLayout(OCRActivity.this, ocrLanguage, pixOrg, mImageView.getWidth(), mImageView.getHeight());
             } else if (layoutKind == LayoutKind.COMPLEX) {//复杂布局，这种情况下还需要选择需要处理的列
                 mAccuracy = 0;
@@ -279,56 +282,59 @@ public class OCRActivity extends MonitoredActivity implements LayoutChoseListene
     private void saveDocument(final Pix pix, final String hocrString, final String utf8String, final int accuracy) {
         Util.startBackgroundJob(OCRActivity.this, "", getText(R.string.saving_document).toString(), new Runnable() {
 
-                    @Override
-                    public void run() {
-                        File imageFile = null;
-                        Uri documentUri = null;
+            @Override
+            public void run() {
+                File imageFile = null;
+                Uri documentUri = null;
 
-                        try {
-                            imageFile = saveImage(pix);//保存最终处理的图片（多个片段合并在一起的图片），并不是原图
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            runOnUiThread(new Runnable() {
+                try {
+                    imageFile = saveImage(pix);//保存最终处理的图片（多个片段合并在一起的图片），并不是原图
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    runOnUiThread(new Runnable() {
 
-                                @Override
-                                public void run() {
-                                    Toast.makeText(getApplicationContext(), getText(R.string.error_create_file), Toast.LENGTH_LONG).show();
-                                }
-                            });
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), getText(R.string.error_create_file), Toast.LENGTH_LONG).show();
                         }
+                    });
+                }
 
-                        try {
-                            documentUri = saveDocumentToDB(imageFile, hocrString, utf8String);//保存文档
-                            if (imageFile != null) {//创建一个缩略图保存下来
-                                Util.createThumbnail(OCRActivity.this, imageFile, Integer.valueOf(documentUri.getLastPathSegment()));
-                            }
-                        } catch (RemoteException e) {
-                            e.printStackTrace();
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(getApplicationContext(), getText(R.string.error_create_file), Toast.LENGTH_LONG).show();
-                                }
-                            });
-                        } finally {
-                            recycleResultPix(pix);
-
-                            //准备跳转到 DocumentActivity
-                            if (documentUri != null && !isFinishing()) {
-                                Intent intent;
-                                intent = new Intent(OCRActivity.this, DocumentActivity.class);//跳到DocumentActivity
-                                intent.putExtra(DocumentActivity.EXTRA_ACCURACY, accuracy);
-                                intent.putExtra(DocumentActivity.EXTRA_LANGUAGE, mOcrLanguage);
-                                intent.setData(documentUri);
-                                intent.putExtra(DocumentGridActivity.EXTRA_NATIVE_PIX, pix.getNativePix());
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                startActivity(intent);
-                                finish();
-                                Screen.unlockOrientation(OCRActivity.this);
-                            }
-                        }
+                try {
+                    documentUri = saveDocumentToDB(imageFile, hocrString, utf8String);//保存文档
+                    if (imageFile != null) {//创建一个缩略图保存下来
+                        Util.createThumbnail(OCRActivity.this, imageFile, Integer.valueOf(documentUri.getLastPathSegment()));
                     }
-                }, new Handler());
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), getText(R.string.error_create_file), Toast.LENGTH_LONG).show();
+                        }
+                    });
+                } finally {
+                    recycleResultPix(pix);
+
+                    //准备跳转到 DocumentActivity ---> 批量处理的时候就不跳转了
+                    /*
+                    if (documentUri != null && !isFinishing()) {
+                        Intent intent = new Intent(OCRActivity.this, DocumentActivity.class);//跳到DocumentActivity
+                        intent.putExtra(DocumentActivity.EXTRA_ACCURACY, accuracy);
+                        intent.putExtra(DocumentActivity.EXTRA_LANGUAGE, mOcrLanguage);
+                        intent.setData(documentUri);
+                        intent.putExtra(DocumentGridActivity.EXTRA_NATIVE_PIX, pix.getNativePix());
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(intent);
+                        finish();
+                        Screen.unlockOrientation(OCRActivity.this);
+                    }*/
+
+                    //startActivity(new Intent(OCRActivity.this, DocumentGridActivity.class));
+                    //应该采取发送消息的形式，这张图片处理完了之后发送消息，在MIPActivity中接收消息，如果还有未处理的继续处理，如果没有了那就跳转到DocumentGridActivity
+                }
+            }
+        }, new Handler());
     }
 
     private void recycleResultPix(Pix pix) {

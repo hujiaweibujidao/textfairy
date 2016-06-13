@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/default_activity_background"
+    tools:context=".thu.MIPActivity">
+
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/toolbar"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/list_images"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/start_batch"
+        android:paddingTop="3dp"
+        android:paddingLeft="2dp"
+        android:paddingRight="2dp"
+        android:layout_below="@id/toolbar"/>
+
+    <Button
+        android:id="@+id/start_batch"
+        style="@style/Base.TextAppearance.AppCompat.Medium"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="@dimen/default_padding_half"
+        android:layout_marginRight="@dimen/default_padding_half"
+        android:layout_marginBottom="@dimen/default_padding_half"
+        android:padding="@dimen/default_padding"
+        android:text="@string/start_ocr"
+        android:textColor="@android:color/white"
+        android:theme="@style/ColoredButton"
+        android:visibility="visible"/>
+
+</RelativeLayout>

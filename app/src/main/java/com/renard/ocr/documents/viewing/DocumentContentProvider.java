@@ -36,28 +36,27 @@ import android.util.Log;
 public class DocumentContentProvider extends ContentProvider {
 
     private final static String TAG = DocumentContentProvider.class.getSimpleName();
-    private static final String AUTHORITY = "com.renard.ocr";
 
+    public static final String AUTHORITY = "com.renard.ocr";
     public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/documents");
 
     //数据表的列
     public static class Columns {
-
         public static final String ID = "_id";
-        public static final String PARENT_ID = "parent_id";
+        public static final String PARENT_ID = "parent_id";//合并文档的时候总是选择文档编号最小的那个作为parent，将其他文档作为child文档
         public static final String CREATED = "created";
         public static final String PHOTO_PATH = "photo_path";
         public static final String TITLE = "title";
-        public static final String OCR_TEXT = "ocr_text";
+        public static final String OCR_TEXT = "ocr_text";//todo 为什么没有保存准确率数据
         public static final String HOCR_TEXT = "hocr_text";
         public static final String PDF_URI = "pdf_uri";
         public static final String CHILD_COUNT = "child_count";
         public static final String OCR_LANG = "ocr_lang";
     }
 
-    private static final UriMatcher sUriMatcher;
     private static final int DOCUMENT = 0;
     private static final int DOCUMENTS = 1;
+    private static final UriMatcher sUriMatcher;
 
     static {
         sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -158,7 +157,6 @@ public class DocumentContentProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-
         if (values != null) {
             values = new ContentValues(values);
         } else {
@@ -166,7 +164,7 @@ public class DocumentContentProvider extends ContentProvider {
         }
 
         Long now = Long.valueOf(System.currentTimeMillis());
-        values.put(Columns.CREATED, now);
+        values.put(Columns.CREATED, now);//创建时间为当前时间！
         // if (!values.containsKey(Columns.TITLE) &&
         // values.containsKey(Columns.OCR_TEXT)) {
         // values.put(Columns.TITLE,
@@ -180,7 +178,7 @@ public class DocumentContentProvider extends ContentProvider {
                 // update child count of parent
                 final String query = "UPDATE " + DBHelper.TABLE_NAME + " set " + Columns.CHILD_COUNT + "=" + Columns.CHILD_COUNT + "+1 WHERE _id="
                         + values.getAsString(Columns.PARENT_ID);
-                Log.i(TAG, query);
+                Log.i(TAG, query);//UPDATE documents set child_count=child_count+1 WHERE _id=0
                 db.execSQL(query);
             }
             long rowId = db.insert(DBHelper.TABLE_NAME, null, values);
@@ -230,7 +228,7 @@ public class DocumentContentProvider extends ContentProvider {
                 String id = uri.getLastPathSegment();
                 count = db.update(DBHelper.TABLE_NAME, values, Columns.ID + "=?", new String[]{id});
                 break;
-            }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          }
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }

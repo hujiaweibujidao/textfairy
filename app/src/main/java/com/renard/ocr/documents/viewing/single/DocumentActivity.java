@@ -168,7 +168,7 @@ public class DocumentActivity extends NewDocumentActivity implements LoaderManag
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
-        getMenuInflater().inflate(R.menu.document_activity_options, menu);
+        getMenuInflater().inflate(R.menu.menu_document_activity, menu);
         return true;
     }
 

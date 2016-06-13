@@ -33,6 +33,7 @@
             android:exported="false">
         </provider>
 
+        <!--删除了图片发送到该应用处理的功能-->
         <activity
             android:name=".thu.MainActivity"
             android:launchMode="singleTop">
@@ -40,14 +41,6 @@
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEND"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-
-                <data android:mimeType="image/jpeg"/>
-                <data android:mimeType="image/jpg"/>
-                <data android:mimeType="image/png"/>
             </intent-filter>
         </activity>
         <activity

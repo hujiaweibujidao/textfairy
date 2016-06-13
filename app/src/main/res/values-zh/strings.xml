@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="installing">正在安装语言包...</string>
+    <string name="installing">正在安装语言包…</string>
     <string name="install_error_disk_space">安装失败:没有足够的空间</string>
     <string name="install_error">安装失败:无法安装配置文件</string>
     <string name="app_name">THU OCR</string>
@@ -9,7 +9,7 @@
     <string name="image_source">请选择图片来源</string>
     <string name="no_gallery_found">本机未发现任何图库!</string>
     <string name="please_wait">请等待</string>
-    <string name="loading_image">加载图片...</string>
+    <string name="loading_image">加载图片…</string>
     <string name="image_could_not_be_read">未找到图片数据</string>
     <string name="image_does_not_exist">图片不在手机中</string>
     <string name="image_format_unsupported">图片格式不支持</string>
@@ -68,7 +68,7 @@
     <string name="empty_document">内容为空</string>
     <string name="ok">确定</string>
     <string name="install_ok">语言包安装成功</string>
-    <string name="empty_document_grid">没有文档</string>
+    <string name="empty_document_grid">没有记录</string>
     <string name="close_app">退出应用</string>
     <string name="label_document_grid">处理记录</string>
     <string name="label_document">处理结果</string>
@@ -98,7 +98,7 @@
     <string name="share_chooser_title">选择分享的方式</string>
     <string name="share_text">分享</string>
     <string name="stop">停止</string>
-    <string name="no_image_picked">未选择任何图片</string>
+    <string name="no_image_picked">未选择图片</string>
     <string name="please_tap_on_column">请先选择需要处理的内容</string>
     <string name="dialog_settings">应用设置</string>
     <string name="default_mode">默认版式</string>
@@ -106,5 +106,11 @@
     <string name="mode_image">图片</string>
     <string name="mode_v_text">竖排文本</string>
     <string name="mode_h_text">横排文本</string>
-
+    <string name="title_activity_mip">图片列表</string>
+    <string name="add_image">添加图片</string>
+    <string name="start_ocr">开始处理</string>
+    <string name="title_ocr_dialog">OCR处理中</string>
+    <string name="message_ocr_dialog">正在处理，请等待…</string>
+    <string name="progress_ocr_dialog">正在处理第 %1$d / %2$d 张图片 (当前进度 %3$d%%)</string>
+    <string name="error_ocr_dialog">OCR处理过程出错了</string>
 </resources>

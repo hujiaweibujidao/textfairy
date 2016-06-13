@@ -60,7 +60,6 @@ public class ImagesThumbnailFragment extends Fragment {
         mImagesRecycler.setAdapter(new ImagesThumbnailAdapter(this, event.albumEntry, mImagesRecycler, mPickOptions));
     }
 
-
     public void onEvent(final Events.OnAttachFabEvent fabEvent) {
         fabEvent.fab.attachToRecyclerView(mImagesRecycler);
     }

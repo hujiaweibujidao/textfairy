@@ -102,6 +102,7 @@ public class DocumentGridAdapter extends CursorAdapter implements OnCheckedChang
         mIndexID = c.getColumnIndex(Columns.ID);
         mIndexTitle = c.getColumnIndex(Columns.TITLE);
         mChildCountID = c.getColumnIndex(Columns.CHILD_COUNT);
+
         mCheckedChangeListener = listener;
     }
 

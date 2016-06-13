@@ -62,7 +62,6 @@ public class InstallActivity extends MonitoredActivity implements InstallTaskFra
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EventBus.getDefault().register(this);
-
         setContentView(R.layout.activity_install);
         ButterKnife.bind(this);
 

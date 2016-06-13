@@ -9,14 +9,16 @@ import java.io.Serializable;
 /**
  * 图片
  *
- * Created by yazeed44 on 6/14/15.
+ * update
+ * 1.去掉isVideo属性
+ *
  */
 public class ImageEntry implements Serializable {
+
     public final int imageId;
     public final String path;
     public final long dateAdded;
     public boolean isPicked = false;
-    public boolean isVideo = false;
 
     public ImageEntry(final Builder builder) {
         this.path = builder.mPath;
@@ -33,7 +35,7 @@ public class ImageEntry implements Serializable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(Object o) {//根据图片路径判断图片是否相等
         return o instanceof ImageEntry && ((ImageEntry) o).path.equals(path);
     }
 
@@ -82,7 +84,6 @@ public class ImageEntry implements Serializable {
         public ImageEntry build() {
             return new ImageEntry(this);
         }
-
     }
 
 }

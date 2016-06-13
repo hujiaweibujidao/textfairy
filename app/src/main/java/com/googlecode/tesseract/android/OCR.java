@@ -581,6 +581,80 @@ public class OCR extends MonitoredActivity.LifeCycleAdapter implements OcrProgre
         }).start();
     }
 
+    /**
+     * startOCRForSimpleLayout去掉线程之后的版本
+     */
+    public void startOCRForSimpleLayoutSyn(final Context context, final String lang, final Pix pixs, int width, int height) {
+        if (pixs == null) {
+            throw new IllegalArgumentException("Source pix must be non-null");
+        }
+        mPreviewHeightUnScaled = height;
+        mPreviewWidthUnScaled = width;
+        mOriginalHeight = pixs.getHeight();
+        mOriginalWidth = pixs.getWidth();
+
+        try {
+            startCaptureLogs();
+            logMemory(context);
+            final String tessDir = Util.getTessDir(context);
+            long nativeTextPix = nativeOCRBook(pixs.getNativePix());//nativeOCRBook 二值化以及矫正操作
+            Pix pixText = new Pix(nativeTextPix);
+            mOriginalHeight = pixText.getHeight();
+            mOriginalWidth = pixText.getWidth();
+            sendMessage(MESSAGE_EXPLANATION_TEXT, R.string.progress_ocr);
+            sendMessage(MESSAGE_FINAL_IMAGE, nativeTextPix);
+
+            synchronized (OCR.this) {
+                if (mStopped) {
+                    return;
+                }
+                final String ocrLanguages = determineOcrLanguage(lang);
+                int ocrMode = determineOcrMode(lang);
+                if (!initTessApi(tessDir, ocrLanguages, ocrMode)) return;
+
+                mTess.setPageSegMode(PageSegMode.PSM_AUTO);
+                mTess.setImage(pixText);
+            }
+
+            String hocrText = mTess.getHOCRText(0);
+            int accuracy = mTess.meanConfidence();
+            final String utf8Text = mTess.getUTF8Text();
+
+            if (utf8Text.isEmpty()) {
+                Log.i(LOG_TAG, "No words found. Looking for sparse text.");
+                mTess.setPageSegMode(PageSegMode.PSM_SPARSE_TEXT);
+                mTess.setImage(pixText);
+                hocrText = mTess.getHOCRText(0);
+                accuracy = mTess.meanConfidence();
+            }
+
+            synchronized (OCR.this) {
+                if (mStopped) {
+                    return;
+                }
+                String htmlText = mTess.getHtmlText();
+                if (accuracy == 95) {
+                    accuracy = 0;
+                }
+
+                sendMessage(MESSAGE_HOCR_TEXT, hocrText, accuracy);
+                sendMessage(MESSAGE_UTF8_TEXT, htmlText, accuracy);
+            }
+        } finally {
+            if (mTess != null) {
+                mTess.end();
+            }
+            String logs = stopCaptureLogs();
+            if (TextFairyApplication.isRelease()) {
+                Crashlytics.log(logs);
+            } else {
+                Log.i(LOG_TAG, logs);
+            }
+            mCompleted = true;
+            sendMessage(MESSAGE_END);
+        }
+    }
+
     //记录此时的剩余内存情况
     private void logMemory(Context context) {
         if (TextFairyApplication.isRelease()) {

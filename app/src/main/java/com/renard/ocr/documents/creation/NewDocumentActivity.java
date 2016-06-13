@@ -66,6 +66,7 @@ import com.renard.ocr.documents.viewing.grid.DocumentGridActivity;
 import com.renard.ocr.documents.viewing.single.DocumentActivity;
 import com.renard.ocr.pdf.Hocr2Pdf;
 import com.renard.ocr.pdf.Hocr2Pdf.PDFProgressListener;
+import com.renard.ocr.thu.MIPActivity;
 import com.renard.ocr.util.MemoryInfo;
 import com.renard.ocr.util.Util;
 
@@ -92,7 +93,7 @@ import imagepicker.util.Picker;
  *
  * @author renard
  */
-public abstract class NewDocumentActivity extends MonitoredActivity implements Picker.PickListener{
+public abstract class NewDocumentActivity extends MonitoredActivity implements Picker.PickListener {
 
     private final static String LOG_TAG = NewDocumentActivity.class.getSimpleName();
 
@@ -135,11 +136,11 @@ public abstract class NewDocumentActivity extends MonitoredActivity implements P
     private CameraResult mCameraResult;
     private AsyncTask<Void, Void, ImageLoadAsyncTask.LoadResult> mBitmapLoadTask;
 
-    //you can override to perform operations in the Activity at the same point* where its fragments are resumed.
+    //you can override to perform operations in the Activity at the same point where its fragments are resumed.
     @Override
     protected void onResumeFragments() {//这里是关键，拍照或者选图之后这个方法就会被回调，而此时mCameraResult已经不为空了
         super.onResumeFragments();
-        if (mCameraResult != null) {
+        if (mCameraResult != null) {//只有在mCameraResult不为空的情况下才会执行的
             onCameraResultReady(mCameraResult);
             mCameraResult = null;
         }
@@ -235,7 +236,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity implements P
             startCamera();
         } else if (doAfter == MemoryWarningDialog.DoAfter.START_GALLERY) {
             startGallery();
-        }else if (doAfter == MemoryWarningDialog.DoAfter.START_MIP){
+        } else if (doAfter == MemoryWarningDialog.DoAfter.START_MIP) {
             startMip();
         }
     }
@@ -243,32 +244,56 @@ public abstract class NewDocumentActivity extends MonitoredActivity implements P
     //进入图片多选，它的回调和其他两种方式不同，它是自带了下面两个回调函数，而其他两种方式是在activityResult中获取结果
     public void startMip() {
         cameraPicUri = null;
-
-        new Picker.Builder(this, this, R.style.AppBaseTheme)
+        new Picker.Builder(this, this, R.style.AppBaseTheme)  //这里传入当前应用的主题AppBaseTheme，不过貌似作用不大
                 .setPickMode(Picker.PickMode.MULTIPLE_IMAGES) //由于我修改了PickActivity的界面布局，所以single模式存在问题
-                .setBackBtnInMainActivity(true)
-                .disableCaptureImageFromCamera()
-                .build()
-                .startActivity();
+                .setBackBtnInMainActivity(true).disableCaptureImageFromCamera().build().startActivity();
     }
 
     @Override
     public void onPickedSuccessfully(ArrayList<ImageEntry> images) {
         //String.valueOf(Uri.fromFile(new File(image.path)))
         //file:///storage/emulated/0/Pictures/Screenshots/S60606-173227.jpg
-
         //如果是一张图片，直接进入下一步；如果是多张图片，进入多张图片的处理界面
         //现在假设只处理第一张图片，并伪造一个mCameraResult -> 这种方式可行 -> 但是目前需求是要进入到多张图片的处理界面
+        //fakeCameraResultReady(Uri.fromFile(new File(images.get(0).path)));
+
+        Intent intent = new Intent(this, MIPActivity.class);
+        //intent.putParcelableArrayListExtra("images", images);//no!
+        intent.putExtra("images", images);//ok
+        startActivity(intent);
+    }
+
+    //这个是为了兼容原有的TextFairy应用，新添加了ImageSource.MIP，但是它并不是onActivityResult中回调，而是onPickedSuccessfully回调函数
+    //所以这里假装有一个CameraResult准备好了，可以进入下一步操作了，所以是fakeCameraResultReady
+    public void fakeCameraResultReady(Uri uri) {
         int requestCode = REQUEST_CODE_MIP;
         int resultCode = RESULT_OK;
         Intent data = new Intent();
-        data.setData(Uri.fromFile(new File(images.get(0).path)));
+        data.setData(uri);
         mCameraResult = new CameraResult(requestCode, resultCode, data, ImageSource.MIP);
+        //这里是直接调用，而不再是在resume的时候调用
+        onCameraResultReady(mCameraResult);
+        mCameraResult = null;//立即置空，防止重新进入
+    }
+
+    public void fakeCameraResultReady(ImageEntry imageEntry) {
+        fakeCameraResultReady(Uri.fromFile(new File(imageEntry.path)));
     }
 
     @Override
     public void onCancel() {
-        //Toast.makeText(this, R.string.no_image_picked, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.no_image_picked, Toast.LENGTH_SHORT).show();
+    }
+
+    protected abstract int getParentId();//toread NewDocumentActivity的抽象方法
+
+    //启动ocr Activity去进行ocr操作
+    void startOcrActivity(long nativePix, boolean accessibilityMode) {
+        Intent intent = new Intent(this, OCRActivity.class);
+        intent.putExtra(EXTRA_NATIVE_PIX, nativePix);
+        intent.putExtra(OCRActivity.EXTRA_USE_ACCESSIBILITY_MODE, accessibilityMode);
+        intent.putExtra(OCRActivity.EXTRA_PARENT_DOCUMENT_ID, getParentId());
+        startActivityForResult(intent, REQUEST_CODE_OCR);//for result!!!
     }
 
     //启动图库
@@ -346,7 +371,8 @@ public abstract class NewDocumentActivity extends MonitoredActivity implements P
         AccessibilityManager am = (AccessibilityManager) getSystemService(ACCESSIBILITY_SERVICE);
         boolean isAccessibilityEnabled = am.isEnabled();
         boolean isExploreByTouchEnabled = AccessibilityManagerCompat.isTouchExplorationEnabled(am);
-        final boolean skipCrop = isExploreByTouchEnabled && isAccessibilityEnabled;//toread 两者都为true就可以跳过图片裁剪
+        boolean skipCrop = isExploreByTouchEnabled && isAccessibilityEnabled;//toread 两者都为true就可以跳过图片裁剪
+        //skipCrop = true;//如果这里强制设置为true的确会跳过裁剪过程，然后直接进入到OCR操作中
 
         registerImageLoaderReceiver();//注册图片加载监听器，加载过程能收到通知 -> mMessageReceiver 接收通知并处理
         mBitmapLoadTask = new ImageLoadAsyncTask(this, skipCrop, cameraPicUri).execute();//启动图片加载
@@ -371,17 +397,6 @@ public abstract class NewDocumentActivity extends MonitoredActivity implements P
         }
     }
 
-    protected abstract int getParentId();//toread 抽象方法
-
-    //启动ocr Activity去进行ocr操作
-    void startOcrActivity(long nativePix, boolean accessibilityMode) {
-        Intent intent = new Intent(this, OCRActivity.class);
-        intent.putExtra(EXTRA_NATIVE_PIX, nativePix);
-        intent.putExtra(OCRActivity.EXTRA_USE_ACCESSIBILITY_MODE, accessibilityMode);
-        intent.putExtra(OCRActivity.EXTRA_PARENT_DOCUMENT_ID, getParentId());
-        startActivityForResult(intent, REQUEST_CODE_OCR);//for result!!!
-    }
-
     //处理图片加载完成之后的事件监听 handler for received Intents for the image loaded event
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
@@ -396,7 +411,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity implements P
                     unRegisterImageLoadedReceiver();
                     final long nativePix = intent.getLongExtra(ImageLoadAsyncTask.EXTRA_PIX, 0);
                     final int statusNumber = intent.getIntExtra(ImageLoadAsyncTask.EXTRA_STATUS, PixLoadStatus.SUCCESS.ordinal());
-                    final boolean skipCrop = intent.getBooleanExtra(ImageLoadAsyncTask.EXTRA_SKIP_CROP, false);
+                    final boolean skipCrop = intent.getBooleanExtra(ImageLoadAsyncTask.EXTRA_SKIP_CROP, false);//
                     handleLoadedImage(nativePix, PixLoadStatus.values()[statusNumber], skipCrop);
                 } else if (intent.getAction().equalsIgnoreCase(ImageLoadAsyncTask.ACTION_IMAGE_LOADING_START)) {//开始加载图片了显示进度条
                     showLoadingImageProgressDialog();
@@ -446,7 +461,8 @@ public abstract class NewDocumentActivity extends MonitoredActivity implements P
     //选图或者拍照结果返回，接下来就是根据PicUri去加载图片数据了
     private void onCameraResultReady(CameraResult cameraResult) {
         if (cameraResult.mResultCode == RESULT_OK) {
-            if (cameraResult.mRequestCode == REQUEST_CODE_MAKE_PHOTO) {//如果是拍照返回的结果，下面就是从中拿到cameraPicUri
+            //如果是拍照返回的结果，下面就是从中拿到cameraPicUri --> hujiawei 修改过后的版本已经没有拍照功能了，所以这块代码不会被调用
+            if (cameraResult.mRequestCode == REQUEST_CODE_MAKE_PHOTO) {
                 Cursor myCursor = null;
                 Date dateOfPicture;
                 //check if there is a file at the uri we specified
@@ -483,6 +499,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity implements P
                 }
             }
 
+            //上面的if代码块不会执行，而是直接执行到这里，从data中取出图片的uri
             if (cameraPicUri == null) {//选图比较简单，直接取出来cameraPicUri
                 try {
                     cameraPicUri = mCameraResult.mData.getData();
@@ -491,7 +508,8 @@ public abstract class NewDocumentActivity extends MonitoredActivity implements P
                 }
             }
 
-            if (cameraPicUri != null) {//cameraPicUri不为空就可以加载图片了
+            //cameraPicUri不为空就可以加载图片了
+            if (cameraPicUri != null) {
                 loadBitmapFromContentUri(cameraPicUri, mCameraResult.mSource);
             } else {
                 showFileError(PixLoadStatus.CAMERA_NO_IMAGE_RETURNED);
@@ -705,7 +723,9 @@ public abstract class NewDocumentActivity extends MonitoredActivity implements P
      * ASYNC TASKS
      */
 
-    //创建pdf文件的任务
+    /**
+     * 创建pdf文件的任务
+     */
     protected class CreatePDFTask extends AsyncTask<Void, Integer, Pair<ArrayList<Uri>, ArrayList<Uri>>> implements PDFProgressListener {
 
         private Set<Integer> mIds = new HashSet<Integer>();
@@ -787,7 +807,6 @@ public abstract class NewDocumentActivity extends MonitoredActivity implements P
         }
 
         private Pair<File, File> createPDF(File dir, long documentId) {
-
             Cursor cursor = getContentResolver().query(DocumentContentProvider.CONTENT_URI, null, Columns.PARENT_ID + "=? OR " + Columns.ID + "=?",
                     new String[]{String.valueOf(documentId), String.valueOf(documentId)}, "created ASC");
             cursor.moveToFirst();
@@ -870,7 +889,9 @@ public abstract class NewDocumentActivity extends MonitoredActivity implements P
         }
     }
 
-    //删除文档的任务
+    /**
+     * 删除文档的任务
+     */
     protected class DeleteDocumentTask extends AsyncTask<Void, Void, Integer> {
         Set<Integer> mIds = new HashSet<Integer>();
         private final static int RESULT_REMOTE_EXCEPTION = -1;
@@ -926,11 +947,9 @@ public abstract class NewDocumentActivity extends MonitoredActivity implements P
                 try {
                     Cursor c = client.query(DocumentContentProvider.CONTENT_URI, new String[]{Columns.ID, Columns.PHOTO_PATH}, Columns.PARENT_ID + "=? OR " + Columns.ID + "=?",
                             new String[]{String.valueOf(id), String.valueOf(id)}, Columns.PARENT_ID + " ASC");
-
                     while (c.moveToNext()) {
                         count += deleteDocument(c, client);
                     }
-
                 } catch (RemoteException exc) {
                     return RESULT_REMOTE_EXCEPTION;
                 }

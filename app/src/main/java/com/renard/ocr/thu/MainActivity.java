@@ -4,7 +4,6 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -14,10 +13,8 @@ import android.view.View;
 
 import com.renard.ocr.R;
 import com.renard.ocr.base.PermissionGrantedEvent;
-import com.renard.ocr.documents.creation.ImageSource;
 import com.renard.ocr.documents.creation.MemoryWarningDialog;
 import com.renard.ocr.documents.creation.NewDocumentActivity;
-import com.renard.ocr.documents.creation.PixLoadStatus;
 import com.renard.ocr.documents.viewing.grid.DocumentGridActivity;
 import com.renard.ocr.install.InstallActivity;
 import com.renard.ocr.language.OcrLanguage;
@@ -43,16 +40,15 @@ public class MainActivity extends NewDocumentActivity {
         setContentView(R.layout.thu_activity_main);
 
         initToolbar();
-        if (savedInstanceState == null) {//从其他应用中可以直接进入到这个应用
-            checkForImageIntent(getIntent());
-        }
 
+        //隐藏功能
         findViewById(R.id.start_camera).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 checkRam(MemoryWarningDialog.DoAfter.START_CAMERA);
             }
         });
+        //隐藏功能
         findViewById(R.id.start_gallary).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -101,36 +97,6 @@ public class MainActivity extends NewDocumentActivity {
         startInstallActivityIfNeeded();
     }
 
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        setIntent(intent);
-        checkForImageIntent(intent);
-    }
-
-    /**
-     * 从其他应用发送过来的图片进入到这个应用中
-     */
-    private void checkForImageIntent(Intent intent) {
-        String action = intent.getAction();
-        String type = intent.getType();
-
-        if (Intent.ACTION_SEND.equals(action) && type != null) {
-            Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);//
-            if (imageUri != null) {
-                loadBitmapFromContentUri(imageUri, ImageSource.INTENT);//加载图片
-            } else {
-                showFileError(PixLoadStatus.IMAGE_COULD_NOT_BE_READ, new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        finish();
-                    }
-                });
-            }
-        }
-    }
-
     /**
      * 如果应用启动之后发现没有安装任何语言，这个时候就会去将assets目录下的tessdata.zip复制到sd卡中，并安装这些默认的语言包
      * Start the InstallActivity if possible and needed.
@@ -162,13 +128,13 @@ public class MainActivity extends NewDocumentActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
-        getMenuInflater().inflate(R.menu.thu_menu_settings,menu);
+        getMenuInflater().inflate(R.menu.thu_menu_settings, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId()== R.id.item_settings){
+        if (item.getItemId() == R.id.item_settings) {
             SettingsDialog.newInstance().show(getSupportFragmentManager(), SettingsDialog.TAG);
         }
         return super.onOptionsItemSelected(item);
@@ -179,7 +145,7 @@ public class MainActivity extends NewDocumentActivity {
         if (requestCode == REQUEST_CODE_INSTALL) {//安装默认语言包
             if (RESULT_OK != resultCode) {//安装失败，立即退出
                 finish();
-            } // install successfull, show happy fairy or introduction text
+            }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }

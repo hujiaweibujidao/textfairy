@@ -22,6 +22,7 @@ import imagepicker.model.ImageEntry;
 import imagepicker.ui.PickerActivity;
 
 /**
+ *  MIP工具类 （存在不少多余的方法，暂时保留，以后清理）
  *
  * Created by yazeed44 on 11/22/14.
  */
@@ -36,7 +37,6 @@ public final class Util {
 
     public static ArrayList<AlbumEntry> getAlbums(final Context context, final Picker pickOptions) {
         final ArrayList<AlbumEntry> albumsSorted = new ArrayList<>();
-
         final HashMap<Integer, AlbumEntry> albums = new HashMap<Integer, AlbumEntry>();
         AlbumEntry allPhotosAlbum = null;
 
@@ -44,11 +44,11 @@ public final class Util {
         Cursor videosCursor = null;
         try {
             imagesCursor = queryImages(context);
-            allPhotosAlbum = iterateCursor(context, imagesCursor, allPhotosAlbum, albumsSorted, albums, false);
-            if (pickOptions.videosEnabled) {
-                videosCursor = queryVideos(context);
-                iterateCursor(context, videosCursor, allPhotosAlbum, albumsSorted, albums, true);
-            }
+            iterateCursor(context, imagesCursor, allPhotosAlbum, albumsSorted, albums, false);//allPhotosAlbum =
+//            if (pickOptions.videosEnabled) {
+//                videosCursor = queryVideos(context);
+//                iterateCursor(context, videosCursor, allPhotosAlbum, albumsSorted, albums, true);
+//            }
         } catch (Exception ex) {
             Log.e("getAlbums", ex.getMessage());
         } finally {
@@ -125,19 +125,14 @@ public final class Util {
     }
 
     private static AlbumEntry iterateCursor(final Context context, final Cursor cursor, AlbumEntry allPhotosAlbum, final ArrayList<AlbumEntry> albumsSorted, final HashMap<Integer, AlbumEntry> albums, final boolean isVideoCursor) {
-
         if (cursor == null) return null;
-
         final int bucketNameColumn = cursor.getColumnIndex(MediaStore.Images.Media.BUCKET_DISPLAY_NAME);
         final int bucketIdColumn = cursor.getColumnIndex(MediaStore.Images.Media.BUCKET_ID);
 
         while (cursor.moveToNext()) {
-
             final ImageEntry imageEntry = getImageFromCursor(cursor, isVideoCursor);
-
             if (imageEntry.path == null || imageEntry.path.length() == 0) {
                 continue;
-
             }
 
             allPhotosAlbum = createAllPhotosAlbumIfDoesntExist(context, allPhotosAlbum, albumsSorted);
@@ -151,12 +146,10 @@ public final class Util {
 
                 if (shouldCreateCameraAlbum(imageEntry)) {
                     addCameraAlbumToArray(albumsSorted, albumEntry);
-
                 } else {
                     albumsSorted.add(albumEntry);
                 }
             }
-
 
             albumEntry.addPhoto(imageEntry);
         }
@@ -183,7 +176,6 @@ public final class Util {
     @NonNull
     private static ImageEntry getImageFromCursor(final Cursor cursor, final boolean isVideoCursor) {
         final ImageEntry imageEntry = ImageEntry.from(cursor);
-        imageEntry.isVideo = isVideoCursor;
         return imageEntry;
     }
 
@@ -215,19 +207,18 @@ public final class Util {
 
     public static int getActionBarThemeResId(final Context context) {
         context.getTheme().resolveAttribute(R.attr.actionBarTheme, TYPED_VALUE, true);
-
         return TYPED_VALUE.resourceId;
     }
 
-    public static int getToolbarThemeResId(final Context context) {
-        return R.style.ThemeOverlay_AppCompat_ActionBar;
-
-//        if (isActionbarThemeLight(context)) {
-//            return R.style.ThemeOverlay_AppCompat_ActionBar;
-//        } else {
-//            return R.style.ThemeOverlay_AppCompat_Dark_ActionBar;
-//        }
-    }
+//    public static int getToolbarThemeResId(final Context context) {
+//        return R.style.ThemeOverlay_AppCompat_ActionBar;
+//
+////        if (isActionbarThemeLight(context)) {
+////            return R.style.ThemeOverlay_AppCompat_ActionBar;
+////        } else {
+////            return R.style.ThemeOverlay_AppCompat_Dark_ActionBar;
+////        }
+//    }
 
     public static int getDefaultPopupTheme(final Context context) {
         if (isActionbarThemeLight(context)) {

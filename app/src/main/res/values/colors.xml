@@ -5,7 +5,7 @@
     <color name="colorAccent">#009e8c</color>
 
     <color name="dark_grey">#ff333333</color>
-    <color name="document_grid_background">#ffDFDFDF</color>
+    <color name="default_activity_background">#ffDFDFDF</color>
     <color name="toolbar_bottom_bar">#AAAAAA</color>
     <color name="colorControlHighlight">#33ffffff</color>
 

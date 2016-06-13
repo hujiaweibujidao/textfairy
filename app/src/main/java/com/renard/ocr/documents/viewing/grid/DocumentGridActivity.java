@@ -20,7 +20,6 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -44,11 +43,9 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.GridView;
 import android.widget.Toast;
 
-import com.renard.ocr.base.PermissionGrantedEvent;
 import com.renard.ocr.R;
-import com.renard.ocr.documents.creation.ImageSource;
+import com.renard.ocr.base.PermissionGrantedEvent;
 import com.renard.ocr.documents.creation.NewDocumentActivity;
-import com.renard.ocr.documents.creation.PixLoadStatus;
 import com.renard.ocr.documents.viewing.DocumentContentProvider;
 import com.renard.ocr.documents.viewing.single.DocumentActivity;
 import com.renard.ocr.util.Util;
@@ -102,10 +99,6 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
 
         initToolbar();
         initGridView();
-
-        if (savedInstanceState == null) {
-            checkForImageIntent(getIntent());
-        }
     }
 
     @Override
@@ -115,9 +108,30 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
+    //初始化gridview
+    private void initGridView() {
+        mGridView = (GridView) findViewById(R.id.gridview);
+        mDocumentAdapter = new DocumentGridAdapter(this, R.layout.element_document, this);
+        registerForContextMenu(mGridView);//toread
+
+        mGridView.setAdapter(mDocumentAdapter);
+        mGridView.setLongClickable(true);
+        mGridView.setOnItemClickListener(new DocumentClickListener());
+        mGridView.setOnItemLongClickListener(new DocumentLongClickListener());
+        mGridView.setOnScrollListener(new DocumentScrollListener());
+        mGridView.setOnTouchListener(new FingerTracker());//
+
+        final int[] outNum = new int[1];
+        final int columnWidth = Util.determineThumbnailSize(this, outNum);
+        mGridView.setColumnWidth(columnWidth);//列宽
+        mGridView.setNumColumns(outNum[0]);//列数
+
+        final View emptyView = findViewById(R.id.empty_view);
+        mGridView.setEmptyView(emptyView);//将emptyview设置给gridview
+    }
+
     @Override
     protected void onResume() {
-        // ViewServer.get(this).setFocusedWindow(this);
         super.onResume();
         if (!mBusIsRegistered) {
             EventBus.getDefault().register(this);
@@ -140,36 +154,6 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
     }
 
     @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        setIntent(intent);
-        checkForImageIntent(intent);
-    }
-
-    /**
-     * 从其他应用发送过来的图片进入到这个应用中
-     */
-    private void checkForImageIntent(Intent intent) {
-        String action = intent.getAction();
-        String type = intent.getType();
-
-        if (Intent.ACTION_SEND.equals(action) && type != null) {
-            Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
-            if (imageUri != null) {
-                loadBitmapFromContentUri(imageUri, ImageSource.INTENT);//加载图片
-            } else {
-                showFileError(PixLoadStatus.IMAGE_COULD_NOT_BE_READ, new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        finish();
-                    }
-                });
-            }
-        }
-    }
-
-    @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         Set<Integer> selection = mDocumentAdapter.getSelectedDocumentIds();
@@ -183,15 +167,6 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         super.onRestoreInstanceState(savedInstanceState);
         ArrayList<Integer> selection = savedInstanceState.getIntegerArrayList(SAVE_STATE_KEY);
         mDocumentAdapter.setSelectedDocumentIds(selection);
-    }
-
-    public static boolean isInSelectionMode() {
-        return sIsInSelectionMode;
-    }
-
-    @Override
-    protected Dialog onCreateDialog(int id, Bundle args) {
-        return super.onCreateDialog(id, args);
     }
 
     @Override
@@ -213,6 +188,10 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
     @Override
     protected int getParentId() {
         return -1;
+    }
+
+    public static boolean isInSelectionMode() {
+        return sIsInSelectionMode;
     }
 
     @Override
@@ -267,7 +246,7 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
 
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            getMenuInflater().inflate(R.menu.grid_action_mode, menu);
+            getMenuInflater().inflate(R.menu.menu_grid_action_mode, menu);
             return true;
         }
 
@@ -284,29 +263,6 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
             }
             mActionMode = null;
         }
-    }
-
-    //初始化gridview
-    private void initGridView() {
-        mGridView = (GridView) findViewById(R.id.gridview);
-        mDocumentAdapter = new DocumentGridAdapter(this, R.layout.element_document, this);
-
-        registerForContextMenu(mGridView);//toread
-
-        mGridView.setAdapter(mDocumentAdapter);
-        mGridView.setLongClickable(true);
-        mGridView.setOnItemClickListener(new DocumentClickListener());
-        mGridView.setOnItemLongClickListener(new DocumentLongClickListener());
-        mGridView.setOnScrollListener(new DocumentScrollListener());
-        mGridView.setOnTouchListener(new FingerTracker());//
-
-        final int[] outNum = new int[1];
-        final int columnWidth = Util.determineThumbnailSize(this, outNum);
-        mGridView.setColumnWidth(columnWidth);//列宽
-        mGridView.setNumColumns(outNum[0]);//列数
-
-        final View emptyView = findViewById(R.id.empty_view);
-        mGridView.setEmptyView(emptyView);//将emptyview设置给gridview
     }
 
     /////////////////  gridview  //////////////////
@@ -335,7 +291,6 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         @Override
         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
             CheckableGridElement clicked = (CheckableGridElement) view;
-
             if (!sIsInSelectionMode) {//如果之前不是在选择模式,那么长按任何一个item都将进入选择模式
                 sIsInSelectionMode = true;
                 clicked.toggle();
@@ -379,7 +334,7 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         }
     }
 
-    //
+    //ScrollHandler
     private static class ScrollHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
@@ -391,7 +346,7 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         }
     }
 
-    //
+    //FingerTracker
     private class FingerTracker implements View.OnTouchListener {
         public boolean onTouch(View view, MotionEvent event) {
             final int action = event.getAction();
@@ -402,7 +357,6 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
             return false;
         }
     }
-
 
     public boolean isPendingThumbnailUpdate() {
         return mPendingThumbnailUpdate;

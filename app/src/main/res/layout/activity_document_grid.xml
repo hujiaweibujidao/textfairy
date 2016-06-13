@@ -1,38 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.DrawerLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@color/default_activity_background"
+    tools:context=".documents.viewing.grid.DocumentGridActivity">
 
-    <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@color/document_grid_background">
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/toolbar"/>
 
-        <include
-            android:id="@+id/toolbar"
-            layout="@layout/toolbar"/>
+    <include
+        android:id="@+id/empty_view"
+        layout="@layout/empty_document_grid"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/toolbar"/>
 
-        <include
-            android:id="@+id/empty_view"
-            layout="@layout/empty_document_grid"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@+id/toolbar"/>
+    <com.renard.ocr.documents.viewing.grid.FancyGridView
+        android:id="@+id/gridview"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/toolbar"
+        android:background="@color/default_activity_background"
+        android:choiceMode="none"
+        android:drawSelectorOnTop="false"
+        android:horizontalSpacing="@dimen/grid_spacing"
+        android:listSelector="@android:color/transparent"
+        android:scrollingCache="true"
+        android:verticalSpacing="@dimen/grid_spacing"/>
 
-        <com.renard.ocr.documents.viewing.grid.FancyGridView
-            android:id="@+id/gridview"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_below="@+id/toolbar"
-            android:background="@color/document_grid_background"
-            android:choiceMode="none"
-            android:drawSelectorOnTop="false"
-            android:horizontalSpacing="@dimen/grid_spacing"
-            android:listSelector="@android:color/transparent"
-            android:scrollingCache="true"
-            android:verticalSpacing="@dimen/grid_spacing"/>
-
-    </RelativeLayout>
-
-</android.support.v4.widget.DrawerLayout>
+</RelativeLayout>
