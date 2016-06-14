@@ -351,9 +351,10 @@ public class OCRActivity extends MonitoredActivity implements LayoutChoseListene
         }
     }
 
-    //保存最终的Pix到sd卡中
+    //保存最终的Pix到sd卡中pictures目录下
     private File saveImage(Pix p) throws IOException {
-        CharSequence id = DateFormat.format("ssmmhhddMMyy", new Date(System.currentTimeMillis()));
+        CharSequence id = DateFormat.format("ssmmhhddMMyy", new Date(System.currentTimeMillis()));//时间表示格式倒序！
+        //CharSequence id = DateFormat.format("yyMMddhhmmss", new Date(System.currentTimeMillis()));//hujiawei 时间表示格式正序
         return Util.savePixToSD(p, id.toString());
     }
 

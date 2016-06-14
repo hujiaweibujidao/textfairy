@@ -24,8 +24,11 @@ import android.graphics.drawable.Drawable;
 
 /**
  * 快速将bitmap转换成Drawable使用
+ *
+ * toread 和BitmapDrawable有啥关系？
  */
 public class FastBitmapDrawable extends Drawable {
+
     private final Bitmap mBitmap;
 
     public FastBitmapDrawable(Bitmap b) {

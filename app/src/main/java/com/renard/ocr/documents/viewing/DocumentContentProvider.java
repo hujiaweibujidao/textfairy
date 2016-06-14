@@ -163,8 +163,10 @@ public class DocumentContentProvider extends ContentProvider {
             values = new ContentValues();
         }
 
-        Long now = Long.valueOf(System.currentTimeMillis());
-        values.put(Columns.CREATED, now);//创建时间为当前时间！
+        //hujiawei 将时间设置放在之前确定，并不是在插入的时候确定
+        //Long now = Long.valueOf(System.currentTimeMillis());
+        //values.put(Columns.CREATED, now);//创建时间为当前时间！
+
         // if (!values.containsKey(Columns.TITLE) &&
         // values.containsKey(Columns.OCR_TEXT)) {
         // values.put(Columns.TITLE,

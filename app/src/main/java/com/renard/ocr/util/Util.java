@@ -58,16 +58,17 @@ import java.io.OutputStream;
 public class Util {
 
     public final static String EXTERNAL_APP_DIRECTORY = "thuocr";//一些存放在sd卡上的文件夹目录 textfee
-    private final static String CACHE_DIRECTORY = EXTERNAL_APP_DIRECTORY + "/thumbnails";
-    private final static String IMAGE_DIRECTORY = EXTERNAL_APP_DIRECTORY + "/pictures";
-    private final static String PDF_DIRECTORY = EXTERNAL_APP_DIRECTORY + "/pdfs";
-    private final static String OCR_DATA_DIRECTORY = "tessdata";
+    public final static String CACHE_DIRECTORY = EXTERNAL_APP_DIRECTORY + "/thumbnails";
+    public final static String IMAGE_DIRECTORY = EXTERNAL_APP_DIRECTORY + "/pictures";
+    public final static String PDF_DIRECTORY = EXTERNAL_APP_DIRECTORY + "/pdfs";
+    public final static String OCR_DATA_DIRECTORY = "tessdata";
 
     private final static String THUMBNAIL_SUFFIX = "png";//缩略图的格式和大小
     public final static int MAX_THUMB_WIDTH = 512;
     public final static int MAX_THUMB_HEIGHT = 512;
-    private static final FastBitmapDrawable NULL_DRAWABLE = new FastBitmapDrawable(null);
+
     public static FastBitmapDrawable sDefaultDocumentThumbnail;//默认的缩略图对应的drawable
+    private static final FastBitmapDrawable NULL_DRAWABLE = new FastBitmapDrawable(null);
 
     //确定缩略图的大小,返回值是缩略图的宽度,并且传入的int数组的第一个元素保存grid view一行能放几列
     public static int determineThumbnailSize(final Activity context, final int[] outNum) {
@@ -101,6 +102,7 @@ public class Util {
         Bitmap b = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         final Canvas canvas = new Canvas(b);
         drawable.draw(canvas);
+
         sDefaultDocumentThumbnail = new FastBitmapDrawable(b);
         PreferencesUtils.saveThumbnailSize(c, w, h);
     }
@@ -109,9 +111,7 @@ public class Util {
      * 缩略图的LRU缓存
      */
     private static class ThumbnailCache extends LruCache<Integer, FastBitmapDrawable> {
-
         final private static int cacheSize = 10 * 1024 * 1024;//缓存10MB
-
         public ThumbnailCache() {
             super(cacheSize);
         }
@@ -132,7 +132,7 @@ public class Util {
     private static ThumbnailCache mCache = new ThumbnailCache();
 
     //根据文档id加载它的缩略图
-    private static Bitmap loadDocumentThumbnail(int documentId) {
+    public static Bitmap loadDocumentThumbnail(int documentId) {
         Log.i("cache", "loadDocumentThumbnail " + documentId);
 
         File thumbDir = new File(Environment.getExternalStorageDirectory(), CACHE_DIRECTORY);
@@ -172,6 +172,33 @@ public class Util {
             mCache.put(documentId, drawable);
         }
         return drawable == NULL_DRAWABLE ? sDefaultDocumentThumbnail : drawable;
+    }
+
+    //根据时间加载它的缩略图
+    public static Bitmap loadDocumentImage(long datetime) {
+        Log.i("load document image", "loadDocumentImage " + datetime);
+
+        File pictureDir = new File(Environment.getExternalStorageDirectory(), IMAGE_DIRECTORY);
+        File pictureFile = new File(pictureDir, String.valueOf(datetime) + ".png");
+        if (pictureFile.exists()) {
+            InputStream stream = null;
+            try {
+                stream = new FileInputStream(pictureFile);
+                BitmapFactory.Options opts = new Options();
+                opts.inPreferredConfig = Bitmap.Config.RGB_565;
+                return BitmapFactory.decodeStream(stream, null, opts);
+            } catch (FileNotFoundException e) {
+                // Ignore
+            } finally {
+                try {
+                    if (stream != null) {
+                        stream.close();
+                    }
+                } catch (IOException ignore) {
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -292,7 +319,7 @@ public class Util {
         File image = new File(picDir, fileName);
         image.createNewFile();
         try {
-            WriteFile.writeImpliedFormat(pix, image, 85, true);
+            WriteFile.writeImpliedFormat(pix, image, 85, true);//
         } catch (Exception e) {
             throw new IOException(e);
         }
@@ -306,6 +333,7 @@ public class Util {
         return savePixToDir(pix, name, picDir);
     }
 
+    //有了这个文件的话就不会被图库识别为图片文件夹
     private static void createNoMediaFile(final File parentDir) {
         File noMedia = new File(parentDir, ".nomedia");
         try {

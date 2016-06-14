@@ -25,8 +25,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -34,9 +32,7 @@ import android.support.v7.view.ActionMode;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -69,6 +65,7 @@ import de.greenrobot.event.EventBus;
  * 3.删除了修改标题菜单项功能 -> 1.显示title有问题 2.修改title界面有异常
  * 4.去掉grid选择状态下的动画
  * 5.选择模式下的菜单简化，如果只选中了一个文档，那么只有删除操作，多个文档有删除和合并的操作
+ * 6.简化不量代码和流程 --> todo 这个界面进入的时候比较耗时，貌似图片加载了多次，后期需要优化
  *
  * @author renard
  */
@@ -80,16 +77,16 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
     private DocumentGridAdapter mDocumentAdapter;
 
     private ActionMode mActionMode;
-    private static final int MESSAGE_UPDATE_THUMNAILS = 1;
-    private static final int DELAY_SHOW_THUMBNAILS = 550;
     private static final int JOIN_PROGRESS_DIALOG = 4;
     private static boolean sIsInSelectionMode = false;
     private static final String SAVE_STATE_KEY = "selection";
 
+    /*private static final int MESSAGE_UPDATE_THUMNAILS = 1;
+    private static final int DELAY_SHOW_THUMBNAILS = 550;
     private boolean mFingerUp = true;
     private int mScrollState = AbsListView.OnScrollListener.SCROLL_STATE_IDLE;
     private final Handler mScrollHandler = new ScrollHandler();
-    private boolean mPendingThumbnailUpdate = false;
+    private boolean mPendingThumbnailUpdate = false;*/
     private boolean mBusIsRegistered = false;
 
     @Override
@@ -111,23 +108,25 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
     //初始化gridview
     private void initGridView() {
         mGridView = (GridView) findViewById(R.id.gridview);
-        mDocumentAdapter = new DocumentGridAdapter(this, R.layout.element_document, this);
-        registerForContextMenu(mGridView);//toread
+        mGridView.setNumColumns(2);//2列
+        registerForContextMenu(mGridView);//toread gridview contextmenu
+        View emptyView = findViewById(R.id.empty_view);
+        mGridView.setEmptyView(emptyView);//将emptyview设置给gridview
 
-        mGridView.setAdapter(mDocumentAdapter);
         mGridView.setLongClickable(true);
         mGridView.setOnItemClickListener(new DocumentClickListener());
         mGridView.setOnItemLongClickListener(new DocumentLongClickListener());
-        mGridView.setOnScrollListener(new DocumentScrollListener());
-        mGridView.setOnTouchListener(new FingerTracker());//
+        //mGridView.setOnScrollListener(new DocumentScrollListener());//这里是做了一个优化，当用户很快滑动的时候延迟更新缩略图
+        //mGridView.setOnTouchListener(new FingerTracker());//和上面的DocumentScrollListener结合在一起，判断用户的手指是不是抬起了
+        //当gridview目前是fling状态并且用户手指抬起来了，此时需要更新缩略图显示
 
-        final int[] outNum = new int[1];
+        /*final int[] outNum = new int[1];
         final int columnWidth = Util.determineThumbnailSize(this, outNum);
         mGridView.setColumnWidth(columnWidth);//列宽
-        mGridView.setNumColumns(outNum[0]);//列数
+        mGridView.setNumColumns(outNum[0]);//列数*/
 
-        final View emptyView = findViewById(R.id.empty_view);
-        mGridView.setEmptyView(emptyView);//将emptyview设置给gridview
+        mDocumentAdapter = new DocumentGridAdapter(this, this);
+        mGridView.setAdapter(mDocumentAdapter);
     }
 
     @Override
@@ -188,10 +187,6 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
     @Override
     protected int getParentId() {
         return -1;
-    }
-
-    public static boolean isInSelectionMode() {
-        return sIsInSelectionMode;
     }
 
     @Override
@@ -274,7 +269,7 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             DocumentGridAdapter.DocumentViewHolder holder = (DocumentGridAdapter.DocumentViewHolder) view.getTag();
             if (sIsInSelectionMode) {//如果是在选择模式下,那么就是选中或者不选中操作;如果不是在选择模式下,那么点击就进入文档界面
-                holder.gridElement.toggle();
+                holder.toggle();
             } else {
                 Intent intent = new Intent(DocumentGridActivity.this, DocumentActivity.class);
                 long documentId = mDocumentAdapter.getItemId(position);
@@ -290,113 +285,25 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
 
         @Override
         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-            CheckableGridElement clicked = (CheckableGridElement) view;
+            DocumentGridAdapter.DocumentViewHolder holder = (DocumentGridAdapter.DocumentViewHolder) view.getTag();
             if (!sIsInSelectionMode) {//如果之前不是在选择模式,那么长按任何一个item都将进入选择模式
                 sIsInSelectionMode = true;
-                clicked.toggle();
-                final int childCount = parent.getChildCount();
+                holder.toggle();
+                /*final int childCount = parent.getChildCount();
                 for (int i = 0; i < childCount; i++) {
-                    CheckableGridElement element = (CheckableGridElement) parent.getChildAt(i);
-                    if (element != view) {
-                        element.setChecked(false);//这种情况下,初次进入选择模式的时候要将所有其他的子view的选中状态设置为未选中
+                    DocumentGridAdapter.DocumentViewHolder childHolder = (DocumentGridAdapter.DocumentViewHolder) parent.getChildAt(i).getTag();
+                    if (childHolder != null) {
+                        childHolder.setChecked(false);//这种情况下,初次进入选择模式的时候要将所有其他的子view的选中状态设置为未选中
                     }
-                }
+                }*/
             } else {
-                clicked.toggle();
+                holder.toggle();
             }
             return true;
         }
     }
 
-    int getScrollState() {
-        return mScrollState;
-    }
-
-    //滑动gridview,处理缩略图更新
-    private class DocumentScrollListener implements AbsListView.OnScrollListener {
-        public void onScrollStateChanged(AbsListView view, int scrollState) {
-            if (mScrollState == SCROLL_STATE_FLING && scrollState != SCROLL_STATE_FLING) {
-                final Handler handler = mScrollHandler;
-                final Message message = handler.obtainMessage(MESSAGE_UPDATE_THUMNAILS, DocumentGridActivity.this);//obj DocumentGridActivity
-                handler.removeMessages(MESSAGE_UPDATE_THUMNAILS);
-                handler.sendMessageDelayed(message, mFingerUp ? 0 : DELAY_SHOW_THUMBNAILS);
-                mPendingThumbnailUpdate = true;
-            } else if (scrollState == SCROLL_STATE_FLING) {
-                mPendingThumbnailUpdate = false;
-                mScrollHandler.removeMessages(MESSAGE_UPDATE_THUMNAILS);
-            }
-
-            mScrollState = scrollState;
-        }
-
-        @Override
-        public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-        }
-    }
-
-    //ScrollHandler
-    private static class ScrollHandler extends Handler {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MESSAGE_UPDATE_THUMNAILS:
-                    ((DocumentGridActivity) msg.obj).updateDocumentThumbnails();
-                    break;
-            }
-        }
-    }
-
-    //FingerTracker
-    private class FingerTracker implements View.OnTouchListener {
-        public boolean onTouch(View view, MotionEvent event) {
-            final int action = event.getAction();
-            mFingerUp = action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL;
-            if (mFingerUp && mScrollState != DocumentScrollListener.SCROLL_STATE_FLING) {
-                postDocumentThumbnails();
-            }
-            return false;
-        }
-    }
-
-    public boolean isPendingThumbnailUpdate() {
-        return mPendingThumbnailUpdate;
-    }
-
-    //更新文档的缩略图
-    private void updateDocumentThumbnails() {
-        mPendingThumbnailUpdate = false;
-
-        final GridView grid = mGridView;
-        final int count = grid.getChildCount();
-
-        for (int i = 0; i < count; i++) {
-            final View view = grid.getChildAt(i);
-            final DocumentGridAdapter.DocumentViewHolder holder = (DocumentGridAdapter.DocumentViewHolder) view.getTag();
-            if (holder.updateThumbnail) {
-                final int documentId = holder.documentId;
-                CrossFadeDrawable d = holder.transition;
-                FastBitmapDrawable thumb = Util.getDocumentThumbnail(documentId);
-                if (thumb.getBitmap() != null) {
-                    d.setEnd(thumb.getBitmap());
-                    holder.gridElement.setImage(d);
-                    d.startTransition(375);
-                }
-                holder.updateThumbnail = false;
-            }
-        }
-
-        grid.invalidate();
-    }
-
-    private void postDocumentThumbnails() {
-        Handler handler = mScrollHandler;
-        Message message = handler.obtainMessage(MESSAGE_UPDATE_THUMNAILS, DocumentGridActivity.this);
-        handler.removeMessages(MESSAGE_UPDATE_THUMNAILS);
-        mPendingThumbnailUpdate = true;
-        handler.sendMessage(message);
-    }
-
-
+    //DocumentGridAdapter.OnCheckedChangeListener
     //gridview中元素的选择状态发生变化的时候这个方法会被调用,选中的文档个数不同,对应的菜单选项不同
     @Override
     public void onCheckedChanged(Set<Integer> checkedIds) {
@@ -429,7 +336,8 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         for (int i = 0; i < childCount; i++) {
             final View v = mGridView.getChildAt(i);
             final DocumentGridAdapter.DocumentViewHolder holder = (DocumentGridAdapter.DocumentViewHolder) v.getTag();
-            holder.gridElement.setChecked(false);//
+            //holder.gridElement.setChecked(false);//
+            holder.setChecked(false);
         }
     }
 

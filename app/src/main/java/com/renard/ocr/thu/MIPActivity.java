@@ -19,7 +19,6 @@ import android.support.v4.view.accessibility.AccessibilityManagerCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -46,7 +45,6 @@ import com.renard.ocr.util.Util;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 
 import imagepicker.model.ImageEntry;
 import imagepicker.ui.SpacesItemDecoration;
@@ -423,8 +421,10 @@ public class MIPActivity extends NewDocumentActivity implements Picker.PickListe
         Log.i(LOG_TAG, "save document text=" + utf8String);
 
         File imageFile = null;
-        try {
-            imageFile = saveImage(pix);//保存最终处理的图片（多个片段合并在一起的图片），并不是原图
+        long datetime = System.currentTimeMillis();
+        String fileName = String.valueOf(datetime);
+        try {//直接调用了Util.savePixToSD方法，修改了图片的名称
+            imageFile = Util.savePixToSD(pix, fileName);//保存最终处理的图片（多个片段合并在一起的图片），并不是原图
         } catch (IOException e) {
             e.printStackTrace();
             runOnUiThread(new Runnable() {
@@ -437,7 +437,7 @@ public class MIPActivity extends NewDocumentActivity implements Picker.PickListe
         }
 
         try {
-            Uri documentUri = saveDocumentToDB(imageFile, hocrString, utf8String, language);//保存文档
+            Uri documentUri = saveDocumentToDB(imageFile, hocrString, utf8String, language, datetime);//保存文档
             if (imageFile != null) {//创建一个缩略图保存下来
                 Util.createThumbnail(this, imageFile, Integer.valueOf(documentUri.getLastPathSegment()));
             }
@@ -450,25 +450,14 @@ public class MIPActivity extends NewDocumentActivity implements Picker.PickListe
                 }
             });
         } finally {
-            recycleResultPix(pix);
+            if (pix != null) {
+                pix.recycle();
+            }
         }
     }
 
-    //释放pix
-    private void recycleResultPix(Pix pix) {
-        if (pix != null) {
-            pix.recycle();
-        }
-    }
-
-    //保存最终的Pix到sd卡中
-    private File saveImage(Pix p) throws IOException {
-        CharSequence id = DateFormat.format("ssmmhhddMMyy", new Date(System.currentTimeMillis()));
-        return Util.savePixToSD(p, id.toString());
-    }
-
-    //保存document到数据库中
-    private Uri saveDocumentToDB(File imageFile, String hocr, String plainText, String language) throws RemoteException {
+    //保存document到数据库中 -> 添加了language和datetime两个值
+    private Uri saveDocumentToDB(File imageFile, String hocr, String plainText, String language, long datetime) throws RemoteException {
         ContentProviderClient client = null;
         try {
             ContentValues contentValues = new ContentValues();
@@ -487,6 +476,7 @@ public class MIPActivity extends NewDocumentActivity implements Picker.PickListe
             if (getParentId() > -1) {
                 contentValues.put(DocumentContentProvider.Columns.PARENT_ID, getParentId());
             }
+            contentValues.put(DocumentContentProvider.Columns.CREATED, datetime);
             client = getContentResolver().acquireContentProviderClient(DocumentContentProvider.CONTENT_URI);
             return client.insert(DocumentContentProvider.CONTENT_URI, contentValues);
         } finally {

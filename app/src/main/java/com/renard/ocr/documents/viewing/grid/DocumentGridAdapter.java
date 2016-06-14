@@ -18,20 +18,20 @@ package com.renard.ocr.documents.viewing.grid;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
+import android.widget.Checkable;
 import android.widget.CursorAdapter;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.renard.ocr.R;
 import com.renard.ocr.documents.viewing.DocumentContentProvider;
 import com.renard.ocr.documents.viewing.DocumentContentProvider.Columns;
-import com.renard.ocr.documents.viewing.grid.CheckableGridElement.OnCheckedChangeListener;
+import com.renard.ocr.util.PreferencesUtils;
 import com.renard.ocr.util.Util;
 
 import java.util.Date;
@@ -41,118 +41,52 @@ import java.util.Set;
 
 /**
  * adapter for the document grid view
- * <p>
+ * <p/>
  * 文档GridView的adapter
  *
  * @author renard
  */
-public class DocumentGridAdapter extends CursorAdapter implements OnCheckedChangeListener {
+public class DocumentGridAdapter extends CursorAdapter {
 
-    //从CheckableGridElement -> DocumentGridAdapter -> DocumentGridActivity
-    public interface OnCheckedChangeListener {//grid item check change!!!
-
-        void onCheckedChanged(final Set<Integer> checkedIds);
-    }
-
-    static class DocumentViewHolder {//ViewHolder
-
-        public CheckableGridElement gridElement;
-        private TextView date;
-        private TextView title;
-        private TextView mPageNumber;
-        public int documentId;
-        public boolean updateThumbnail;
-
-        CrossFadeDrawable transition;
-
-        DocumentViewHolder(View v) {
-            gridElement = (CheckableGridElement) v;
-            date = (TextView) v.findViewById(R.id.date);
-            mPageNumber = (TextView) v.findViewById(R.id.page_number);
-            title = (TextView) v.findViewById(R.id.title);
-        }
-
-    }
-
-    private final static String[] PROJECTION = {Columns.ID, Columns.TITLE, Columns.OCR_TEXT, Columns.CREATED, Columns.PHOTO_PATH, Columns.CHILD_COUNT};
-
-    private Set<Integer> mSelectedDocuments = new HashSet<Integer>();//选中的文档集合
-    private LayoutInflater mInflater;
-    private final DocumentGridActivity mActivity;
-    private int mElementLayoutId;//grid element layout id
-
-    private int mIndexCreated;
-    private int mIndexTitle;
     private int mIndexID;
-    private int mChildCountID;
+    private int mIndexCreated;
+    private LayoutInflater mInflater;
     private OnCheckedChangeListener mCheckedChangeListener = null;
+    private Set<Integer> mSelectedDocuments = new HashSet<>();//选中的文档集合
+    private final static String[] PROJECTION = {Columns.ID, Columns.CREATED, Columns.PHOTO_PATH};
 
-    public void clearAllSelection() {
-        mSelectedDocuments.clear();
-    }
-
-    public DocumentGridAdapter(DocumentGridActivity activity, int elementLayout, OnCheckedChangeListener listener) {
+    public DocumentGridAdapter(Context activity, OnCheckedChangeListener listener) {
         super(activity, activity.getContentResolver().query(DocumentContentProvider.CONTENT_URI, PROJECTION, DocumentContentProvider.Columns.PARENT_ID + "=-1", null, null), true);
         //默认的query是取出parentId=-1的文档
 
-        mElementLayoutId = elementLayout;
-        mActivity = activity;
         mInflater = LayoutInflater.from(activity);
-
         final Cursor c = getCursor();
         mIndexCreated = c.getColumnIndex(Columns.CREATED);
         mIndexID = c.getColumnIndex(Columns.ID);
-        mIndexTitle = c.getColumnIndex(Columns.TITLE);
-        mChildCountID = c.getColumnIndex(Columns.CHILD_COUNT);
-
         mCheckedChangeListener = listener;
     }
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         final DocumentViewHolder holder = (DocumentViewHolder) view.getTag();
-
         final int documentId = cursor.getInt(mIndexID);
-        final int childCount = cursor.getInt(mChildCountID);
-        final boolean isSelected = mSelectedDocuments.contains(documentId);
+        holder.isChecked = mSelectedDocuments.contains(documentId);
         holder.documentId = documentId;
-
         holder.title.setVisibility(View.GONE);
-        //有title显示title -> 不显示title,界面有问题
-        /*String title = cursor.getString(mIndexTitle);
-        if (title != null && title.length() > 0) {
-            holder.title.setText(title);
-            holder.title.setVisibility(View.VISIBLE);
-        }else{
-            holder.title.setVisibility(View.INVISIBLE);
-        }*/
-
         long created = cursor.getLong(mIndexCreated);//上面显示时间
         //hujiawei 修改时间显示格式 MMM dd, yyyy h:mmaa
         CharSequence formattedDate = DateFormat.format("yyyyMMdd HH:mm:ss", new Date(created));
         holder.date.setText(formattedDate);
 
-        //if (holder.mPageNumber != null) {//文档的页数
-        //    holder.mPageNumber.setText(String.valueOf(childCount + 1));
-        //}
-        if (isSelected) {//本来是用来显示文档页数的,现在改成显示item是否选中!!!
-            holder.mPageNumber.setText(R.string.item_check);
+        if (holder.isChecked) {//本来是用来显示文档页数的,现在改成显示item是否选中!!!
+            holder.checkbox.setText(R.string.item_check);
         } else {
-            holder.mPageNumber.setText(R.string.item_uncheck);
+            holder.checkbox.setText(R.string.item_uncheck);
         }
 
-        if (holder.gridElement != null) {
-            //如果当前处于快速滑动状态的话,只显示默认的缩略图就行了
-            if (mActivity.getScrollState() == AbsListView.OnScrollListener.SCROLL_STATE_FLING || mActivity.isPendingThumbnailUpdate()) {
-                holder.gridElement.setImage(Util.sDefaultDocumentThumbnail);
-                holder.updateThumbnail = true;
-            } else {//否则获取对应文档的缩略图并显示
-                final Drawable d = Util.getDocumentThumbnail(documentId);
-                holder.gridElement.setImage(d);
-                holder.updateThumbnail = false;
-            }
-        }
-        holder.gridElement.setCheckedNoAnimate(isSelected);//不带动画效果的check
+        //设置图片的长和宽的大小
+        holder.thumb.setLayoutParams(new RelativeLayout.LayoutParams(PreferencesUtils.getThumbnailWidth(context),PreferencesUtils.getThumbnailHeight(context)));
+        holder.thumb.setImageBitmap(Util.loadDocumentImage(created));
     }
 
     @Override
@@ -166,27 +100,9 @@ public class DocumentGridAdapter extends CursorAdapter implements OnCheckedChang
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        View view = mInflater.inflate(mElementLayoutId, null, false);
-        int index = cursor.getColumnIndex(Columns.ID);
-        int documentId = cursor.getInt(index);
-
+        View view = mInflater.inflate(R.layout.element_document, null, false);
         DocumentViewHolder holder = new DocumentViewHolder(view);
-        holder.documentId = documentId;
-        holder.gridElement.setChecked(mSelectedDocuments.contains(documentId));
-        holder.gridElement.setOnCheckedChangeListener(this);
         view.setTag(holder);
-
-        //hujiawei 删除下面这段代码没有效果
-        FastBitmapDrawable start = Util.sDefaultDocumentThumbnail;
-        Bitmap startBitmap = null;
-        if (start != null) {
-            startBitmap = start.getBitmap();
-        }
-        final CrossFadeDrawable transition = new CrossFadeDrawable(startBitmap, null);
-        transition.setCallback(view);
-        transition.setCrossFadeEnabled(true);
-        holder.transition = transition;
-
         return view;
     }
 
@@ -202,17 +118,76 @@ public class DocumentGridAdapter extends CursorAdapter implements OnCheckedChang
         return mSelectedDocuments;
     }
 
-    //grid item check change!!!
-    @Override
-    public void onCheckedChanged(View documentView, boolean isChecked) {
-        DocumentViewHolder holder = (DocumentViewHolder) documentView.getTag();
-        if (isChecked) {
+    public void clearAllSelection() {
+        mSelectedDocuments.clear();
+    }
+
+    //从CheckableGridElement -> DocumentGridAdapter -> DocumentGridActivity
+    public interface OnCheckedChangeListener {//grid item check change!!!
+        void onCheckedChanged(final Set<Integer> checkedIds);
+    }
+
+    private void onCheckedChanged(DocumentViewHolder holder, boolean isChecked) {
+        if (isChecked){
             mSelectedDocuments.add(holder.documentId);
-            holder.mPageNumber.setText(R.string.item_check);
-        } else {
+        }else{
             mSelectedDocuments.remove(holder.documentId);
-            holder.mPageNumber.setText(R.string.item_uncheck);
         }
-        mCheckedChangeListener.onCheckedChanged(mSelectedDocuments);
+
+        if (mCheckedChangeListener!=null){
+            mCheckedChangeListener.onCheckedChanged(mSelectedDocuments);
+        }
+    }
+
+    /**
+     * ViewHolder，但是特别的是它实现了Checkable接口
+     */
+    class DocumentViewHolder implements Checkable {
+
+        private TextView date;
+        private TextView title;
+        private TextView checkbox;
+        private ImageView thumb;
+
+        public int documentId;//hujiawei viewholder一般会作为view的tag，所以可以在viewholder中保存一些其他的数据
+        public boolean isChecked = false;
+
+        DocumentViewHolder(View v) {
+            thumb = (ImageView) v.findViewById(R.id.thumb);
+            date = (TextView) v.findViewById(R.id.date);
+            checkbox = (TextView) v.findViewById(R.id.checkbox);
+            title = (TextView) v.findViewById(R.id.title);
+        }
+
+        /**
+         * Checkable接口的三个方法
+         */
+        @Override
+        public void setChecked(boolean checked) {
+            isChecked = checked;
+            updateCheckbox();
+            onCheckedChanged(this, isChecked);
+        }
+
+        private void updateCheckbox() {
+            if (isChecked) {//本来是用来显示文档页数的,现在改成显示item是否选中!!!
+                checkbox.setText(R.string.item_check);
+            } else {
+                checkbox.setText(R.string.item_uncheck);
+            }
+        }
+
+        @Override
+        public boolean isChecked() {
+            return isChecked;
+        }
+
+        @Override
+        public void toggle() {
+            isChecked = !isChecked;
+            updateCheckbox();
+            onCheckedChanged(this, isChecked);
+        }
+
     }
 }
