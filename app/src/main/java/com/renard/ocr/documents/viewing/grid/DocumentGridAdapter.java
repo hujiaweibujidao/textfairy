@@ -18,7 +18,9 @@ package com.renard.ocr.documents.viewing.grid;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.os.Environment;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,12 +30,14 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.renard.ocr.R;
 import com.renard.ocr.documents.viewing.DocumentContentProvider;
 import com.renard.ocr.documents.viewing.DocumentContentProvider.Columns;
 import com.renard.ocr.util.PreferencesUtils;
 import com.renard.ocr.util.Util;
 
+import java.io.File;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -47,6 +51,8 @@ import java.util.Set;
  * @author renard
  */
 public class DocumentGridAdapter extends CursorAdapter {
+
+    public static final String TAG = DocumentGridAdapter.class.getSimpleName();
 
     private int mIndexID;
     private int mIndexCreated;
@@ -85,8 +91,11 @@ public class DocumentGridAdapter extends CursorAdapter {
         }
 
         //设置图片的长和宽的大小
-        holder.thumb.setLayoutParams(new RelativeLayout.LayoutParams(PreferencesUtils.getThumbnailWidth(context),PreferencesUtils.getThumbnailHeight(context)));
-        holder.thumb.setImageBitmap(Util.loadDocumentImage(created));
+        holder.thumb.setLayoutParams(new RelativeLayout.LayoutParams(PreferencesUtils.getThumbnailWidth(context), PreferencesUtils.getThumbnailHeight(context)));
+        //holder.thumb.setImageBitmap(Util.loadDocumentImage(created));
+        String imageFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + Util.IMAGE_DIRECTORY + File.separator + String.valueOf(created) + ".png";
+        Log.i(TAG, "image path=" + imageFilePath);
+        Glide.with(context).load(imageFilePath).asBitmap().centerCrop().into(holder.thumb);
     }
 
     @Override
@@ -124,17 +133,18 @@ public class DocumentGridAdapter extends CursorAdapter {
 
     //从CheckableGridElement -> DocumentGridAdapter -> DocumentGridActivity
     public interface OnCheckedChangeListener {//grid item check change!!!
+
         void onCheckedChanged(final Set<Integer> checkedIds);
     }
 
     private void onCheckedChanged(DocumentViewHolder holder, boolean isChecked) {
-        if (isChecked){
+        if (isChecked) {
             mSelectedDocuments.add(holder.documentId);
-        }else{
+        } else {
             mSelectedDocuments.remove(holder.documentId);
         }
 
-        if (mCheckedChangeListener!=null){
+        if (mCheckedChangeListener != null) {
             mCheckedChangeListener.onCheckedChanged(mSelectedDocuments);
         }
     }
