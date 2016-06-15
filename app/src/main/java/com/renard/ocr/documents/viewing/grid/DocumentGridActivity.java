@@ -80,13 +80,6 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
     private static final int JOIN_PROGRESS_DIALOG = 4;
     private static boolean sIsInSelectionMode = false;
     private static final String SAVE_STATE_KEY = "selection";
-
-    /*private static final int MESSAGE_UPDATE_THUMNAILS = 1;
-    private static final int DELAY_SHOW_THUMBNAILS = 550;
-    private boolean mFingerUp = true;
-    private int mScrollState = AbsListView.OnScrollListener.SCROLL_STATE_IDLE;
-    private final Handler mScrollHandler = new ScrollHandler();
-    private boolean mPendingThumbnailUpdate = false;*/
     private boolean mBusIsRegistered = false;
 
     @Override
@@ -95,6 +88,7 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
         setContentView(R.layout.activity_document_grid);
 
         initToolbar();
+        initThumbnailSize();
         initGridView();
     }
 
@@ -109,7 +103,7 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
     private void initGridView() {
         mGridView = (GridView) findViewById(R.id.gridview);
         mGridView.setNumColumns(2);//2列
-        registerForContextMenu(mGridView);//toread gridview contextmenu
+        //registerForContextMenu(mGridView);//toread gridview contextmenu 删除之后也正常！
         View emptyView = findViewById(R.id.empty_view);
         mGridView.setEmptyView(emptyView);//将emptyview设置给gridview
 
@@ -143,7 +137,6 @@ public class DocumentGridActivity extends NewDocumentActivity implements Documen
     @SuppressWarnings("unused")
     public void onEventMainThread(final PermissionGrantedEvent event) {
         Log.i(LOG_TAG, "Permission Granted");
-        initThumbnailSize();
     }
 
     //初始化缩略图的大小

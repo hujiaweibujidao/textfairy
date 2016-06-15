@@ -193,7 +193,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity implements P
         mImageSource = ImageSource.values()[index];
     }
 
-    @Override
+    /*@Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (RESULT_OK == resultCode) {//返回了成功
             switch (requestCode) {
@@ -205,7 +205,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity implements P
                     break;
             }
         }
-    }
+    }*/
 
     //检查目前可用的ram，如果ram足够的话就进行相应的操作
     protected void checkRam(MemoryWarningDialog.DoAfter doAfter) {
@@ -830,7 +830,6 @@ public abstract class NewDocumentActivity extends MonitoredActivity implements P
                         }
                         outText = null;
                     }
-
                     mOCRText.append(text);
                 } else {
                     hocr[cursor.getPosition()] = "";
@@ -919,9 +918,7 @@ public abstract class NewDocumentActivity extends MonitoredActivity implements P
 
         @Override
         protected Integer doInBackground(Void... params) {
-
             ContentProviderClient client = getContentResolver().acquireContentProviderClient(DocumentContentProvider.CONTENT_URI);
-
             int count = 0;
             int progress = 0;
             for (Integer id : mIds) {
@@ -940,7 +937,9 @@ public abstract class NewDocumentActivity extends MonitoredActivity implements P
         }
     }
 
-    //保存文档的任务
+    /**
+     * 保存文档的任务
+     */
     public static class SaveDocumentTask extends AsyncTask<Void, Integer, Integer> {
 
         private final Context mContext;

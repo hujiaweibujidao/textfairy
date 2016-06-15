@@ -99,10 +99,16 @@ public class CropImageActivity extends MonitoredActivity {
         ButterKnife.bind(this);
 
         initToolbar();
-        setToolbarMessage(R.string.crop_title);
-        initNavigationAsUp();
+        //initNavigationAsUp();
 
         startCropping();
+    }
+
+    @Override
+    protected void initToolbar() {
+        super.initToolbar();
+        setToolbarMessage(R.string.crop_title);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     //toolbar左侧变成返回键
@@ -115,7 +121,7 @@ public class CropImageActivity extends MonitoredActivity {
             public void onClick(View v) {
                 finish();
             }
-        });
+        });//todo hujiawei
     }
 
     @OnClick(R.id.item_rotate_left)

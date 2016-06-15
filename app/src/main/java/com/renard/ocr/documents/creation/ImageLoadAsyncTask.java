@@ -45,6 +45,7 @@ public class ImageLoadAsyncTask extends AsyncTask<Void, Void, ImageLoadAsyncTask
     final static String EXTRA_PIX = "pix";
     final static String EXTRA_STATUS = "status";
     final static String EXTRA_SKIP_CROP = "skip_crop";
+
     final static String ACTION_IMAGE_LOADED = ImageLoadAsyncTask.class.getName() + ".image.loaded";
     final static String ACTION_IMAGE_LOADING_START = ImageLoadAsyncTask.class.getName() + ".image.loading.start";
 
