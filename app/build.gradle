@@ -106,7 +106,9 @@ if (propFile.canRead()) {
 }
 
 dependencies {
-    compile project(':tess-two:tess-two')
+    //compile project(':tess-two:tess-two')
+    compile fileTree(dir: 'tess-two', include: ['tess-two'])
+
     compile fileTree(dir: 'src/main/libs', include: '*.jar')
     compile 'com.android.support:design:23.4.0'
     compile 'com.android.support:appcompat-v7:23.4.0'

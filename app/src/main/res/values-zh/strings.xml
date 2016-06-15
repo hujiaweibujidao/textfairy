@@ -113,4 +113,6 @@
     <string name="progress_ocr_dialog">正在处理第 %1$d / %2$d 张图片\n\n当前处理进度 %3$s</string>
     <string name="error_ocr_dialog">OCR处理过程出错了</string>
     <string name="title_mip">图片列表</string>
+    <string name="delete_dialog_message">删除文档</string>
+    <string name="delete_error">删除失败</string>
 </resources>

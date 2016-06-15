@@ -152,7 +152,6 @@ public class MIPActivity extends NewDocumentActivity implements Picker.PickListe
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RESULT_OK) {
             switch (requestCode) {
                 case REQUEST_CODE_CROP_PHOTO: {//图片裁剪成功，可以进入到ocr了
@@ -179,6 +178,7 @@ public class MIPActivity extends NewDocumentActivity implements Picker.PickListe
                 }
             }
         }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
