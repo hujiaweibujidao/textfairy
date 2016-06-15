@@ -1,4 +1,4 @@
 include ':tess-two:tess-two'
 include ':app'
 
-
+project(':tess-two:tess-two').projectDir = new File('tess-two/tess-two')
